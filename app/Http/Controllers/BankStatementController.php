@@ -71,6 +71,23 @@ class BankStatementController extends Controller
 
     private function importBankStatement($path)
     {
+        $dataTable = $this->getCsvData($path);
+        $dataTable = $this->sanitize($dataTable);
+
+        try {
+            foreach (array_chunk($dataTable,1000) as $t) {
+                $this->bs->insert($t);
+            }
+        } catch(\Exception $e) {
+            dd($e);
+            return false;
+        }
+
+        return true;
+    }
+
+    private function getCsvData($path)
+    {
         $dataTable = [];
         $this->bs->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
@@ -80,6 +97,21 @@ class BankStatementController extends Controller
             }
         fclose($h);
         }
-        return $this->bs->insert($dataTable);
+
+        return $dataTable;
+    }
+
+    private function sanitize($dataTable)
+    {
+        foreach($dataTable as $k => $dt) {
+            $dataTable[$k]['purpose_of_use'] = $this->sanitizePurposeOfUse($dt['purpose_of_use']);
+        }
+
+        return $dataTable;
+    }
+
+    private function sanitizePurposeOfUse($value)
+    {
+        return 'XXX' . $value;
     }
 }
