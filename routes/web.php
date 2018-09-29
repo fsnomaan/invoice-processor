@@ -16,6 +16,7 @@ Route::get('/', function () {
 });
 
 Route::get('/bank-statement','BankStatementController@index');
-Route::post('/bank-statement','BankStatementController@processBankStatement', function (App\Models\BankStatement $bs) {
-   
-});
+Route::post('/bank-statement','BankStatementController@processBankStatement');
+
+Route::get('/open-invoice','OpenInvoiceController@index');
+Route::post('/open-invoice','OpenInvoiceController@processOpenInvoice');

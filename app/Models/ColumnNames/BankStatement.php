@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\ColumnNames;
 
-class ColumnNames
+class BankStatement
 {
     const MAP = [
         "date" => "datum",
