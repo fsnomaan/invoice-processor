@@ -110,8 +110,11 @@ class BankStatementController extends Controller
         return $dataTable;
     }
 
+    /**
+     *  find the value 1125 and after 1125 if there is no "-", then insert "-" after 1125
+     */
     private function sanitizePurposeOfUse($value)
     {
-        return 'XXX' . $value;
+        return preg_replace("/1125 /", "1125 - ", $value);
     }
 }
