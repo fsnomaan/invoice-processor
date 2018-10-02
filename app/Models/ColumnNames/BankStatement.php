@@ -5,7 +5,7 @@ namespace App\Models\ColumnNames;
 class BankStatement
 {
     const MAP = [
-        "date" => "datum",
+        "trans_date" => "datum",
         "valuta" => "valuta",
         "datev_account_number" => "fibu_kontonummer",
         "amount" => "betrag",

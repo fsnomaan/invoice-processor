@@ -25,7 +25,7 @@ class BankStatementController extends Controller
         $response = [
             'success' => ''
         ];
-        return view('bank_statement')->with($response);
+        return view('process_invoice')->with($response);
     }
 
     public function processBankStatement(Request $request)
@@ -37,10 +37,10 @@ class BankStatementController extends Controller
             $path = $file->getRealPath();
             if ($this->importBankStatement($path) ) {
                 $response = [
-                    'success' => 'Successfully imported'
+                    'success' => 'Successfully imported bank statement'
                 ];
             }
-            return view('bank_statement')->with($response);
+            return view('process_invoice')->with($response);
         }
 
     }
@@ -115,6 +115,12 @@ class BankStatementController extends Controller
      */
     private function sanitizePurposeOfUse($value)
     {
-        return preg_replace("/1125 /", "1125 - ", $value);
+        $value = preg_replace("/1125/", "1125 ", $value);
+        $value = preg_replace("/1125 -/", "1125 ", $value);
+        $value = preg_replace("/1125- /", "1125 ", $value);
+        $value = preg_replace("/1125 - /", "1125 ", $value);
+
+        $value = preg_replace("/1125\s*/", "1125-", $value);
+        return $value;
     }
 }

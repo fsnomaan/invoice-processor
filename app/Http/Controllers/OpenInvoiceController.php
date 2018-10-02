@@ -5,10 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\OpenInvoice;
 use App\Models\ColumnNames\OpenInvoice  as ColumnNames;
 use Illuminate\Http\Request;
-use Illuminate\Http\Testing\MimeType;
-use App\Http\Requests;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Input;
 
 class OpenInvoiceController extends Controller
 {
@@ -25,7 +21,7 @@ class OpenInvoiceController extends Controller
         $response = [
             'success' => ''
         ];
-        return view('open_invoice')->with($response);
+        return view('process_invoice')->with($response);
     }
 
     public function processOpenInvoice(Request $request)
@@ -37,10 +33,10 @@ class OpenInvoiceController extends Controller
             $path = $file->getRealPath();
             if ($this->importOpenInvoice($path) ) {
                 $response = [
-                    'success' => 'Successfully imported'
+                    'success' => 'Successfully imported invoice'
                 ];
             }
-            return view('open_invoice')->with($response);
+            return view('process_invoice')->with($response);
         }
 
     }
@@ -71,18 +67,9 @@ class OpenInvoiceController extends Controller
 
     private function importOpenInvoice($path)
     {
-        $dataTable = [];
-        $this->openInvoice->truncate();
-        if (($h = fopen($path, "r")) !== FALSE) {
-            $columnHeadings = fgetcsv($h, 1000, ";");
-            // dd($columnHeadings);
-            // dd(array_keys(ColumnNames::MAP));
-            while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {		
-                // dd($data);
-                $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
-            }
-        fclose($h);
-        }
+        $dataTable = $this->getCsvData($path);
+        $dataTable = $this->sanitize($dataTable);
+
         try {
             foreach (array_chunk($dataTable,1000) as $t) {
                 $this->openInvoice->insert($t);
@@ -93,5 +80,31 @@ class OpenInvoiceController extends Controller
         }
 
         return true;
+    }
+
+    private function getCsvData($path)
+    {
+        $dataTable = [];
+        $this->openInvoice->truncate();
+        if (($h = fopen($path, "r")) !== FALSE) {
+            $this->columnHeadings = fgetcsv($h, 1000, ";");
+            while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {		
+                $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+            }
+        fclose($h);
+        }
+
+        return $dataTable;
+    }
+    
+    private function sanitize($dataTable)
+    {
+        foreach($dataTable as $k => $dt) {
+            if ($dataTable[$k]['amount_transaction_currency'] < 1 ) {
+                unset($dataTable[$k]);
+            }
+        }
+
+        return $dataTable;
     }
 }

@@ -9,7 +9,7 @@ class OpenInvoice
         "name" => "name",
         "voucher" => "voucher",
         "invoice" => "invoice",
-        "date" => "date",
+        "trans_date" => "date",
         "Description" => "description",
         "currency" => "currency",
         "amount_transaction_currency" => "amount_transaction_currency",

@@ -15,7 +15,7 @@ class CreateBankStatementTable extends Migration
     {
         Schema::create('bank_statement', function (Blueprint $table) {
             $table->increments('id');
-            $table->longText("date");
+            $table->longText("trans_date");
             $table->longText("valuta");
             $table->longText("datev_account_number");
             $table->longText("amount");

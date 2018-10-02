@@ -10,13 +10,11 @@
 |
 */
 
-
-Route::get('/', function () {
-    return view('welcome');
-});
-
+Route::get('/','BankStatementController@index');
 Route::get('/bank-statement','BankStatementController@index');
 Route::post('/bank-statement','BankStatementController@processBankStatement');
 
 Route::get('/open-invoice','OpenInvoiceController@index');
 Route::post('/open-invoice','OpenInvoiceController@processOpenInvoice');
+
+Route::post('/process-invoice','ProcessInvoiceController@processInvoice');

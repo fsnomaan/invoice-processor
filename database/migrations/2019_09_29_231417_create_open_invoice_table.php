@@ -19,7 +19,7 @@ class CreateOpenInvoiceTable extends Migration
             $table->longText("name");
             $table->longText("voucher");
             $table->longText("invoice");
-            $table->longText("date");
+            $table->longText("trans_date");
             $table->longText("description");
             $table->longText("currency");
             $table->longText("amount_transaction_currency");
