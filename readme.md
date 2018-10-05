@@ -18,6 +18,12 @@ from bank_statement where original_amount = 1.68;
 
 ===========
 
+for point 1:
+- remove new lines before insert
+
+for point 2:
+- check number format for amount
+
 for point 3:
 - get rows from 'bank statement' where 'purpose of use' contains mathcing inovice pattern
 - create an array of invoices from it

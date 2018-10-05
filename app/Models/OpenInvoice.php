@@ -12,4 +12,9 @@ class OpenInvoice extends Model
     {
         return Model::whereIn('invoice', $invoices)->get();
     }
+
+    public function getAllInvoices()
+    {
+        return Model::where('invoice', '<>', '')->pluck('invoice');
+    }
 }

@@ -22,7 +22,7 @@ class CreateOpenInvoiceTable extends Migration
             $table->longText("trans_date");
             $table->longText("description");
             $table->longText("currency");
-            $table->longText("amount_transaction_currency");
+            $table->longText("amount_transaction");
             $table->longText("bank_account");
             $table->longText("business_unit");
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));

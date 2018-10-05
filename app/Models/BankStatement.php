@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 
 class BankStatement extends Model
@@ -11,6 +10,14 @@ class BankStatement extends Model
 
     public function getRowsLikeInvoice(string $invoice)
     {
-        return Model::where('purpose_of_use', 'LIKE', '%' . $invoice . '%')->get();
+        return Model::where('purpose_of_use', 'LIKE', '%' . $invoice . '%')
+            ->first();
+
+    }
+
+    public function getUnmatchedRows(array $ids)
+    {
+        return Model::whereNotIn('id', $ids)
+            ->get();
     }
 }

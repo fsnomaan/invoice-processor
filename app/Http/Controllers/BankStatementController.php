@@ -5,10 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BankStatement;
 use App\Models\ColumnNames\BankStatement as ColumnNames;
 use Illuminate\Http\Request;
-use Illuminate\Http\Testing\MimeType;
 use App\Http\Requests;
-use Maatwebsite\Excel\Facades\Excel;
-use Illuminate\Support\Facades\Input;
 
 class BankStatementController extends Controller
 {
@@ -91,8 +88,8 @@ class BankStatementController extends Controller
         $dataTable = [];
         $this->bs->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
-            $this->columnHeadings = fgetcsv($h, 1000, ";");
-            while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {		
+            fgetcsv($h, 1000, ";");
+            while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {
                 $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
             }
         fclose($h);
@@ -105,6 +102,7 @@ class BankStatementController extends Controller
     {
         foreach($dataTable as $k => $dt) {
             $dataTable[$k]['purpose_of_use'] = $this->sanitizePurposeOfUse($dt['purpose_of_use']);
+            $dataTable[$k]['purpose_of_use'] = trim(preg_replace('/\s+/', '', $dt['purpose_of_use']));
         }
 
         return $dataTable;

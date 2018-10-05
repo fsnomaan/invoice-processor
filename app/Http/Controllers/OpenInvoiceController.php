@@ -87,8 +87,8 @@ class OpenInvoiceController extends Controller
         $dataTable = [];
         $this->openInvoice->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
-            $this->columnHeadings = fgetcsv($h, 1000, ";");
-            while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {		
+            fgetcsv($h, 1000, ";");
+            while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {
                 $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
             }
         fclose($h);
@@ -100,7 +100,7 @@ class OpenInvoiceController extends Controller
     private function sanitize($dataTable)
     {
         foreach($dataTable as $k => $dt) {
-            if ($dataTable[$k]['amount_transaction_currency'] < 1 ) {
+            if ($dataTable[$k]['amount_transaction'] < 1 ) {
                 unset($dataTable[$k]);
             }
         }

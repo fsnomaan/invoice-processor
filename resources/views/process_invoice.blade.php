@@ -56,4 +56,7 @@
 {{ Form::submit('Process Invoice') }}
 
 {{ Form::close() }}
+
+    <hr>
+
 @stop

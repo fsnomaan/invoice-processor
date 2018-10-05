@@ -12,7 +12,7 @@ class OpenInvoice
         "trans_date" => "date",
         "Description" => "description",
         "currency" => "currency",
-        "amount_transaction_currency" => "amount_transaction_currency",
+        "amount_transaction" => "amount_transaction",
         "bank_account" => "bank_account",
         "business_unit" => "business_unit"
     ];
