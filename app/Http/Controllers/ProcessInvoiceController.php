@@ -166,9 +166,9 @@ class ProcessInvoiceController extends Controller
             fputcsv($handle, [
                 'date',
                 'customer',
-                'purpose of use',
                 'invoice number',
                 'debit',
+                'original_amount',
                 'credit',
                 'currency',
                 'payment reference',

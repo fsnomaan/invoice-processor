@@ -70,6 +70,7 @@ class BankStatementController extends Controller
     {
         $dataTable = $this->getCsvData($path);
         $dataTable = $this->sanitize($dataTable);
+        $dataTable = $this->removeWithBookingText($dataTable, 'CASH CONCENTRATING BUCHUNG');
 
         try {
             foreach (array_chunk($dataTable,1000) as $t) {
@@ -101,7 +102,7 @@ class BankStatementController extends Controller
     private function sanitize($dataTable)
     {
         foreach($dataTable as $k => $dt) {
-            $dataTable[$k]['purpose_of_use'] = $this->sanitizePurposeOfUse($dt['purpose_of_use']);
+            $dataTable[$k]['purpose_of_use'] = $this->standardiseInvoice($dt['purpose_of_use']);
             $dataTable[$k]['purpose_of_use'] = trim(preg_replace('/\s+/', '', $dt['purpose_of_use']));
         }
 
@@ -111,14 +112,26 @@ class BankStatementController extends Controller
     /**
      *  find the value 1125 and after 1125 if there is no "-", then insert "-" after 1125
      */
-    private function sanitizePurposeOfUse($value)
+    private function standardiseInvoice(string $value)
     {
         $value = preg_replace("/1125/", "1125 ", $value);
         $value = preg_replace("/1125 -/", "1125 ", $value);
         $value = preg_replace("/1125- /", "1125 ", $value);
         $value = preg_replace("/1125 - /", "1125 ", $value);
-
         $value = preg_replace("/1125\s*/", "1125-", $value);
+        $value = trim(preg_replace('/\s+/', '', $value));
+
         return $value;
+    }
+
+    private function removeWithBookingText(&$bsArray, $text)
+    {
+        foreach ($bsArray as $key => $row) {
+            if (strpos($row['booking_text'], $text ) !== false) {
+                unset($bsArray[$key]);
+            }
+        }
+
+        return $bsArray;
     }
 }
