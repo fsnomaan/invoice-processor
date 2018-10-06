@@ -16,14 +16,6 @@ class OpenInvoiceController extends Controller
         $this->openInvoice = empty($openInvoice) ? new OpenInvoice() : $openInvoice;
     }
 
-    public function index()
-    {
-        $response = [
-            'success' => ''
-        ];
-        return view('process_invoice')->with($response);
-    }
-
     public function processOpenInvoice(Request $request)
     {
         $this->validateForm($request);

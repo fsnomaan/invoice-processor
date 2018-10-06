@@ -10,8 +10,8 @@
 |
 */
 
-Route::get('/','BankStatementController@index');
-Route::post('/bank-statement','BankStatementController@processBankStatement');
-Route::post('/open-invoice','OpenInvoiceController@processOpenInvoice');
+Route::get('/','ProcessInvoiceController@index');
 
-Route::post('/process-invoice','ProcessInvoiceController@processInvoice');
+Route::match(['get', 'post'], '/process-invoice','ProcessInvoiceController@processInvoice');
+Route::match(['get', 'post'], '/bank-statement','BankStatementController@processBankStatement');
+Route::match(['get', 'post'], '/open-invoice','OpenInvoiceController@processOpenInvoice');

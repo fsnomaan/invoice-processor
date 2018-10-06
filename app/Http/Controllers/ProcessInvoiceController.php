@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BankStatement;
 use App\Models\OpenInvoice;
+use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProcessInvoiceController extends Controller
@@ -26,6 +27,14 @@ class ProcessInvoiceController extends Controller
         $this->export = [];
     }
 
+    public function index()
+    {
+        $response = [
+            'success' => ''
+        ];
+        return view('process_invoice')->with($response);
+    }
+
     public function processInvoice()
     {
         $invoices = $this->openInvoice->getAllInvoices()->toArray();
@@ -43,6 +52,7 @@ class ProcessInvoiceController extends Controller
         if (! in_array($invoiceNumber, $invoices) ) {
             return;
         }
+
         $matchingInvoice = [];
         $bsRow = $this->bs->getRowsLikeInvoice($invoiceNumber);
         if (! empty($bsRow) ) {
@@ -70,9 +80,6 @@ class ProcessInvoiceController extends Controller
             if ( $this->isTotalMatches($bsRow->original_amount, $openInvoiceTotal)) {
                 $this->exportRowsForMatchingTotal($bsRow, $openInvoiceRows);
             } else {
-                // - get difference in total
-                // - add to export array with the paid invoice
-                // - add to export array with the unpaid difference
                 $this->exportRowsForUnmatchedTotal($bsRow, $openInvoiceRows, $openInvoiceTotal);
             }
         }
@@ -84,7 +91,6 @@ class ProcessInvoiceController extends Controller
             $this->export[] = [
                 $bsRow->trans_date,
                 $openInvoiceRow->customer_account,
-                $bsRow->purpose_of_use,
                 $openInvoiceRow->invoice,
                 '',
                 $openInvoiceRow->amount_transaction,
@@ -92,7 +98,10 @@ class ProcessInvoiceController extends Controller
                 $bsRow->company_customer,
                 $bsRow->trans_date,
                 '01',
-                'total matched'
+                'total matched',
+                $openInvoiceRow->name,
+                $bsRow->account_holder
+
             ];
         }
     }
@@ -108,7 +117,6 @@ class ProcessInvoiceController extends Controller
             $this->export[] = [
                 $bsRow->trans_date,
                 $openInvoiceRow->customer_account,
-                $bsRow->purpose_of_use,
                 $openInvoiceRow->invoice,
                 '',
                 $openInvoiceRow->amount_transaction,
@@ -116,7 +124,9 @@ class ProcessInvoiceController extends Controller
                 $bsRow->company_customer,
                 $bsRow->trans_date,
                 '01',
-                'unmatched total'
+                'unmatched total',
+                $openInvoiceRow->name,
+                $bsRow->account_holder
             ];
         }
 
@@ -124,7 +134,6 @@ class ProcessInvoiceController extends Controller
             $this->export[] = [
                 $bsRow->trans_date,
                 $openInvoiceRows[0]->customer_account,
-                $bsRow->purpose_of_use,
                 $openInvoiceRows[0]->invoice,
                 '',
                 $differenceInTotal,
@@ -132,7 +141,9 @@ class ProcessInvoiceController extends Controller
                 $bsRow->company_customer,
                 $bsRow->trans_date,
                 '01',
-                'difference in total'
+                'difference in total',
+                $openInvoiceRows[0]->name,
+                $bsRow->account_holder
             ];
         } catch (\Exception $e) {
             var_dump($bsRow->original_amount);
@@ -145,21 +156,67 @@ class ProcessInvoiceController extends Controller
     private function exportRowsForMissingInvoices()
     {
         $unmatchedBsRows = $this->bs->getUnmatchedRows($this->matchedBsRows);
+
         foreach ($unmatchedBsRows as $unmatchedBsRow) {
+            /** @var Collection $invoices */
+            $invoices = $this->openInvoice->getInvoiceByAmount($unmatchedBsRow['original_amount'], array_column($this->export, 3));
+
+            if ($invoices->isEmpty()) {
+                $this->exportRowsWithNoMatch($unmatchedBsRow);
+            } else {
+                if (count($invoices) == 1) {
+                    $invoiceRow = $invoices->first();
+                    $this->exportRowsWithOneMatch($unmatchedBsRow, $invoiceRow, 'Invoice matched based on total');
+                } else { // count is more than 1
+                    $multipleInvoices = array_column($invoices->toArray(), 'invoice');
+                    if (! empty($unmatchedBsRow->company_customer) ) {
+                        /** @var Collection $invoiceRowByName */
+                        $invoiceRowByName = $this->openInvoice->getInvoiceByMatchingName($unmatchedBsRow->company_customer, $multipleInvoices);
+                        if ($invoiceRowByName->isNotEmpty()) {
+                            $this->exportRowsWithOneMatch($unmatchedBsRow, $invoiceRowByName->first(), 'Invoice matched based on similar name');
+                        } else {
+                            $this->exportRowsWithNoMatch($unmatchedBsRow);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private function exportRowsWithOneMatch($unmatchedBsRow, $invoiceRow, $note)
+    {
+        $this->export[] = [
+            $unmatchedBsRow->trans_date,
+            $invoiceRow->customer_account,
+            $invoiceRow->invoice,
+            '',
+            $invoiceRow->amount_transaction,
+            $unmatchedBsRow->original_currency,
+            $unmatchedBsRow->company_customer,
+            $unmatchedBsRow->trans_date,
+            '01',
+            $note,
+            $invoiceRow->name,
+            $unmatchedBsRow->account_holder
+        ];
+    }
+
+    private function exportRowsWithNoMatch($unmatchedBsRow)
+    {
             $this->export[] = [
                 $unmatchedBsRow->trans_date,
-                'no account found',
-                $unmatchedBsRow->purpose_of_use,
-                'no matching invoice',
+                'not found',
+                'not found',
                 '',
                 $unmatchedBsRow->original_amount,
                 $unmatchedBsRow->original_currency,
                 $unmatchedBsRow->company_customer,
                 $unmatchedBsRow->trans_date,
                 '01',
-                'Missing invoice details'
+                'Missing invoice details',
+                'not found',
+                $unmatchedBsRow->account_holder
             ];
-        }
     }
 
     private function streamResponse()
@@ -172,17 +229,18 @@ class ProcessInvoiceController extends Controller
                 'customer',
                 'invoice number',
                 'debit',
-                'original_amount',
                 'credit',
                 'currency',
                 'payment reference',
                 'document date',
                 'trans type',
-                'notes'
-            ]);
+                'notes',
+                'OPOS File Customer Name',
+                'purpose of use'
+            ], ';');
 
             foreach ($this->export as $row) {
-                fputcsv($handle, $row);
+                fputcsv($handle, $row, ';');
             }
 
             fclose($handle);

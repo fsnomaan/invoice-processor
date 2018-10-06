@@ -17,4 +17,16 @@ class OpenInvoice extends Model
     {
         return Model::where('invoice', '<>', '')->pluck('invoice');
     }
+
+    public function getInvoiceByAmount(float $amount, array $excludeInvoices=null)
+    {
+        return Model::where('amount_transaction', $amount)
+            ->whereNotIn('invoice', $excludeInvoices)->get();
+    }
+
+    public function getInvoiceByMatchingName(string $name, array $invoices)
+    {
+        return Model::where('name', 'LIKE', '%' . $name . '%')
+            ->whereIn('invoice', $invoices)->get();
+    }
 }

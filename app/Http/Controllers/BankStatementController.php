@@ -17,14 +17,6 @@ class BankStatementController extends Controller
         $this->bs = empty($bs) ? new BankStatement() : $bs;
     }
 
-    public function index()
-    {
-        $response = [
-            'success' => ''
-        ];
-        return view('process_invoice')->with($response);
-    }
-
     public function processBankStatement(Request $request)
     {
         $this->validateForm($request);
