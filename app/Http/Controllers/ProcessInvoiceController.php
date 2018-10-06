@@ -99,6 +99,11 @@ class ProcessInvoiceController extends Controller
 
     private function exportRowsForUnmatchedTotal($bsRow, $openInvoiceRows, $openInvoiceTotal)
     {
+        $differenceInTotal = $this->getDifferenceInTotal($bsRow->original_amount, $openInvoiceTotal);
+        if ($differenceInTotal < 0) {
+            return;
+        }
+
         foreach($openInvoiceRows as $openInvoiceRow) {
             $this->export[] = [
                 $bsRow->trans_date,
@@ -115,7 +120,6 @@ class ProcessInvoiceController extends Controller
             ];
         }
 
-        $differenceInTotal = $this->getDifferenceInTotal($bsRow->original_amount, $openInvoiceTotal);
         try {
             $this->export[] = [
                 $bsRow->trans_date,
