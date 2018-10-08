@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class OpenInvoice extends Model
 {
@@ -28,5 +29,18 @@ class OpenInvoice extends Model
     {
         return Model::where('name', 'LIKE', '%' . $name . '%')
             ->whereIn('invoice', $invoices)->get();
+    }
+
+    public function getInvoiceFromTotalAndName(float $total, string $name)
+    {
+//        DB::enableQueryLog();
+        $results = Model::where('amount_transaction', $total)
+            ->where('name', 'LIKE', '%' . $name . '%')->get();
+        if ($total == '150') {
+//            dd($results);
+//            dd(DB::getQueryLog());
+        }
+        return $results;
+
     }
 }
