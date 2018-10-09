@@ -21,8 +21,12 @@ class OpenInvoice extends Model
 
     public function getInvoiceByAmount(float $amount, array $excludeInvoices=null)
     {
+        DB::enableQueryLog();
+
         return Model::where('amount_transaction', $amount)
             ->whereNotIn('invoice', $excludeInvoices)->get();
+
+        dd(DB::getQueryLog());
     }
 
     public function getInvoiceByMatchingName(string $name, array $invoices)
@@ -33,13 +37,10 @@ class OpenInvoice extends Model
 
     public function getInvoiceFromTotalAndName(float $total, string $name)
     {
-//        DB::enableQueryLog();
+       DB::enableQueryLog();
         $results = Model::where('amount_transaction', $total)
             ->where('name', 'LIKE', '%' . $name . '%')->get();
-        if ($total == '150') {
-//            dd($results);
-//            dd(DB::getQueryLog());
-        }
+//       dd(DB::getQueryLog());
         return $results;
 
     }

@@ -92,7 +92,7 @@ class OpenInvoiceController extends Controller
     private function sanitize($dataTable)
     {
         foreach($dataTable as $k => $dt) {
-            if ($dataTable[$k]['amount_transaction'] < 1 ) {
+            if ($dataTable[$k]['amount_transaction'] < 0 ) {
                 unset($dataTable[$k]);
             }
         }

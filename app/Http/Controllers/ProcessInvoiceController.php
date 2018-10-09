@@ -77,7 +77,7 @@ class ProcessInvoiceController extends Controller
                 }
             }
 
-            if ( $this->isTotalMatches($bsRow->original_amount, $openInvoiceTotal)) {
+            if ( $this->isTotalMatches((float) $bsRow->original_amount, (float) $openInvoiceTotal)) {
                 $this->exportRowsForMatchingTotal($bsRow, $openInvoiceRows);
             } else {
                 $this->exportRowsForUnmatchedTotal($bsRow, $openInvoiceRows, $openInvoiceTotal);
@@ -106,7 +106,7 @@ class ProcessInvoiceController extends Controller
         }
 
         foreach($openInvoiceRows as $openInvoiceRow) {
-            $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'matched invoice');
+            $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'unmatched invoice total');
         }
 
         $differenceInvoices = $this->openInvoice->getInvoiceFromTotalAndName((float)$differenceInTotal, $openInvoiceRows[0]->name);
@@ -244,7 +244,7 @@ class ProcessInvoiceController extends Controller
             'not found',
             'not found',
             '',
-            $difference,
+            round($difference, 2),
             $bsRow->original_currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
@@ -288,7 +288,7 @@ class ProcessInvoiceController extends Controller
         ]);
     }
 
-    private function isTotalMatches($bsTotal, $openInvoiceTotal)
+    private function isTotalMatches(float $bsTotal, float $openInvoiceTotal)
     {
         return $bsTotal == $openInvoiceTotal;
     }
