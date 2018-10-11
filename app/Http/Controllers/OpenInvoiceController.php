@@ -79,7 +79,10 @@ class OpenInvoiceController extends Controller
         $dataTable = [];
         $this->openInvoice->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
-            fgetcsv($h, 1000, ";");
+            $heading = fgetcsv($h, 1000, ";");
+            if (count($heading) > 10 ) {
+                dd("Extra columns found! Please remove extra ';' from end of each line");
+            }
             while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {
                 $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
             }

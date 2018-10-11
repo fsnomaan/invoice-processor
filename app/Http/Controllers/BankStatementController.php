@@ -64,6 +64,7 @@ class BankStatementController extends Controller
         $dataTable = $this->sanitize($dataTable);
         $dataTable = $this->removeWithBookingText($dataTable, 'CASH CONCENTRATING BUCHUNG');
         $dataTable = $this->removeAwinRefunds($dataTable);
+        $dataTable = $this->removeEmptyPayRef($dataTable);
 
         try {
             foreach (array_chunk($dataTable,1000) as $t) {
@@ -130,6 +131,17 @@ class BankStatementController extends Controller
     {
         foreach ($bsArray as $key => $row) {
             if (strpos($row['purpose_of_use'], 'AWINPAYOUT' ) !== false) {
+                unset($bsArray[$key]);
+            }
+        }
+
+        return $bsArray;
+    }
+
+    private function removeEmptyPayRef(&$bsArray)
+    {
+        foreach ($bsArray as $key => $row) {
+            if ( empty($row['company_customer']) ) {
                 unset($bsArray[$key]);
             }
         }
