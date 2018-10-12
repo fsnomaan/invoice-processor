@@ -67,6 +67,7 @@ class ProcessInvoiceController extends Controller
                     }
                 }
             }
+
             $openInvoiceTotal = 0;
             $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoice);
             foreach($openInvoiceRows as $openInvoiceRow) {
@@ -125,22 +126,21 @@ class ProcessInvoiceController extends Controller
             /** @var Collection $invoices */
             $invoices = $this->openInvoice->getInvoiceByAmount((float)$unmatchedBsRow['original_amount'], array_column($this->export, 3));
 
-            if ($invoices->isEmpty()) {
-                $this->exportRowsWithNoMatch($unmatchedBsRow);
-            } else {
-                if (count($invoices) == 1) {
-                    $this->exportRowsWithMatch($unmatchedBsRow, $invoices->first(), 'Invoice matched based on total.');
-                } else { // count is more than 1
-                    $multipleInvoices = array_column($invoices->toArray(), 'invoice');
+            if (count($invoices) > 1 ) {
+                $multipleInvoices = array_column($invoices->toArray(), 'invoice');
 
-                    /** @var Collection $invoiceRowByName */
-                    $invoiceRowByName = $this->openInvoice->getInvoiceByMatchingName($unmatchedBsRow->company_customer, $multipleInvoices);
-                    if ($invoiceRowByName->isNotEmpty()) {
-                        $this->processRowsWithSimilarName($unmatchedBsRow, $invoiceRowByName, 'Invoice matched based on similar name.');
-                    } else {
-                        $this->exportRowsWithNoMatch($unmatchedBsRow);
-                    }
+                /** @var Collection $invoiceRowByName */
+                $invoiceRowByName = $this->openInvoice->getInvoiceByMatchingName($unmatchedBsRow->company_customer, $multipleInvoices);
+                if ($invoiceRowByName->isNotEmpty()) {
+                    $this->processRowsWithSimilarName($unmatchedBsRow, $invoiceRowByName, 'Invoice matched based on similar name.');
+                } else {
+                    $this->exportRowsWithNoMatch($unmatchedBsRow);
                 }
+            } elseif (count($invoices) == 1 ) {
+                $this->exportRowsWithMatch($unmatchedBsRow, $invoices->first(), 'Invoice matched based on total.');
+            } else {
+                $this->exportRowsWithNoMatch($unmatchedBsRow);
+
             }
         }
     }
@@ -202,8 +202,8 @@ class ProcessInvoiceController extends Controller
     {
             $this->export[] = [
                 $unmatchedBsRow->trans_date,
-                'not found',
-                'not found',
+                'Not found',
+                'Not found',
                 '',
                 $unmatchedBsRow->amount,
                 $unmatchedBsRow->original_currency,
@@ -211,7 +211,7 @@ class ProcessInvoiceController extends Controller
                 $unmatchedBsRow->trans_date,
                 '01',
                 'Missing invoice details',
-                'not found',
+                'Not found',
                 $unmatchedBsRow->amount,
                 $unmatchedBsRow->purpose_of_use
             ];
@@ -264,16 +264,16 @@ class ProcessInvoiceController extends Controller
             $handle = fopen('php://output', 'w');
 
             fputcsv($handle, [
-                'date',
-                'customer',
-                'invoice number',
-                'debit',
-                'credit',
-                'currency',
-                'payment reference',
-                'document date',
-                'trans type',
-                'notes',
+                'Date',
+                'Customer',
+                'Invoice number',
+                'Debit',
+                'Credit',
+                'Currency',
+                'Payment reference',
+                'Document date',
+                'Trans type',
+                'Notes',
                 'OPOS File Customer Name',
                 'bank statement total',
                 'Bank Statement invoices'
