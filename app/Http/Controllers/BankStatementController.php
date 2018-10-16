@@ -26,7 +26,7 @@ class BankStatementController extends Controller
             $path = $file->getRealPath();
             if ($this->importBankStatement($path) ) {
                 $response = [
-                    'success' => 'Successfully imported bank statement'
+                    'success' => 'Successfully imported bank statement: ' . $file->getClientOriginalName()
                 ];
             }
             return view('process_invoice')->with($response);

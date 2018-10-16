@@ -15,16 +15,16 @@ class CreateOpenInvoiceTable extends Migration
     {
         Schema::create('open_invoice', function (Blueprint $table) {
             $table->increments('id');
-            $table->longText("customer_account");
-            $table->longText("name");
-            $table->longText("voucher");
-            $table->longText("invoice");
-            $table->longText("trans_date");
-            $table->longText("description");
-            $table->longText("currency");
-            $table->longText("amount_transaction");
-            $table->longText("bank_account");
-            $table->longText("business_unit");
+            $table->mediumText("customer_account");
+            $table->mediumText("name");
+            $table->mediumText("voucher");
+            $table->mediumText("invoice");
+            $table->mediumText("trans_date");
+            $table->mediumText("description");
+            $table->mediumText("currency");
+            $table->mediumText("amount_transaction");
+            $table->mediumText("bank_account");
+            $table->mediumText("business_unit");
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
         });

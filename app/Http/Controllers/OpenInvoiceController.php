@@ -25,7 +25,7 @@ class OpenInvoiceController extends Controller
             $path = $file->getRealPath();
             if ($this->importOpenInvoice($path) ) {
                 $response = [
-                    'success' => 'Successfully imported invoice'
+                    'success' => 'Successfully imported invoice: ' . $file->getClientOriginalName()
                 ];
             }
             return view('process_invoice')->with($response);
