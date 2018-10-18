@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\CompanyName;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\BankStatementController;
 use App\Http\Controllers\OpenInvoiceController;
@@ -39,7 +40,11 @@ class AppServiceProvider extends ServiceProvider
         resolve(OpenInvoiceController::class);
 
         $this->app->bind(ProcessInvoiceController::class, function () {
-            return new ProcessInvoiceController(resolve(BankStatement::class), resolve(OpenInvoice::class));
+            return new ProcessInvoiceController(
+                resolve(BankStatement::class),
+                resolve(OpenInvoice::class),
+                resolve(CompanyName::class)
+            );
         });
         resolve(ProcessInvoiceController::class);        
     }

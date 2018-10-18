@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\BankStatement;
+use App\Models\CompanyName;
 use App\Models\OpenInvoice;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -21,11 +22,18 @@ class ProcessInvoiceController extends Controller
     /** @var array  */
     private $matchedBsRows = [];
 
-    public function __construct(BankStatement $bs, OpenInvoice $openInvoice)
-    {
+    /** @var CompanyName */
+    private $companyName;
+
+    public function __construct(
+        BankStatement $bs,
+        OpenInvoice $openInvoice,
+        CompanyName $companyName
+    ) {
+        $this->export = [];
         $this->bs = $bs;
         $this->openInvoice = $openInvoice;
-        $this->export = [];
+        $this->companyName = $companyName;
     }
 
     public function index()
@@ -126,7 +134,7 @@ class ProcessInvoiceController extends Controller
 
         if ( $differenceInvoices->isNotEmpty() && count($differenceInvoices) == 1 ){
             $differenceInvoice = $differenceInvoices->first();
-            $this->exportRowsWithMatch($bsRow, $differenceInvoice, "Matched by total");
+            $this->exportRowsWithMatch($bsRow, $differenceInvoice, "Matched");
         } else {
             if ( $differenceInTotal == 0 ) { return; }
             $this->exportRowsWithDifference($bsRow, $differenceInTotal, 'Please find invoice manually');
@@ -170,12 +178,12 @@ class ProcessInvoiceController extends Controller
 
                 if ( isset($parts[1])) {
                     $needle = $parts[1];
+                    if (strpos($bsRow->purpose_of_use, trim($needle) ) !== false) {
+                        $matchingInvoices[] = $invoice;
+                        unset($invoices[$key]);
+                    }
                 }
 
-                if (strpos($bsRow->purpose_of_use, trim($needle) ) !== false) {
-                    $matchingInvoices[] = $invoice;
-                    unset($invoices[$key]);
-                }
             }
         }
 
@@ -196,7 +204,10 @@ class ProcessInvoiceController extends Controller
                 $multipleInvoices = array_column($invoices->toArray(), 'invoice');
 
                 /** @var Collection $invoiceRowByName */
-                $invoiceRowByName = $this->openInvoice->getInvoiceByMatchingName($unmatchedBsRow->company_customer, $multipleInvoices);
+                $invoiceRowByName = $this->openInvoice->getInvoiceByMatchingName(
+                                        $this->getCompanyCustomerName($unmatchedBsRow->company_customer),
+                                        $multipleInvoices
+                                    );
                 if ($invoiceRowByName->isNotEmpty()) {
                     $this->processRowsWithSimilarName($unmatchedBsRow, $invoiceRowByName, 'Invoice matched based on similar name.');
                 } else {
@@ -379,5 +390,16 @@ class ProcessInvoiceController extends Controller
     private function removeComma(string $value) : string
     {
         return str_replace(',', '', $value);
+    }
+
+    private function getCompanyCustomerName(string $name) : string
+    {
+        $map = $this->companyName->getNames();
+
+        if (array_key_exists($name, $map) ) {
+            return $map[$name];
+        }
+
+        return $name;
     }
 }
