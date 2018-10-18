@@ -15,3 +15,4 @@ Route::get('/','ProcessInvoiceController@index');
 Route::match(['get', 'post'], '/process-invoice','ProcessInvoiceController@processInvoice');
 Route::match(['get', 'post'], '/bank-statement','BankStatementController@processBankStatement');
 Route::match(['get', 'post'], '/open-invoice','OpenInvoiceController@processOpenInvoice');
+Route::match(['get', 'post'], '/update-map','CompanyNameController@updateMap');

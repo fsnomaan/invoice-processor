@@ -22,7 +22,7 @@ class ProcessInvoiceController extends Controller
     /** @var array  */
     private $matchedBsRows = [];
 
-    /** @var CompanyName */
+    /** @var CompanyNameController */
     private $companyName;
 
     public function __construct(
@@ -39,6 +39,7 @@ class ProcessInvoiceController extends Controller
     public function index()
     {
         $response = [
+            'companyNames' => $this->companyName->getNames(),
             'success' => ''
         ];
 

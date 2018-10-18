@@ -1,62 +1,86 @@
 @extends('layout')
 
 @section('content')
-<center><h1> {{ $success }} </h1></center>
 
+<div class="response">  {{ $success }} </div>
+
+<div class="importTable">
     <h1>Import a bank statement</h1>
 
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-{{ Form::open(array('url' => '/bank-statement', 'files' => true)) }}
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    {{ Form::open(array('url' => '/bank-statement', 'files' => true)) }}
 
-{{ Form::open(array('action' => 'BankStatementController@processBankStatement')) }}
+    {{ Form::open(array('action' => 'BankStatementController@processBankStatement')) }}
 
-{{ Form::file('bankStatement') }}
+    {{ Form::file('bankStatement') }}
 
-{{ Form::submit('Import') }}
+    {{ Form::submit('Import') }}
 
-{{ Form::close() }}
+    {{ Form::close() }}
+</div>
 
-<hr>
+<div class="importTable">
+    <h1>Import an open invoice</h1>
 
-<h1>Import an open invoice</h1>
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    {{ Form::open(array('url' => '/open-invoice', 'files' => true)) }}
 
-@if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
-{{ Form::open(array('url' => '/open-invoice', 'files' => true)) }}
+    {{ Form::open(array('action' => 'OpenInvoiceController@processOpenInvoice')) }}
 
-{{ Form::open(array('action' => 'OpenInvoiceController@processOpenInvoice')) }}
+    {{ Form::file('OpenInvoice') }}
 
-{{ Form::file('OpenInvoice') }}
+    {{ Form::submit('Import') }}
 
-{{ Form::submit('Import') }}
+    {{ Form::close() }}
+</div>
 
-{{ Form::close() }}
+<div class="mappingTable">
+    {!! Form::open(['url' => '/update-map']) !!}
+    {{ Form::open(array('action' => 'CompanyNameController@updateMap')) }}
 
-<hr>
+    <table class="table-responsive-sm">
+        <tr>
+            <thead>
+                <tr>
+                    <th>Name</th><th>Map To</th>
+                </tr>
+            </thead>
+        </tr>
+    @foreach ($companyNames as $name => $mapTo)
+        <tr><td>{{ $name }}</td><td>{{ $mapTo }}</td><td><button type="submit" name="actionName" value="<?php echo 'remove=>'. $name ?>">Remove</button></td> </tr>
+    @endforeach
+        <tr>
+            <td> {{ Form::text('mapName') }} </td> <td> {{ Form::text('mapTo') }}</td><td><button type="submit" name="actionName" value="save">Save</button></td>
+        </tr>
+    </table>
+    {{ Form::close() }}
 
-{!! Form::open(['url' => '/process-invoice']) !!}
+</div>
 
-{{ Form::open(array('action' => 'ProcessInvoiceController@processInvoice')) }}
+<div class="process">
+    {!! Form::open(['url' => '/process-invoice']) !!}
 
-{{ Form::submit('Process Invoice') }}
+    {{ Form::open(array('action' => 'ProcessInvoiceController@processInvoice')) }}
 
-{{ Form::close() }}
+    {{ Form::submit('Process Invoice') }}
 
-    <hr>
+    {{ Form::close() }}
 
+</div>
 @stop
