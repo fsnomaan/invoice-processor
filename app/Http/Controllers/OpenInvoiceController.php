@@ -20,15 +20,15 @@ class OpenInvoiceController extends Controller
     {
         $this->validateForm($request);
 
-        if ($request->hasFile('OpenInvoice') && $request->file('OpenInvoice')->isValid()) {
-            $file = $request->file('OpenInvoice');
+        if ($request->hasFile('openInvoice') && $request->file('openInvoice')->isValid()) {
+            $file = $request->file('openInvoice');
             $path = $file->getRealPath();
             if ($this->importOpenInvoice($path) ) {
-                $response = [
-                    'success' => 'Successfully imported invoice: ' . $file->getClientOriginalName()
-                ];
+                session()->put('notifications','Invoice file imported: '. $file->getClientOriginalName());
+                return redirect()->action(
+                    'ProcessInvoiceController@index'
+                );
             }
-            return view('process_invoice')->with($response);
         }
 
     }
@@ -36,7 +36,7 @@ class OpenInvoiceController extends Controller
     private function validateForm($request)
     {
         $rules = [
-            'OpenInvoice' => '
+            'openInvoice' => '
                 required
                 |
                 mimetypes:text/plain,

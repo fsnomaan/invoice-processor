@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BankStatement;
 use App\Models\CompanyName;
 use App\Models\OpenInvoice;
+use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -36,11 +37,11 @@ class ProcessInvoiceController extends Controller
         $this->companyName = $companyName;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $response = [
             'companyNames' => $this->companyName->getNames(),
-            'success' => ''
+            'success' => $request->message
         ];
 
         return view('process_invoice')->with($response);

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\BankStatement;
 use App\Models\ColumnNames\BankStatement as ColumnNames;
 use Illuminate\Http\Request;
-use App\Http\Requests;
 
 class BankStatementController extends Controller
 {
@@ -25,11 +24,11 @@ class BankStatementController extends Controller
             $file = $request->file('bankStatement');
             $path = $file->getRealPath();
             if ($this->importBankStatement($path) ) {
-                $response = [
-                    'success' => 'Successfully imported bank statement: ' . $file->getClientOriginalName()
-                ];
+                session()->put('notifications', 'Bank statement imported: '. $file->getClientOriginalName() );
+                return redirect()->action(
+                    'ProcessInvoiceController@index'
+                );
             }
-            return view('process_invoice')->with($response);
         }
 
     }

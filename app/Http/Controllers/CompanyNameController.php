@@ -23,19 +23,18 @@ class CompanyNameController extends Controller
             $this->companyName->name = $request->mapName;
             $this->companyName->map_to = $request->mapTo;
             $this->companyName->save();
-            $response = [
-                'companyNames' => $this->companyName->getNames(),
-                'success' => 'Successfully saved'
-            ];
+            session()->put('notifications','Item created successfully.');
+            return redirect()->action(
+                'ProcessInvoiceController@index'
+            );
         }
         $parts = explode('=>',$request->actionName);
         if ($parts[0]  == 'remove') {
             $this->companyName::where('name', $parts[1])->delete();
-            $response = [
-                'companyNames' => $this->companyName->getNames(),
-                'success' => 'Successfully deleted '. $parts[1]
-            ];
+            session()->put('notifications','Successfully deleted');
+            return redirect()->action(
+                'ProcessInvoiceController@index'
+            );
         }
-        return view('process_invoice')->with($response);
     }
 }
