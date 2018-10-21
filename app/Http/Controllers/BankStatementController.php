@@ -11,6 +11,9 @@ class BankStatementController extends Controller
     /** @var BankStatement  */
     private $bs;
 
+    /** @var string */
+    private $invoicePrimary;
+
     public function __construct(BankStatement $bs)
     {
         $this->bs = empty($bs) ? new BankStatement() : $bs;
@@ -19,6 +22,8 @@ class BankStatementController extends Controller
     public function processBankStatement(Request $request)
     {
         $this->validateForm($request);
+
+        $this->invoicePrimary = $request->invoicePrimary;
 
         if ($request->hasFile('bankStatement') && $request->file('bankStatement')->isValid()) {
             $file = $request->file('bankStatement');
@@ -47,8 +52,10 @@ class BankStatementController extends Controller
                 text/csv,
                 text/anytext,
                 text/comma-separated-values',
+            'invoicePrimary' => '
+                required'
         ];
-    
+
         $customMessages = [
             'required' => 'The :attribute field is required.',
             'mimetypes' => 'not a valid csv file'
@@ -104,12 +111,12 @@ class BankStatementController extends Controller
 
     private function standardiseInvoice(string $value)
     {
-        $value = preg_replace("/1125\./", "1125 ", $value);
-        $value = preg_replace("/1125/", "1125 ", $value);
-        $value = preg_replace("/1125 -/", "1125 ", $value);
-        $value = preg_replace("/1125- /", "1125 ", $value);
-        $value = preg_replace("/1125 - /", "1125 ", $value);
-        $value = preg_replace("/1125\s*/", "1125-", $value);
+        $value = preg_replace("/" . $this->invoicePrimary . "\./", $this->invoicePrimary . " ", $value);
+        $value = preg_replace("/" . $this->invoicePrimary . "/", $this->invoicePrimary . " ", $value);
+        $value = preg_replace("/" . $this->invoicePrimary . " -/", $this->invoicePrimary . " ", $value);
+        $value = preg_replace("/" . $this->invoicePrimary . "- /", $this->invoicePrimary . " ", $value);
+        $value = preg_replace("/" . $this->invoicePrimary . " - /", $this->invoicePrimary . " ", $value);
+        $value = preg_replace("/" . $this->invoicePrimary . "\s*/", $this->invoicePrimary . "-", $value);
 
         $value = trim(preg_replace('/\s+/', '', $value));
 
