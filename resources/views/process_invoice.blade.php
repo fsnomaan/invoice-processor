@@ -72,14 +72,15 @@
                 <table class="table-bordered">
                     <thead class="bg-dark text-white-50">
                         <tr>
-                            <th scope="col">Company Name</th><th scope="col">Map To</th>
+                            <th scope="col" class="text-center">Company Name</th>
+                            <th scope="col" class="text-center">Map To</th>
                         </tr>
                     </thead>
                     @if(isset($companyNames))
                         @foreach ($companyNames as $name => $mapTo)
                             <tr scope="row">
-                                <td>{{ $name }}</td>
-                                <td>{{ $mapTo }}</td>
+                                <td class="text-center">{{ $name }}</td>
+                                <td class="text-center">{{ $mapTo }}</td>
                                 <td>
                                     <button class="alert-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $name ?>">
                                         <i class="fa fa-trash"></i>
@@ -89,8 +90,8 @@
                         @endforeach
                     @endif
                     <tr>
-                        <td> {{ Form::text('mapName') }} </td>
-                        <td> {{ Form::text('mapTo') }}</td>
+                        <td class="text-center"> {{ Form::text('mapName') }} </td>
+                        <td class="text-center"> {{ Form::text('mapTo') }}</td>
                         <td><button class="alert-success" type="submit" name="actionName" value="save"><i class="fa fa-check"></i></button></td>
                     </tr>
                 </table>

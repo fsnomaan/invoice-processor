@@ -84,6 +84,7 @@ class OpenInvoiceController extends Controller
                 dd("Extra columns found! Please remove extra ';' from end of each line");
             }
             while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {
+                $data = array_slice($data, 0, count(ColumnNames::MAP));
                 $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
             }
         fclose($h);
