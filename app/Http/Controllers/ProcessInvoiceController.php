@@ -17,6 +17,8 @@ class ProcessInvoiceController extends Controller
     /** @var OpenInvoice */
     private $openInvoice;
 
+    private $invoices = [];
+
     /** @var array  */
     private $export = [];
 
@@ -49,16 +51,14 @@ class ProcessInvoiceController extends Controller
 
     public function processInvoice()
     {
-        $invoices = $this->openInvoice->getAllInvoices()->toArray();
-
-        foreach ($invoices as $key => $invoice) {
-            $this->createExportRow($invoice, $invoices);
+        $this->invoices = $this->openInvoice->getAllInvoices()->toArray();
+        foreach ($this->invoices as $key => $invoice) {
+            $this->createExportRow($invoice, $this->invoices);
         }
 
-        foreach ($invoices as $key => $invoice) {
-            $this->createExportRowWithPartialInvoice($invoice, $invoices);
+        foreach ($this->invoices as $key => $invoice) {
+            $this->createExportRowWithPartialInvoice($invoice, $this->invoices);
         }
-
         $this->exportRowsForMissingInvoices();
 
         return $this->streamResponse();
@@ -90,11 +90,9 @@ class ProcessInvoiceController extends Controller
         $this->matchedBsRows[] = $bsRow->id;
 
         foreach ($invoices as $key => $invoice) {
-            $needle = $invoice;
 
-            if (strpos($bsRow->purpose_of_use, trim($needle) ) !== false) {
+            if (strpos($bsRow->purpose_of_use, trim($invoice) ) !== false) {
                 $matchingInvoices[] = $invoice;
-                unset($invoices[$key]);
             }
         }
 
@@ -158,12 +156,8 @@ class ProcessInvoiceController extends Controller
                 $note = 'Matched by partial invoice number';
                 $matchingInvoices = $this->getPartialMatchingInvoices($bsRow, $invoices);
                 $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoices);
-                $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
-
-                if ( $this->isTotalMatches((float) $bsRow->original_amount, (float) $openInvoiceTotal)) {
-                    $this->exportRowsForMatchingTotal($bsRow, $openInvoiceRows, $note);
-                } else {
-                    $this->exportRowsForUnmatchedTotal($bsRow, $openInvoiceRows, $openInvoiceTotal, $note);
+                foreach($openInvoiceRows as $openInvoiceRow) {
+                    $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $note);
                 }
             }
         }
@@ -286,6 +280,7 @@ class ProcessInvoiceController extends Controller
             $bsRow->purpose_of_use
 
         ];
+        $this->deleteElement($invoiceRow->invoice, $this->invoices);
     }
 
     private function exportRowsWithNoMatch(BankStatement $unmatchedBsRow)
@@ -403,5 +398,12 @@ class ProcessInvoiceController extends Controller
         }
 
         return $name;
+    }
+
+    private function deleteElement($element, &$array){
+        $index = array_search($element, $array);
+        if($index !== false){
+            unset($array[$index]);
+        }
     }
 }

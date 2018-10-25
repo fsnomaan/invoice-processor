@@ -117,9 +117,8 @@ class BankStatementController extends Controller
         $value = preg_replace("/" . $this->invoicePrimary . " -/", $this->invoicePrimary . " ", $value);
         $value = preg_replace("/" . $this->invoicePrimary . "- /", $this->invoicePrimary . " ", $value);
         $value = preg_replace("/" . $this->invoicePrimary . " - /", $this->invoicePrimary . " ", $value);
+        $value = trim(preg_replace('/\s+/', '', $value)); // REMOVE ANY NEW LINE
         $value = preg_replace("/" . $this->invoicePrimary . "\s*/", $this->invoicePrimary . "-", $value);
-
-        $value = trim(preg_replace('/\s+/', '', $value));
 
         return $value;
     }
