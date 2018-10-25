@@ -90,8 +90,8 @@ class BankStatementController extends Controller
         $dataTable = [];
         $this->bs->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
-            fgetcsv($h, 1000, ";");
-            while (($data = fgetcsv($h, 1000, ";")) !== FALSE) {
+            fgetcsv($h, 1000, ",");
+            while (($data = fgetcsv($h, 1000, ",")) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
                 $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
             }
