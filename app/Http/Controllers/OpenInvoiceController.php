@@ -80,9 +80,6 @@ class OpenInvoiceController extends Controller
         $this->openInvoice->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
             $heading = fgetcsv($h, 1000, ",");
-            if (count($heading) > 10 ) {
-                dd("column count does not match");
-            }
             while (($data = fgetcsv($h, 1000, ",")) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
                 $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
