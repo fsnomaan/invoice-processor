@@ -93,6 +93,8 @@ class OpenInvoiceController extends Controller
     private function sanitize($dataTable)
     {
         foreach($dataTable as $k => $dt) {
+            $dataTable[$k]['Description'] = utf8_encode($dataTable[$k]['Description']);
+            $dataTable[$k]['name'] = utf8_encode($dataTable[$k]['name']);
             if ($dataTable[$k]['amount_transaction'] < 0 ) {
                 unset($dataTable[$k]);
             }
