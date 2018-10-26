@@ -25,7 +25,8 @@
     </div>
 
     <div class="row pt-3">
-        <div class="col-sm-4 bg-grey">
+        <div class="col-sm-6 bg-grey">
+            <h6 class="bg-warning"> Step 1 </h6>
             <div class="importTable">
 
                 {{ Form::open(array('url' => '/bank-statement', 'files' => true)) }}
@@ -47,7 +48,8 @@
                 {{ Form::close() }}
             </div>
         </div>
-        <div class="col-sm-3">
+        <div class="col-sm-6">
+            <h6 class="bg-warning"> Step 2 </h6>
             <div class="importTable">
 
                 {{ Form::open(array('url' => '/open-invoice', 'files' => true)) }}
@@ -64,12 +66,15 @@
                 {{ Form::close() }}
             </div>
         </div>
-        <div class="col-sm-4" align="right">
+    </div>
+    <div class="row pt-3">
+        <div class="col-sm-6">
+            <h6 class="bg-warning"> Optional </h6>
             <div class="mappingTable">
                 {!! Form::open(['url' => '/update-map']) !!}
                 {{ Form::open(array('action' => 'CompanyNameController@updateMap')) }}
 
-                <table class="table-bordered">
+                <table class="table-responsive-sm">
                     <thead class="bg-dark text-white-50">
                         <tr>
                             <th scope="col" class="text-center">Company Name</th>
@@ -99,11 +104,9 @@
 
             </div>
         </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-12" align="left">
-            <div class="process">
+        <div class="col-sm-6" align="left">
+            <h6 class="bg-warning"> Step 3 </h6>
+            <div class="process pull-right">
                 {!! Form::open(['url' => '/process-invoice']) !!}
 
                 {{ Form::open(array('action' => 'ProcessInvoiceController@processInvoice')) }}
