@@ -74,11 +74,12 @@
                 {!! Form::open(['url' => '/update-map']) !!}
                 {{ Form::open(array('action' => 'CompanyNameController@updateMap')) }}
 
-                <table class="table-responsive-sm">
+                <table class="table-condensed" style="width: 100%;">
                     <thead class="bg-dark text-white-50">
                         <tr>
                             <th scope="col" class="text-center">Company Name</th>
                             <th scope="col" class="text-center">Map To</th>
+                            <th scope="col" class="text-center">#</th>
                         </tr>
                     </thead>
                     @if(isset($companyNames))
