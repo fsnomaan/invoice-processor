@@ -58,7 +58,7 @@ class ProcessInvoiceController extends Controller
     {
         $this->validateForm($request);
 
-        $this->invoicePrimary = $request->invoicePrimary;
+        $this->invoicePrimary = $request->invoiceFirstPart;
         $this->separator = empty($request->separator) ? $this->separator : $request->separator;
 
         if ($request->hasFile('bankStatement') && $request->file('bankStatement')->isValid()) {
@@ -66,20 +66,14 @@ class ProcessInvoiceController extends Controller
             $path = $file->getRealPath();
             $this->statementImporter->setSeparator($this->separator);
             $this->statementImporter->setInvoicePrimary($this->invoicePrimary);
-
-            if ($this->statementImporter->importBankStatement($path) ) {
-                session()->put('notifications', 'Bank statement imported: '. $file->getClientOriginalName() );
-            }
+            $this->statementImporter->importBankStatement($path);
         }
 
         if ($request->hasFile('openInvoice') && $request->file('openInvoice')->isValid()) {
             $file = $request->file('openInvoice');
             $path = $file->getRealPath();
             $this->invoiceImporter->setSeparator($this->separator);
-
-            if ($this->invoiceImporter->importOpenInvoice($path) ) {
-                session()->put('notifications','Invoice file imported: '. $file->getClientOriginalName());
-            }
+            $this->invoiceImporter->importOpenInvoice($path);
         }
 
         $this->export = $this->invoiceProcessor->processInvoice();
@@ -91,7 +85,7 @@ class ProcessInvoiceController extends Controller
     private function validateForm($request)
     {
         $rules = [
-            'invoicePrimary' => '
+            'invoiceFirstPart' => '
                 required',
             'bankStatement' => '
                 required

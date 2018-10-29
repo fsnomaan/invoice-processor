@@ -8,12 +8,6 @@
     </div>
     <div class="row pb-3">
         <div class="col-sm-12" align="center">
-            @if (Session::has('notifications'))
-                <span class="alert alert-success">
-                    {{ Session::get('notifications') }}
-                    {{ Session::forget('notifications') }}
-                </span>
-            @endif
             @if ($errors->any())
                 <ul class="col-sm-4 alert alert-danger">
                     @foreach ($errors->all() as $error)
@@ -29,7 +23,7 @@
 
             {{ Form::open(array('action' => 'ProcessInvoiceController@processInvoice')) }}
             <div class="form-group">
-                <input type="text" class="form-control" name="invoicePrimary" placeholder="Enter first part of invoice i.e 1125">
+                <input type="text" class="form-control" name="invoiceFirstPart" placeholder="Enter first part of invoice i.e 1125">
             </div>
             <div class="form-group">
                 <input type="text" class="form-control" name="separator" placeholder="Please define separator. Default is ;">
