@@ -4,12 +4,16 @@ namespace App\Providers;
 
 use App\Http\Controllers\CompanyNameController;
 use App\Models\CompanyName;
+use App\Models\InvoiceImporter;
+use App\Models\InvoiceProcessor;
+use App\Models\StatementImporter;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\BankStatementController;
 use App\Http\Controllers\OpenInvoiceController;
 use App\Http\Controllers\ProcessInvoiceController;
 use App\Models\BankStatement;
 use App\Models\OpenInvoice;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -30,28 +34,38 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->bind(BankStatementController::class, function () {
-            return new BankStatementController(resolve(BankStatement::class));
+        $this->app->bind(StatementImporter::class, function () {
+            return new StatementImporter(resolve(BankStatement::class));
         });
-        resolve(BankStatementController::class);
+        resolve(StatementImporter::class);
         
-        $this->app->bind(OpenInvoiceController::class, function () {
-            return new OpenInvoiceController(resolve(OpenInvoice::class));
+        $this->app->bind(InvoiceImporter::class, function () {
+            return new InvoiceImporter(resolve(OpenInvoice::class));
         });
-        resolve(OpenInvoiceController::class);
+        resolve(InvoiceImporter::class);
 
         $this->app->bind(CompanyNameController::class, function () {
             return new CompanyNameController(resolve(CompanyName::class));
         });
         resolve(CompanyNameController::class);
 
-        $this->app->bind(ProcessInvoiceController::class, function () {
-            return new ProcessInvoiceController(
+        $this->app->bind(InvoiceProcessor::class, function () {
+            return new InvoiceProcessor(
                 resolve(BankStatement::class),
                 resolve(OpenInvoice::class),
                 resolve(CompanyName::class)
             );
         });
-        resolve(ProcessInvoiceController::class);        
+        resolve(InvoiceProcessor::class);
+
+        $this->app->bind(ProcessInvoiceController::class, function () {
+            return new ProcessInvoiceController(
+                resolve(StatementImporter::class),
+                resolve(InvoiceImporter::class),
+                resolve(CompanyName::class),
+                resolve(InvoiceProcessor::class)
+            );
+        });
+        resolve(InvoiceProcessor::class);
     }
 }

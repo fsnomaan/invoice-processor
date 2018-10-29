@@ -1,12 +1,9 @@
 <?php
+namespace App\Models;
 
-namespace App\Http\Controllers;
-
-use App\Models\BankStatement;
 use App\Models\ColumnNames\BankStatement as ColumnNames;
-use Illuminate\Http\Request;
 
-class BankStatementController extends Controller
+class StatementImporter
 {
     /** @var BankStatement  */
     private $bs;
@@ -14,61 +11,15 @@ class BankStatementController extends Controller
     /** @var string */
     private $invoicePrimary;
 
-    /** @var string */
-    private $delimiter = ';';
+    /** @var string  */
+    private $separator = ';';
 
     public function __construct(BankStatement $bs)
     {
-        $this->bs = empty($bs) ? new BankStatement() : $bs;
+        $this->bs = $bs;
     }
 
-    public function processBankStatement(Request $request)
-    {
-        $this->validateForm($request);
-
-        $this->invoicePrimary = $request->invoicePrimary;
-        $this->delimiter = empty($request->separator) ? $this->delimiter : $request->separator;
-
-        if ($request->hasFile('bankStatement') && $request->file('bankStatement')->isValid()) {
-            $file = $request->file('bankStatement');
-            $path = $file->getRealPath();
-            if ($this->importBankStatement($path) ) {
-                session()->put('notifications', 'Bank statement imported: '. $file->getClientOriginalName() );
-                return redirect()->action(
-                    'ProcessInvoiceController@index'
-                );
-            }
-        }
-
-    }
-
-    private function validateForm($request)
-    {
-        $rules = [
-            'bankStatement' => '
-                required
-                |
-                mimetypes:text/plain,
-                application/csv,
-                application/excel,
-                application/vnd.ms-excel,
-                application/vnd.msexcel,
-                text/csv,
-                text/anytext,
-                text/comma-separated-values',
-            'invoicePrimary' => '
-                required'
-        ];
-
-        $customMessages = [
-            'required' => 'The :attribute field is required.',
-            'mimetypes' => 'not a valid csv file'
-        ];
-    
-        $this->validate($request, $rules, $customMessages);
-    }
-
-    private function importBankStatement($path)
+    public function importBankStatement($path): bool
     {
         $dataTable = $this->getCsvData($path);
         $dataTable = $this->sanitize($dataTable);
@@ -94,16 +45,16 @@ class BankStatementController extends Controller
         $dataTable = [];
         $this->bs->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
-            $heading = fgetcsv($h, 1000, $this->delimiter);
-            while (($data = fgetcsv($h, 1000, $this->delimiter)) !== FALSE) {
+            $heading = fgetcsv($h, 1000, $this->separator);
+            while (($data = fgetcsv($h, 1000, $this->separator)) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
                 try{
                     $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
                 } catch (\Exception $e) {
-                    dd([$e->getMessage(), $data]);
+                    dd($e->getMessage(), $data);
                 }
             }
-        fclose($h);
+            fclose($h);
         }
 
         return $dataTable;
@@ -174,4 +125,21 @@ class BankStatementController extends Controller
 
         return $bsArray;
     }
+
+    /**
+     * @param string $invoicePrimary
+     */
+    public function setInvoicePrimary(string $invoicePrimary): void
+    {
+        $this->invoicePrimary = $invoicePrimary;
+    }
+
+    /**
+     * @param string $separator
+     */
+    public function setSeparator(string $separator): void
+    {
+        $this->separator = $separator;
+    }
+
 }
