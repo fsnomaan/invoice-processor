@@ -1,16 +1,28 @@
 <?php
+namespace App\Models;
 
-namespace App\Http\Controllers;
-
-use App\Models\BankStatement;
-use App\Models\CompanyName;
-use App\Models\OpenInvoice;
-use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Collection;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class ProcessInvoiceController extends Controller
+class InvoiceProcessor
 {
+    /** @var BankStatement */
+    private $bs;
+
+    /** @var OpenInvoice */
+    private $openInvoice;
+
+    private $invoices = [];
+
+    /** @var array  */
+    private $export = [];
+
+    /** @var array  */
+    private $matchedBsRows = [];
+
+    /** @var CompanyName */
+    private $companyName;
+
     public function __construct(
         BankStatement $bs,
         OpenInvoice $openInvoice,
@@ -22,45 +34,8 @@ class ProcessInvoiceController extends Controller
         $this->companyName = $companyName;
     }
 
-    public function index(Request $request)
+    public function processInvoice()
     {
-        $response = [
-            'companyNames' => $this->companyName->getNames(),
-            'success' => $request->message
-        ];
-
-        return view('process_invoice')->with($response);
-    }
-
-    public function processInvoice(Request $request)
-    {
-        $this->validateForm($request);
-
-        $this->invoicePrimary = $request->invoicePrimary;
-        $this->separator = empty($request->separator) ? $this->separator : $request->separator;
-
-        if ($request->hasFile('bankStatement') && $request->file('bankStatement')->isValid()) {
-            $file = $request->file('bankStatement');
-            $path = $file->getRealPath();
-
-
-            if ($this->importBankStatement($path) ) {
-                session()->put('notifications', 'Bank statement imported: '. $file->getClientOriginalName() );
-                return redirect()->action(
-                    'ProcessInvoiceController@index'
-                );
-            }
-        }
-
-
-
-
-
-
-
-
-
-
         $this->invoices = $this->openInvoice->getAllInvoices()->toArray();
         foreach ($this->invoices as $key => $invoice) {
             $this->createExportRow($invoice, $this->invoices);
@@ -73,47 +48,6 @@ class ProcessInvoiceController extends Controller
 
         return $this->streamResponse();
     }
-
-
-    private function validateForm($request)
-    {
-        $rules = [
-            'bankStatement' => '
-                required
-                |
-                mimetypes:text/plain,
-                application/csv,
-                application/excel,
-                application/vnd.ms-excel,
-                application/vnd.msexcel,
-                text/csv,
-                text/anytext,
-                text/comma-separated-values',
-            'invoicePrimary' => '
-                required'
-        ];
-
-        $customMessages = [
-            'required' => 'The :attribute field is required.',
-            'mimetypes' => 'not a valid csv file'
-        ];
-
-        $this->validate($request, $rules, $customMessages);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     private function createExportRow(string $invoiceNumber, array &$invoices)
     {
@@ -252,9 +186,9 @@ class ProcessInvoiceController extends Controller
 
                 /** @var Collection $invoiceRowByName */
                 $invoiceRowByName = $this->openInvoice->getInvoiceByMatchingName(
-                                        $this->getCompanyCustomerName($unmatchedBsRow->company_customer),
-                                        $multipleInvoices
-                                    );
+                    $this->getCompanyCustomerName($unmatchedBsRow->company_customer),
+                    $multipleInvoices
+                );
                 if ($invoiceRowByName->isNotEmpty()) {
                     $this->processRowsWithSimilarName($unmatchedBsRow, $invoiceRowByName, 'Invoice matched based on similar name.');
                 } else {
@@ -336,21 +270,21 @@ class ProcessInvoiceController extends Controller
 
     private function exportRowsWithNoMatch(BankStatement $unmatchedBsRow)
     {
-            $this->export[] = [
-                $unmatchedBsRow->trans_date,
-                'Not found',
-                'Not found',
-                '',
-                $unmatchedBsRow->amount,
-                $unmatchedBsRow->original_currency,
-                $unmatchedBsRow->company_customer,
-                $unmatchedBsRow->trans_date,
-                '01',
-                'Missing invoice details',
-                'Not found',
-                $unmatchedBsRow->amount,
-                $unmatchedBsRow->purpose_of_use
-            ];
+        $this->export[] = [
+            $unmatchedBsRow->trans_date,
+            'Not found',
+            'Not found',
+            '',
+            $unmatchedBsRow->amount,
+            $unmatchedBsRow->original_currency,
+            $unmatchedBsRow->company_customer,
+            $unmatchedBsRow->trans_date,
+            '01',
+            'Missing invoice details',
+            'Not found',
+            $unmatchedBsRow->amount,
+            $unmatchedBsRow->purpose_of_use
+        ];
     }
 
     private function exportRowsWithMultipleMatch(BankStatement $bsRow, OpenInvoice $invoiceRow, $note)

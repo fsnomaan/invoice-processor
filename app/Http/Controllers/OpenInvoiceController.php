@@ -11,6 +11,8 @@ class OpenInvoiceController extends Controller
     /** @var OpenInvoice  */
     private $openInvoice;
 
+    private $separator = ';';
+
     public function __construct(OpenInvoice $openInvoice)
     {
         $this->openInvoice = empty($openInvoice) ? new OpenInvoice() : $openInvoice;
@@ -23,6 +25,9 @@ class OpenInvoiceController extends Controller
         if ($request->hasFile('openInvoice') && $request->file('openInvoice')->isValid()) {
             $file = $request->file('openInvoice');
             $path = $file->getRealPath();
+
+            $this->separator = empty($request->separator) ? $this->separator : $request->separator;
+
             if ($this->importOpenInvoice($path) ) {
                 session()->put('notifications','Invoice file imported: '. $file->getClientOriginalName());
                 return redirect()->action(

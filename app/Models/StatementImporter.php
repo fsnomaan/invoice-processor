@@ -1,12 +1,9 @@
 <?php
+namespace App\Models;
 
-namespace App\Http\Controllers;
-
-use App\Models\BankStatement;
 use App\Models\ColumnNames\BankStatement as ColumnNames;
-use Illuminate\Http\Request;
 
-class BankStatementController extends Controller
+class StatementImporter
 {
     /** @var BankStatement  */
     private $bs;
@@ -14,62 +11,15 @@ class BankStatementController extends Controller
     /** @var string */
     private $invoicePrimary;
 
+    /** @var string  */
     private $separator = ';';
 
     public function __construct(BankStatement $bs)
     {
-        $this->bs = empty($bs) ? new BankStatement() : $bs;
+        $this->bs = $bs;
     }
 
-    public function processBankStatement(Request $request)
-    {
-        $this->validateForm($request);
-
-        $this->invoicePrimary = $request->invoicePrimary;
-
-        if ($request->hasFile('bankStatement') && $request->file('bankStatement')->isValid()) {
-            $file = $request->file('bankStatement');
-            $path = $file->getRealPath();
-
-            $this->separator = empty($request->separator) ? $this->separator : $request->separator;
-
-            if ($this->importBankStatement($path) ) {
-                session()->put('notifications', 'Bank statement imported: '. $file->getClientOriginalName() );
-                return redirect()->action(
-                    'ProcessInvoiceController@index'
-                );
-            }
-        }
-
-    }
-
-    private function validateForm($request)
-    {
-        $rules = [
-            'bankStatement' => '
-                required
-                |
-                mimetypes:text/plain,
-                application/csv,
-                application/excel,
-                application/vnd.ms-excel,
-                application/vnd.msexcel,
-                text/csv,
-                text/anytext,
-                text/comma-separated-values',
-            'invoicePrimary' => '
-                required'
-        ];
-
-        $customMessages = [
-            'required' => 'The :attribute field is required.',
-            'mimetypes' => 'not a valid csv file'
-        ];
-    
-        $this->validate($request, $rules, $customMessages);
-    }
-
-    private function importBankStatement($path)
+    public function importBankStatement($path): bool
     {
         $dataTable = $this->getCsvData($path);
         $dataTable = $this->sanitize($dataTable);
@@ -100,7 +50,7 @@ class BankStatementController extends Controller
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
                 $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
             }
-        fclose($h);
+            fclose($h);
         }
 
         return $dataTable;
