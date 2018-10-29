@@ -34,7 +34,7 @@ class InvoiceProcessor
         $this->companyName = $companyName;
     }
 
-    public function processInvoice()
+    public function processInvoice() :array
     {
         $this->invoices = $this->openInvoice->getAllInvoices()->toArray();
         foreach ($this->invoices as $key => $invoice) {
@@ -46,7 +46,7 @@ class InvoiceProcessor
         }
         $this->exportRowsForMissingInvoices();
 
-        return $this->streamResponse();
+        return $this->export;
     }
 
     private function createExportRow(string $invoiceNumber, array &$invoices)
@@ -325,38 +325,6 @@ class InvoiceProcessor
             $bsRow->amount,
             $bsRow->purpose_of_use
         ];
-    }
-
-    private function streamResponse()
-    {
-        return new StreamedResponse(function(){
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, [
-                'Date',
-                'Customer',
-                'Invoice number',
-                'Debit',
-                'Credit',
-                'Currency',
-                'Payment reference',
-                'Document date',
-                'Trans type',
-                'Notes',
-                'OPOS File Customer Name',
-                'bank statement total',
-                'Bank Statement invoices'
-            ], ',');
-
-            foreach ($this->export as $row) {
-                fputcsv($handle, $row, ',');
-            }
-
-            fclose($handle);
-        }, 200, [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="export_'.date("Ymd_Hi").'.csv"',
-        ]);
     }
 
     private function isTotalMatches(float $bsTotal, float $openInvoiceTotal) : bool

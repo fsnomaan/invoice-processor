@@ -40,7 +40,11 @@ class InvoiceImporter
             $heading = fgetcsv($h, 1000, $this->separator);
             while (($data = fgetcsv($h, 1000, $this->separator)) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
-                $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                try {
+                    $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                } catch (\Exception $e) {
+                    dd($e->getMessage(), $data);
+                }
             }
             fclose($h);
         }
@@ -59,5 +63,13 @@ class InvoiceImporter
         }
 
         return $dataTable;
+    }
+
+    /**
+     * @param string $separator
+     */
+    public function setSeparator(string $separator): void
+    {
+        $this->separator = $separator;
     }
 }

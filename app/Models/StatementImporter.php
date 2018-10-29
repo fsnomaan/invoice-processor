@@ -48,7 +48,11 @@ class StatementImporter
             $heading = fgetcsv($h, 1000, $this->separator);
             while (($data = fgetcsv($h, 1000, $this->separator)) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
-                $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                try{
+                    $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                } catch (\Exception $e) {
+                    dd($e->getMessage(), $data);
+                }
             }
             fclose($h);
         }
@@ -121,4 +125,21 @@ class StatementImporter
 
         return $bsArray;
     }
+
+    /**
+     * @param string $invoicePrimary
+     */
+    public function setInvoicePrimary(string $invoicePrimary): void
+    {
+        $this->invoicePrimary = $invoicePrimary;
+    }
+
+    /**
+     * @param string $separator
+     */
+    public function setSeparator(string $separator): void
+    {
+        $this->separator = $separator;
+    }
+
 }
