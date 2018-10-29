@@ -361,10 +361,10 @@ class ProcessInvoiceController extends Controller
                 'OPOS File Customer Name',
                 'bank statement total',
                 'Bank Statement invoices'
-            ], ',');
+            ], ';');
 
             foreach ($this->export as $row) {
-                fputcsv($handle, $row, ',');
+                fputcsv($handle, $row, ';');
             }
 
             fclose($handle);

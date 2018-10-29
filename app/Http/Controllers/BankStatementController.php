@@ -14,6 +14,9 @@ class BankStatementController extends Controller
     /** @var string */
     private $invoicePrimary;
 
+    /** @var string */
+    private $delimiter = ';';
+
     public function __construct(BankStatement $bs)
     {
         $this->bs = empty($bs) ? new BankStatement() : $bs;
@@ -24,6 +27,7 @@ class BankStatementController extends Controller
         $this->validateForm($request);
 
         $this->invoicePrimary = $request->invoicePrimary;
+        $this->delimiter = empty($request->separator) ? $this->delimiter : $request->separator;
 
         if ($request->hasFile('bankStatement') && $request->file('bankStatement')->isValid()) {
             $file = $request->file('bankStatement');
@@ -90,10 +94,14 @@ class BankStatementController extends Controller
         $dataTable = [];
         $this->bs->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
-            $heading = fgetcsv($h, 1000, ",");
-            while (($data = fgetcsv($h, 1000, ",")) !== FALSE) {
+            $heading = fgetcsv($h, 1000, $this->delimiter);
+            while (($data = fgetcsv($h, 1000, $this->delimiter)) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
-                $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                try{
+                    $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                } catch (\Exception $e) {
+                    dd([$e->getMessage(), $data]);
+                }
             }
         fclose($h);
         }

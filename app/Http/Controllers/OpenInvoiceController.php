@@ -11,6 +11,9 @@ class OpenInvoiceController extends Controller
     /** @var OpenInvoice  */
     private $openInvoice;
 
+    /** @var string */
+    private $delimiter = ';';
+
     public function __construct(OpenInvoice $openInvoice)
     {
         $this->openInvoice = empty($openInvoice) ? new OpenInvoice() : $openInvoice;
@@ -19,6 +22,7 @@ class OpenInvoiceController extends Controller
     public function processOpenInvoice(Request $request)
     {
         $this->validateForm($request);
+        $this->delimiter = empty($request->separator) ? $this->delimiter : $request->separator;
 
         if ($request->hasFile('openInvoice') && $request->file('openInvoice')->isValid()) {
             $file = $request->file('openInvoice');
@@ -79,10 +83,14 @@ class OpenInvoiceController extends Controller
         $dataTable = [];
         $this->openInvoice->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
-            $heading = fgetcsv($h, 1000, ",");
-            while (($data = fgetcsv($h, 1000, ",")) !== FALSE) {
+            $heading = fgetcsv($h, 1000, $this->delimiter);
+            while (($data = fgetcsv($h, 1000, $this->delimiter)) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
-                $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                try{
+                    $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                } catch (\Exception $e) {
+                    dd([$e->getMessage(), $data]);
+                }
             }
         fclose($h);
         }

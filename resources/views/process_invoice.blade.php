@@ -36,7 +36,9 @@
                 <div class="form-group">
                     <input type="text" class="form-control" name="invoicePrimary" placeholder="Enter first part of invoice, i.e 1125">
                 </div>
-
+                <div class="form-group">
+                    <input type="text" class="form-control" name="separator" placeholder="Enter separator. Default is ;">
+                </div>
                 <div class="custom-file">
                     <input type="file" class="custom-file-input" name="bankStatement">
                     <label class="custom-file-label" for="customFile">Import a bank statement</label>
@@ -56,11 +58,13 @@
 
                 {{ Form::open(array('action' => 'OpenInvoiceController@processOpenInvoice')) }}
 
+                <div class="form-group">
+                    <input type="text" class="form-control" name="separator" placeholder="Enter separator. Default is ;">
+                </div>
                 <div class="custom-file">
                     <input type="file" class="custom-file-input" name="openInvoice">
                     <label class="custom-file-label" for="customFile">Import an open invoice</label>
                 </div>
-
                 <button type="submit" class="btn btn-primary pull-right mt-2">Import</button>
 
                 {{ Form::close() }}
