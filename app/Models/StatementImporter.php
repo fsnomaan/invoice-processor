@@ -64,6 +64,7 @@ class StatementImporter
     {
         foreach($dataTable as $k => $dt) {
             $dataTable[$k]['purpose_of_use'] = $this->standardiseInvoice($dt['purpose_of_use']);
+            $dataTable[$k]['amount'] = floatval(str_replace(",","",$dt['amount']));
         }
 
         return $dataTable;
