@@ -121,27 +121,38 @@ class ProcessInvoiceController extends Controller
 
     private function streamResponse()
     {
-        return new StreamedResponse(function(){
+        $columnHeadings = [
+            'Date',
+            'Customer',
+            'Invoice number',
+            'Debit',
+            'Credit',
+            'Currency',
+            'Payment reference',
+            'Document date',
+            'Trans type',
+            'Notes',
+            'OPOS File Customer Name',
+            'bank statement total',
+            'Bank Statement invoices'
+        ];
+
+        $sortedExport = [];
+        foreach ($this->export as $row) {
+            $sortedExport[] = array_combine($columnHeadings, $row);
+        }
+
+        usort($sortedExport, function($a, $b) {
+            return $a['bank statement total'] <=> $b['bank statement total'];
+        });
+
+        return new StreamedResponse(function() use ($columnHeadings, $sortedExport){
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, [
-                'Date',
-                'Customer',
-                'Invoice number',
-                'Debit',
-                'Credit',
-                'Currency',
-                'Payment reference',
-                'Document date',
-                'Trans type',
-                'Notes',
-                'OPOS File Customer Name',
-                'bank statement total',
-                'Bank Statement invoices'
-            ], $this->separator);
+            fputcsv($handle, $columnHeadings, '|');
 
-            foreach ($this->export as $row) {
-                fputcsv($handle, $row, $this->separator);
+            foreach ($sortedExport as $row) {
+                fputcsv($handle, $row, '|');
             }
 
             fclose($handle);
