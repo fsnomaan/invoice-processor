@@ -141,8 +141,12 @@ class InvoiceProcessor
                 $note = 'Matched by partial invoice number';
                 $matchingInvoices = $this->getPartialMatchingInvoices($bsRow, $invoices);
                 $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoices);
-                foreach($openInvoiceRows as $openInvoiceRow) {
-                    $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $note);
+                $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
+
+                if ( $this->isTotalMatches((float) $bsRow->original_amount, (float) $openInvoiceTotal)) {
+                    foreach($openInvoiceRows as $openInvoiceRow) {
+                        $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $note);
+                    }
                 }
             }
         }
