@@ -149,10 +149,10 @@ class ProcessInvoiceController extends Controller
         return new StreamedResponse(function() use ($columnHeadings, $sortedExport){
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, $columnHeadings, '|');
+            fputcsv($handle, $columnHeadings, ';');
 
             foreach ($sortedExport as $row) {
-                fputcsv($handle, $row, '|');
+                fputcsv($handle, $row, ';');
             }
 
             fclose($handle);
