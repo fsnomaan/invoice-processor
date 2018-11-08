@@ -3,7 +3,7 @@
 @section('content')
     <div class="row">
         <div class="col-sm-12" align="center">
-            <h1 class="bg-info text-white mb-3" align="center">Invoice Processor</h1>
+            <h1 class="bg-info text-white mb-3" align="center">Invoice Matching Processor</h1>
         </div>
     </div>
     <div class="row pb-3">
@@ -34,10 +34,10 @@
             </div>
             <div class="custom-file mt-3">
                 <input type="file" class="custom-file-input" name="openInvoice">
-                <label class="custom-file-label" for="customFile">Select invoice file</label>
+                <label class="custom-file-label" for="customFile">Select Open Invoices</label>
             </div>
             <div class="form-group mt-3">
-                <button type="submit" class="btn btn-primary pull-right">Process Invoice</button>
+                <button type="submit" class="btn btn-primary pull-right">Match Invoices</button>
             </div>
             {{ Form::close() }}
         </div>
