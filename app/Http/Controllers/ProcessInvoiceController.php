@@ -115,7 +115,7 @@ class ProcessInvoiceController extends Controller
             'Debit',
             'Credit',
             'Currency',
-            'Customer Name',
+            'Bank Statement Name',
             'Document date',
             'Trans type',
             'Notes',

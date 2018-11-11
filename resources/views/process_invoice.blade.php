@@ -30,7 +30,7 @@
             </div>
             <div class="custom-file">
                 <input type="file" class="custom-file-input" name="bankStatement">
-                <label class="custom-file-label" for="customFile">Select bank statement</label>
+                <label class="custom-file-label" for="customFile">Select Bank statement</label>
             </div>
             <div class="custom-file mt-3">
                 <input type="file" class="custom-file-input" name="openInvoice">
@@ -50,7 +50,7 @@
                     <thead class="bg-dark text-white-50">
                     <tr>
                         <th scope="col" class="text-center">Company Name</th>
-                        <th scope="col" class="text-center">Map To</th>
+                        <th scope="col" class="text-center">Customer Name</th>
                         <th scope="col" class="text-center">#</th>
                     </tr>
                     </thead>
