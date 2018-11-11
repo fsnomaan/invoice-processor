@@ -280,7 +280,7 @@ class InvoiceProcessor
             'Not found',
             'Not found',
             '',
-            'Not found',
+            $unmatchedBsRow->amount,
             $unmatchedBsRow->original_currency,
             $unmatchedBsRow->company_customer,
             $unmatchedBsRow->trans_date,
