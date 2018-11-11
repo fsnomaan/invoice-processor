@@ -43,7 +43,7 @@ class InvoiceImporter
                 try {
                     $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
                 } catch (\Exception $e) {
-                    dd($e->getMessage(), $data);
+                    dd($e);
                 }
             }
             fclose($h);
@@ -57,6 +57,7 @@ class InvoiceImporter
         foreach($dataTable as $k => $dt) {
             $dataTable[$k]['Description'] = utf8_encode($dataTable[$k]['Description']);
             $dataTable[$k]['name'] = utf8_encode($dataTable[$k]['name']);
+            $dataTable[$k]['amount_transaction'] = floatval(str_replace(',', '', $dt['amount_transaction']));
             if ($dataTable[$k]['amount_transaction'] < 0 ) {
                 unset($dataTable[$k]);
             }

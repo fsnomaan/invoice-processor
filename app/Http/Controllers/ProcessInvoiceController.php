@@ -56,6 +56,7 @@ class ProcessInvoiceController extends Controller
 
     public function processInvoice(Request $request)
     {
+
         $this->validateForm($request);
 
         $this->invoicePrimary = $request->invoiceFirstPart;
@@ -90,30 +91,16 @@ class ProcessInvoiceController extends Controller
             'bankStatement' => '
                 required
                 |
-                mimetypes:text/plain,
-                application/csv,
-                application/excel,
-                application/vnd.ms-excel,
-                application/vnd.msexcel,
-                text/csv,
-                text/anytext,
-                text/comma-separated-values',
+                mimetypes:text/plain,text/x-Algol68,application/csv,application/excel,application/vnd.ms-excel,application/vnd.msexcel,text/csv,text/anytext,text/comma-separated-values',
             'openInvoice' => '
                 required
                 |
-                mimetypes:text/plain,
-                application/csv,
-                application/excel,
-                application/vnd.ms-excel,
-                application/vnd.msexcel,
-                text/csv,
-                text/anytext,
-                text/comma-separated-values',
+                mimetypes:text/plain,text/x-Algol68,application/csv,application/excel,application/vnd.ms-excel,application/vnd.msexcel,text/csv,text/anytext,text/comma-separated-values',
         ];
 
         $customMessages = [
             'required' => 'The :attribute field is required.',
-            'mimetypes' => 'not a valid csv file'
+            'mimetypes' => ':attribute not a valid csv file'
         ];
 
         $this->validate($request, $rules, $customMessages);

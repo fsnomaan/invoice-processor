@@ -181,6 +181,7 @@ class InvoiceProcessor
 
         foreach ($unmatchedBsRows as $unmatchedBsRow) {
             /** @var Collection $invoices */
+
             $invoices = $this->openInvoice->getInvoiceByAmount((float)$unmatchedBsRow['original_amount'], array_column($this->export, 3));
 
             if (count($invoices) == 1 ) {
@@ -196,7 +197,7 @@ class InvoiceProcessor
                 if ($invoiceRowByName->isNotEmpty()) {
                     $this->processRowsWithSimilarName($unmatchedBsRow, $invoiceRowByName, 'Invoice matched based on similar name.');
                 } else {
-                    $this->exportRowsWithNoMatch($unmatchedBsRow);
+                    $this->exportRowsWithNoMatch($unmatchedBsRow, 'Multiple invoice found');
                 }
             } else {
                 $this->exportRowsWithNoMatch($unmatchedBsRow);
@@ -272,19 +273,19 @@ class InvoiceProcessor
         $this->deleteElement($invoiceRow->invoice, $this->invoices);
     }
 
-    private function exportRowsWithNoMatch(BankStatement $unmatchedBsRow)
+    private function exportRowsWithNoMatch(BankStatement $unmatchedBsRow, $note="Missing invoice details")
     {
         $this->export[] = [
             $unmatchedBsRow->trans_date,
             'Not found',
             'Not found',
             '',
-            $unmatchedBsRow->amount,
+            'Not found',
             $unmatchedBsRow->original_currency,
             $unmatchedBsRow->company_customer,
             $unmatchedBsRow->trans_date,
             '01',
-            'Missing invoice details',
+            $note,
             'Not found',
             $unmatchedBsRow->amount,
             $unmatchedBsRow->purpose_of_use
