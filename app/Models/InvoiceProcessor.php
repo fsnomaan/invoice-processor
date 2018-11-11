@@ -72,7 +72,6 @@ class InvoiceProcessor
     private function getMatchingInvoices(BankStatement $bsRow, array &$invoices) : array
     {
         $matchingInvoices = [];
-        $this->matchedBsRows[] = $bsRow->id;
 
         foreach ($invoices as $key => $invoice) {
 
@@ -155,7 +154,6 @@ class InvoiceProcessor
     private function getPartialMatchingInvoices(BankStatement $bsRow, array &$invoices) : array
     {
         $matchingInvoices = [];
-        $this->matchedBsRows[] = $bsRow->id;
 
         foreach ($invoices as $key => $invoice) {
             if (! empty($invoice)) {
@@ -185,7 +183,9 @@ class InvoiceProcessor
             $invoices = $this->openInvoice->getInvoiceByAmount((float)$unmatchedBsRow['original_amount'], array_column($this->export, 3));
 
             if (count($invoices) == 1 ) {
+
                 $this->exportRowsWithMatch($unmatchedBsRow, $invoices->first(), 'Invoice matched based on total.');
+
             } elseif (count($invoices) > 1 ) {
                 $multipleInvoices = array_column($invoices->toArray(), 'invoice');
 
@@ -201,7 +201,6 @@ class InvoiceProcessor
                 }
             } else {
                 $this->exportRowsWithNoMatch($unmatchedBsRow);
-
             }
         }
     }
@@ -252,6 +251,8 @@ class InvoiceProcessor
 
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $invoiceRow, string $note)
     {
+        $this->matchedBsRows[] = $bsRow->id;
+
         $note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
 
         $this->export[] = [
@@ -275,6 +276,8 @@ class InvoiceProcessor
 
     private function exportRowsWithNoMatch(BankStatement $unmatchedBsRow, $note="Missing invoice details")
     {
+        $this->matchedBsRows[] = $unmatchedBsRow->id;
+
         $this->export[] = [
             $unmatchedBsRow->trans_date,
             'Not found',
@@ -294,6 +297,8 @@ class InvoiceProcessor
 
     private function exportRowsWithMultipleMatch(BankStatement $bsRow, OpenInvoice $invoiceRow, $note)
     {
+        $this->matchedBsRows[] = $bsRow->id;
+
         $note .= $bsRow->currency == $bsRow->original_currency ? '' : "\n Different Currency";
 
         $this->export[] = [
@@ -315,6 +320,8 @@ class InvoiceProcessor
 
     private function exportRowsWithDifference(BankStatement $bsRow, float $difference, string $note)
     {
+        $this->matchedBsRows[] = $bsRow->id;
+
         $this->export[] = [
             $bsRow->trans_date,
             'Not found',

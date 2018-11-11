@@ -123,7 +123,6 @@ class ProcessInvoiceController extends Controller
             'bank statement total',
             'Bank Statement invoices'
         ];
-
         $sortedExport = [];
         foreach ($this->export as $row) {
             $sortedExport[] = array_combine($columnHeadings, $row);
