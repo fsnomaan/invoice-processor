@@ -183,8 +183,12 @@ class InvoiceProcessor
             $invoices = $this->openInvoice->getInvoiceByAmount((float)$unmatchedBsRow['original_amount'], array_column($this->export, 3));
 
             if (count($invoices) == 1 ) {
-
-                $this->exportRowsWithMatch($unmatchedBsRow, $invoices->first(), 'Invoice matched based on total.');
+                $invoice = $invoices->first();
+                if ($unmatchedBsRow['original_amount'] == $invoice->amount_transaction) {
+                    $this->exportRowsWithMatch($unmatchedBsRow, $invoice, 'Invoice matched based on total.');
+                } else {
+                    $this->exportRowsWithDifference($unmatchedBsRow, ((float)$unmatchedBsRow['original_amount'] - (float)$invoice->amount_transaction), 'Please find invoice manually');
+                }
 
             } elseif (count($invoices) > 1 ) {
                 $multipleInvoices = array_column($invoices->toArray(), 'invoice');
