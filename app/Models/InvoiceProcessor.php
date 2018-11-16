@@ -2,7 +2,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoiceProcessor
 {
@@ -258,6 +257,7 @@ class InvoiceProcessor
         $this->matchedBsRows[] = $bsRow->id;
 
         $note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
+        $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
 
         $this->export[] = [
             $bsRow->trans_date,
@@ -265,7 +265,7 @@ class InvoiceProcessor
             $invoiceRow->invoice,
             '',
             $invoiceRow->amount_transaction,
-            $bsRow->original_currency,
+            $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
             '01',
@@ -278,24 +278,26 @@ class InvoiceProcessor
         $this->deleteElement($invoiceRow->invoice, $this->invoices);
     }
 
-    private function exportRowsWithNoMatch(BankStatement $unmatchedBsRow, $note="Missing invoice details")
+    private function exportRowsWithNoMatch(BankStatement $bsRow, $note="Missing invoice details")
     {
-        $this->matchedBsRows[] = $unmatchedBsRow->id;
+        $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
+
+        $this->matchedBsRows[] = $bsRow->id;
 
         $this->export[] = [
-            $unmatchedBsRow->trans_date,
+            $bsRow->trans_date,
             'Not found',
             'Not found',
             '',
-            $unmatchedBsRow->amount,
-            $unmatchedBsRow->original_currency,
-            $unmatchedBsRow->company_customer,
-            $unmatchedBsRow->trans_date,
+            $bsRow->amount,
+            $currency,
+            $bsRow->company_customer,
+            $bsRow->trans_date,
             '01',
             $note,
             'Not found',
-            $unmatchedBsRow->amount,
-            $unmatchedBsRow->purpose_of_use
+            $bsRow->amount,
+            $bsRow->purpose_of_use
         ];
     }
 
@@ -304,6 +306,7 @@ class InvoiceProcessor
         $this->matchedBsRows[] = $bsRow->id;
 
         $note .= $bsRow->currency == $bsRow->original_currency ? '' : "\n Different Currency";
+        $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
 
         $this->export[] = [
             $bsRow->trans_date,
@@ -311,7 +314,7 @@ class InvoiceProcessor
             '',
             '',
             $invoiceRow->amount_transaction,
-            $bsRow->original_currency,
+            $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
             '01',
@@ -324,6 +327,8 @@ class InvoiceProcessor
 
     private function exportRowsWithDifference(BankStatement $bsRow, float $difference, string $note)
     {
+        $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
+
         $this->matchedBsRows[] = $bsRow->id;
 
         $this->export[] = [
@@ -332,7 +337,7 @@ class InvoiceProcessor
             'Not found',
             '',
             round($difference, 2),
-            $bsRow->original_currency,
+            $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
             '01',
