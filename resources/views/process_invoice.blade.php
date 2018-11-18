@@ -1,6 +1,7 @@
 @extends('layout')
 
 @section('content')
+<div class="container-fluid">
     <div class="row">
         <div class="col-sm-12" align="center">
             <h1 class="bg-info text-white mb-3" align="center">Invoice Matching Processor</h1>
@@ -18,7 +19,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-sm-6">
+        <div class="col-sm-6 offset-3 mb-3">
             {{ Form::open(array('url' => '/process-invoice', 'files' => true)) }}
 
             {{ Form::open(array('action' => 'ProcessInvoiceController@processInvoice')) }}
@@ -41,13 +42,19 @@
             </div>
             {{ Form::close() }}
         </div>
+        </div>
+    </div>
+    <div class="row">
         <div class="col-sm-6">
             <div class="mappingTable">
-                {!! Form::open(['url' => '/update-map']) !!}
-                {{ Form::open(array('action' => 'CompanyNameController@updateMap')) }}
+                {!! Form::open(['url' => '/map-company-name']) !!}
+                {{ Form::open(array('action' => 'MappingController@mapCompanyName')) }}
 
                 <table class="table-condensed" style="width: 100%;">
                     <thead class="bg-dark text-white-50">
+                    <tr>
+                        <th colspan="3" class="bg-dark border-bottom text-white text-center">Customer Name Mapping</th>
+                    </tr>
                     <tr>
                         <th scope="col" class="text-center">Company Name</th>
                         <th scope="col" class="text-center">Customer Name</th>
@@ -74,7 +81,46 @@
                     </tr>
                 </table>
                 {{ Form::close() }}
+            </div>
         </div>
+        <div class="col-sm-6">
+            <div class="mappingTable">
+                {!! Form::open(['url' => '/map-bank-number']) !!}
+                {{ Form::open(array('action' => 'MappingController@mapBankAccountNumber')) }}
+
+                <table class="table-condensed" style="width: 100%;">
+                    <thead class="bg-dark text-white-50">
+                    <tr>
+                        <th colspan="3" class="bg-dark border-bottom text-white text-center">Bank Account Mapping</th>
+                    </tr>
+                    <tr>
+                        <th scope="col" class="text-center">Bank Account Number</th>
+                        <th scope="col" class="text-center">Bank Account Id</th>
+                        <th scope="col" class="text-center">#</th>
+                    </tr>
+                    </thead>
+                    @if(isset($bankAccounts))
+                        @foreach ($bankAccounts as $number => $mapTo)
+                            <tr scope="row">
+                                <td class="text-center">{{ $number }}</td>
+                                <td class="text-center">{{ $mapTo }}</td>
+                                <td>
+                                    <button class="alert-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $number ?>">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @endif
+                    <tr>
+                        <td class="text-center"> {{ Form::text('mapNumber') }} </td>
+                        <td class="text-center"> {{ Form::text('mapTo') }}</td>
+                        <td><button class="alert-success" type="submit" name="actionName" value="save"><i class="fa fa-check"></i></button></td>
+                    </tr>
+                </table>
+                {{ Form::close() }}
+            </div>
         </div>
     </div>
+</div>
 @stop

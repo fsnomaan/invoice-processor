@@ -2,14 +2,13 @@
 
 namespace App\Providers;
 
-use App\Http\Controllers\CompanyNameController;
+use App\Http\Controllers\MappingController;
+use App\Models\BankAccount;
 use App\Models\CompanyName;
 use App\Models\InvoiceImporter;
 use App\Models\InvoiceProcessor;
 use App\Models\StatementImporter;
 use Illuminate\Support\ServiceProvider;
-use App\Http\Controllers\BankStatementController;
-use App\Http\Controllers\OpenInvoiceController;
 use App\Http\Controllers\ProcessInvoiceController;
 use App\Models\BankStatement;
 use App\Models\OpenInvoice;
@@ -44,10 +43,10 @@ class AppServiceProvider extends ServiceProvider
         });
         resolve(InvoiceImporter::class);
 
-        $this->app->bind(CompanyNameController::class, function () {
-            return new CompanyNameController(resolve(CompanyName::class));
+        $this->app->bind(MappingController::class, function () {
+            return new MappingController(resolve(CompanyName::class), resolve(BankAccount::class));
         });
-        resolve(CompanyNameController::class);
+        resolve(MappingController::class);
 
         $this->app->bind(InvoiceProcessor::class, function () {
             return new InvoiceProcessor(
@@ -63,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
                 resolve(StatementImporter::class),
                 resolve(InvoiceImporter::class),
                 resolve(CompanyName::class),
+                resolve(BankAccount::class),
                 resolve(InvoiceProcessor::class)
             );
         });

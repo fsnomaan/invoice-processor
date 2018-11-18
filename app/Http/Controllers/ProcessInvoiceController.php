@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BankAccount;
 use App\Models\InvoiceImporter;
 use App\Models\InvoiceProcessor;
 use App\Models\StatementImporter;
@@ -32,22 +33,28 @@ class ProcessInvoiceController extends Controller
     /** @var array  */
     private $export = [];
 
+    /** @var BankAccount */
+    private $bankAccount;
+
     public function __construct(
         StatementImporter $statementImporter,
         InvoiceImporter $invoiceImporter,
         CompanyName $companyName,
+        BankAccount $bankAccount,
         InvoiceProcessor $invoiceProcessor
     ) {
         $this->statementImporter = $statementImporter;
         $this->invoiceImporter = $invoiceImporter;
         $this->companyName = $companyName;
         $this->invoiceProcessor = $invoiceProcessor;
+        $this->bankAccount = $bankAccount;
     }
 
     public function index(Request $request)
     {
         $response = [
             'companyNames' => $this->companyName->getNames(),
+            'bankAccounts' => $this->bankAccount->getAccounts(),
             'success' => $request->message
         ];
 
