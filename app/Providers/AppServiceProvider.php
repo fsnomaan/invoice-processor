@@ -52,7 +52,8 @@ class AppServiceProvider extends ServiceProvider
             return new InvoiceProcessor(
                 resolve(BankStatement::class),
                 resolve(OpenInvoice::class),
-                resolve(CompanyName::class)
+                resolve(CompanyName::class),
+                resolve(BankAccount::class)
             );
         });
         resolve(InvoiceProcessor::class);

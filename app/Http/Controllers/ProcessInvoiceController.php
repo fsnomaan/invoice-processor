@@ -124,7 +124,7 @@ class ProcessInvoiceController extends Controller
             'Currency',
             'Bank Statement Name',
             'Document date',
-            'Trans type',
+            'Bank Account ID',
             'Notes',
             'OPOS File Customer Name',
             'bank statement total',

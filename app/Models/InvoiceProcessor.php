@@ -22,19 +22,30 @@ class InvoiceProcessor
     /** @var CompanyName */
     private $companyName;
 
+    /** @var BankAccount */
+    private $bankAccount;
+
+    /** @var  array */
+    private $bankAccountMap;
+
     public function __construct(
         BankStatement $bs,
         OpenInvoice $openInvoice,
-        CompanyName $companyName
+        CompanyName $companyName,
+        BankAccount $bankAccount
     ) {
         $this->export = [];
         $this->bs = $bs;
         $this->openInvoice = $openInvoice;
         $this->companyName = $companyName;
+        $this->bankAccount = $bankAccount;
+
     }
 
     public function processInvoice() :array
     {
+        $this->bankAccountMap = $this->bankAccount->getAccounts();
+
         $this->invoices = $this->openInvoice->getAllInvoices()->toArray();
         foreach ($this->invoices as $key => $invoice) {
             $this->createExportRow($invoice, $this->invoices);
@@ -272,7 +283,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            '01',
+            $this->bankAccountMap[$bsRow->datev_account_number],
             $note,
             $invoiceRow->name,
             $bsRow->amount,
@@ -297,7 +308,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            '01',
+            $this->bankAccountMap[$bsRow->datev_account_number],
             $note,
             'Not found',
             $bsRow->amount,
@@ -321,7 +332,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            '01',
+            $this->bankAccountMap[$bsRow->datev_account_number],
             $note,
             $invoiceRow->name,
             $bsRow->amount,
@@ -344,7 +355,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            '01',
+            $this->bankAccountMap[$bsRow->datev_account_number],
             $note,
             'Not found',
             $bsRow->amount,
