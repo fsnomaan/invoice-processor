@@ -5,6 +5,7 @@ require 'recipe/laravel.php';
 
 // Project name
 set('application', 'invoice-processor');
+set('test-application', 'test-invoice-processor');
 
 // Project repository
 set('repository', 'git@bitbucket.org:mmrs151/invoice-processing.git');
@@ -21,8 +22,12 @@ add('writable_dirs', []);
 
 
 // Hosts
+host('test')
+    ->hostname('nothingbutsales')
+    ->set('deploy_path', '/home/apps/{{test-application}}/app');
 
-host('nothingbutsales')
+host('production')
+    ->hostname('nothingbutsales')
     ->set('deploy_path', '/home/apps/{{application}}/app');
     
 // Tasks

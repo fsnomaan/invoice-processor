@@ -283,7 +283,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            $this->bankAccountMap[$bsRow->datev_account_number],
+            $this->getBankAccountId((int)$bsRow->datev_account_number),
             $note,
             $invoiceRow->name,
             $bsRow->amount,
@@ -308,7 +308,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            $this->bankAccountMap[$bsRow->datev_account_number],
+            $this->getBankAccountId((int)$bsRow->datev_account_number),
             $note,
             'Not found',
             $bsRow->amount,
@@ -332,7 +332,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            $this->bankAccountMap[$bsRow->datev_account_number],
+            $this->getBankAccountId((int)$bsRow->datev_account_number),
             $note,
             $invoiceRow->name,
             $bsRow->amount,
@@ -355,7 +355,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            $this->bankAccountMap[$bsRow->datev_account_number],
+            $this->getBankAccountId((int)$bsRow->datev_account_number),
             $note,
             'Not found',
             $bsRow->amount,
@@ -397,5 +397,14 @@ class InvoiceProcessor
             return (float)$bsRow->amount;
         }
         return (float)$bsRow->original_amount;
+    }
+
+    private function getBankAccountId(int $accountNumber)
+    {
+        if ( isset($this->bankAccountMap[$accountNumber])) {
+            return $this->bankAccountMap[$accountNumber];
+        }
+
+        return $accountNumber;
     }
 }
