@@ -272,6 +272,8 @@ class InvoiceProcessor
         $this->matchedBsRows[] = $bsRow->id;
 
         $note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
+        $note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
+
         $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
 
         $this->export[] = [
@@ -321,6 +323,8 @@ class InvoiceProcessor
         $this->matchedBsRows[] = $bsRow->id;
 
         $note .= $bsRow->currency == $bsRow->original_currency ? '' : "\n Different Currency";
+        $note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
+
         $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
 
         $this->export[] = [
