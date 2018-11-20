@@ -393,9 +393,16 @@ class InvoiceProcessor
 
     private function getBsAmount(BankStatement $bsRow)
     {
+        if ( $bsRow->currency == $bsRow->original_currency ) {
+            if ( $bsRow->amount != $bsRow->original_amount ) {
+                return (float)$bsRow->amount;
+            }
+        }
+
         if ( empty($bsRow->original_amount) ) {
             return (float)$bsRow->amount;
         }
+
         return (float)$bsRow->original_amount;
     }
 
