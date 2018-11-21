@@ -28,6 +28,9 @@ class InvoiceProcessor
     /** @var  array */
     private $bankAccountMap;
 
+    /** @var string  */
+    private $bsAmountNote = "";
+
     public function __construct(
         BankStatement $bs,
         OpenInvoice $openInvoice,
@@ -73,7 +76,7 @@ class InvoiceProcessor
             $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
 
             if ( $this->isTotalMatches($this->getBsAmount($bsRow), (float) $openInvoiceTotal)) {
-                $this->exportRowsForMatchingTotal($bsRow, $openInvoiceRows, 'Matched');
+                $this->exportRowsForMatchingTotal($bsRow, $openInvoiceRows, $this->getNote("Matched"));
             } else {
                 $this->exportRowsForUnmatchedTotal($bsRow, $openInvoiceRows, $openInvoiceTotal, 'Unmatched total payment');
             }
@@ -123,9 +126,8 @@ class InvoiceProcessor
         }
 
         foreach($openInvoiceRows as $openInvoiceRow) {
-            $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $note);
+            $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $this->getNote($note));
         }
-
 
         if ( $differenceInvoices->isNotEmpty() && count($differenceInvoices) == 1 ){
             $differenceInvoice = $differenceInvoices->first();
@@ -155,7 +157,7 @@ class InvoiceProcessor
 
                 if ( $this->isTotalMatches($this->getBsAmount($bsRow), (float) $openInvoiceTotal)) {
                     foreach($openInvoiceRows as $openInvoiceRow) {
-                        $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $note);
+                        $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $this->getNote($note));
                     }
                 }
             }
@@ -399,6 +401,7 @@ class InvoiceProcessor
     {
         if ( $bsRow->currency == $bsRow->original_currency ) {
             if ( $bsRow->amount != $bsRow->original_amount ) {
+                $this->bsAmountNote = '\nBank charge adjusted';
                 return (float)$bsRow->amount;
             }
         }
@@ -417,5 +420,14 @@ class InvoiceProcessor
         }
 
         return $accountNumber;
+    }
+
+    private function getNote(string $note)
+    {
+        if ( !empty($this->bsAmountNote) ) {
+            $note .= $this->bsAmountNote;
+        }
+
+        return $note;
     }
 }
