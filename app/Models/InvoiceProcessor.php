@@ -28,8 +28,8 @@ class InvoiceProcessor
     /** @var  array */
     private $bankAccountMap;
 
-    /** @var string  */
-    private $bsAmountNote = "";
+    /** @var string */
+    private $note = '';
 
     public function __construct(
         BankStatement $bs,
@@ -57,6 +57,7 @@ class InvoiceProcessor
         foreach ($this->invoices as $key => $invoice) {
             $this->createExportRowWithPartialInvoice($invoice, $this->invoices);
         }
+
         $this->exportRowsForMissingInvoices();
 
         return $this->export;
@@ -76,9 +77,9 @@ class InvoiceProcessor
             $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
 
             if ( $this->isTotalMatches($this->getBsAmount($bsRow), (float) $openInvoiceTotal)) {
-                $this->exportRowsForMatchingTotal($bsRow, $openInvoiceRows, $this->getNote("Matched"));
+                $this->exportRowsForMatchingTotal($bsRow, $openInvoiceRows);
             } else {
-                $this->exportRowsForUnmatchedTotal($bsRow, $openInvoiceRows, $openInvoiceTotal, 'Unmatched total payment');
+                $this->exportRowsForUnmatchedTotal($bsRow, $openInvoiceRows, $openInvoiceTotal);
             }
         }
     }
@@ -107,34 +108,34 @@ class InvoiceProcessor
         return $openInvoiceTotal;
     }
 
-    private function exportRowsForMatchingTotal(BankStatement $bsRow, Collection $openInvoiceRows, string $note='')
+    private function exportRowsForMatchingTotal(BankStatement $bsRow, Collection $openInvoiceRows)
     {
         foreach($openInvoiceRows as $openInvoiceRow) {
-            $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $note);
+            $this->note .= 'Matched';
+            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
         }
     }
 
-    private function exportRowsForUnmatchedTotal(BankStatement $bsRow, Collection $openInvoiceRows, float $openInvoiceTotal, string $note='')
+    private function exportRowsForUnmatchedTotal(BankStatement $bsRow, Collection $openInvoiceRows, float $openInvoiceTotal)
     {
         $differenceInTotal = $this->getDifferenceInTotal($this->getBsAmount($bsRow), $openInvoiceTotal);
         $differenceInvoices = $this->openInvoice->getInvoiceFromTotalAndName((float)$differenceInTotal, $openInvoiceRows[0]->name);
 
-        if ($differenceInTotal == 0 ) {
-            $note = 'Matched';
-        } elseif ( $differenceInvoices->isNotEmpty() && count($differenceInvoices) == 1 ) {
-            $note = 'Matched';
-        }
-
         foreach($openInvoiceRows as $openInvoiceRow) {
-            $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $this->getNote($note));
+            $this->note .= 'Matched';
+            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
         }
 
         if ( $differenceInvoices->isNotEmpty() && count($differenceInvoices) == 1 ){
+            $this->note .= 'Matched';
             $differenceInvoice = $differenceInvoices->first();
-            $this->exportRowsWithMatch($bsRow, $differenceInvoice, "Matched");
+            $this->exportRowsWithMatch($bsRow, $differenceInvoice);
         } else {
-            if ( $differenceInTotal == 0 ) { return; }
-            $this->exportRowsWithDifference($bsRow, $differenceInTotal, 'Please find invoice manually');
+            if ( $differenceInTotal == 0 ) {
+                return;
+            }
+            $this->note = 'Please find invoice manually';
+            $this->exportRowsWithDifference($bsRow, $differenceInTotal);
         }
     }
 
@@ -150,14 +151,14 @@ class InvoiceProcessor
             $bsRow = $this->bs->getRowsLikeInvoice($parts[1]);
 
             if (! empty($bsRow)) {
-                $note = 'Matched by partial invoice number';
                 $matchingInvoices = $this->getPartialMatchingInvoices($bsRow, $invoices);
                 $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoices);
                 $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
 
                 if ( $this->isTotalMatches($this->getBsAmount($bsRow), (float) $openInvoiceTotal)) {
                     foreach($openInvoiceRows as $openInvoiceRow) {
-                        $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $this->getNote($note));
+                        $this->note .= 'Matched by partial invoice number';
+                        $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                     }
                 }
             }
@@ -199,9 +200,11 @@ class InvoiceProcessor
             if (count($invoices) == 1 ) {
                 $invoice = $invoices->first();
                 if ($amount == $invoice->amount_transaction) {
-                    $this->exportRowsWithMatch($unmatchedBsRow, $invoice, 'Invoice matched based on total.');
+                    $this->note .= 'Invoice matched based on total';
+                    $this->exportRowsWithMatch($unmatchedBsRow, $invoice);
                 } else {
-                    $this->exportRowsWithDifference($unmatchedBsRow, ($amount - (float)$invoice->amount_transaction), 'Please find invoice manually');
+                    $this->note = 'Please find invoice manually';
+                    $this->exportRowsWithDifference($unmatchedBsRow, ($amount - (float)$invoice->amount_transaction));
                 }
 
             } elseif (count($invoices) > 1 ) {
@@ -213,17 +216,19 @@ class InvoiceProcessor
                     $multipleInvoices
                 );
                 if ($invoiceRowByName->isNotEmpty()) {
-                    $this->processRowsWithSimilarName($unmatchedBsRow, $invoiceRowByName, 'Invoice matched based on similar name.');
+                    $this->processRowsWithSimilarName($unmatchedBsRow, $invoiceRowByName);
                 } else {
-                    $this->exportRowsWithNoMatch($unmatchedBsRow, 'Multiple invoice found');
+                    $this->note = 'Multiple invoice found';
+                    $this->exportRowsWithNoMatch($unmatchedBsRow);
                 }
             } else {
+                $this->note = 'Missing invoice details';
                 $this->exportRowsWithNoMatch($unmatchedBsRow);
             }
         }
     }
 
-    private function processRowsWithSimilarName(BankStatement $unmatchedBsRow, Collection $invoiceRows, $note)
+    private function processRowsWithSimilarName(BankStatement $unmatchedBsRow, Collection $invoiceRows)
     {
         $invoiceRow = null;
 
@@ -235,23 +240,23 @@ class InvoiceProcessor
             if ( count($found) == 1) {
                 /** @var OpenInvoice $invoiceRow */
                 $invoiceRow = $found[0];
-                $this->exportRowsWithMatch($unmatchedBsRow, $invoiceRow, $note);
+                $this->note = 'Invoice matched based on similar name';
+                $this->exportRowsWithMatch($unmatchedBsRow, $invoiceRow);
             } elseif ( count($found) > 1 ) {
-                $note = "Multiple Invoice matched based on similar name. \nPlease manually select invoice.";
+                $this->note = "Multiple Invoice matched based on similar name. \nPlease manually select invoice.";
                 /** @var OpenInvoice $invoiceRow */
                 $invoiceRow = $found[0];
-                $this->exportRowsWithMultipleMatch($unmatchedBsRow, $invoiceRow, $note);
+                $this->exportRowsWithMultipleMatch($unmatchedBsRow, $invoiceRow);
             } else {
+                $this->note = 'Missing invoice details';
                 $this->exportRowsWithNoMatch($unmatchedBsRow);
             }
         } elseif (count($invoiceRows) == 1) {
             $openInvoiceRow = $invoiceRows->first();
-            if ( $this->isTotalMatches(
-                $amount,
-                (float)$openInvoiceRow->amount_transaction)
-            ) {
-                $this->exportRowsWithMatch($unmatchedBsRow, $openInvoiceRow, $note);
+            if ( $this->isTotalMatches( $amount, (float)$openInvoiceRow->amount_transaction) ) {
+                $this->exportRowsWithMatch($unmatchedBsRow, $openInvoiceRow);
             } else {
+                $this->note = 'Missing invoice details';
                 $this->exportRowsWithNoMatch($unmatchedBsRow);
             }
         }
@@ -269,12 +274,12 @@ class InvoiceProcessor
         return $found;
     }
 
-    private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $invoiceRow, string $note)
+    private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $invoiceRow)
     {
         $this->matchedBsRows[] = $bsRow->id;
 
-        $note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
-        $note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
+        $this->note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
+        $this->note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
 
         $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
 
@@ -288,44 +293,23 @@ class InvoiceProcessor
             $bsRow->company_customer,
             $bsRow->trans_date,
             $this->getBankAccountId((int)$bsRow->datev_account_number),
-            $note,
+            $this->note,
             $invoiceRow->name,
             $bsRow->amount,
             $bsRow->purpose_of_use
 
         ];
+
         $this->deleteElement($invoiceRow->invoice, $this->invoices);
+        $this->note = '';
     }
 
-    private function exportRowsWithNoMatch(BankStatement $bsRow, $note="Missing invoice details")
-    {
-        $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
-
-        $this->matchedBsRows[] = $bsRow->id;
-
-        $this->export[] = [
-            $bsRow->trans_date,
-            'Not found',
-            'Not found',
-            '',
-            $bsRow->amount,
-            $currency,
-            $bsRow->company_customer,
-            $bsRow->trans_date,
-            $this->getBankAccountId((int)$bsRow->datev_account_number),
-            $note,
-            'Not found',
-            $bsRow->amount,
-            $bsRow->purpose_of_use
-        ];
-    }
-
-    private function exportRowsWithMultipleMatch(BankStatement $bsRow, OpenInvoice $invoiceRow, $note)
+    private function exportRowsWithMultipleMatch(BankStatement $bsRow, OpenInvoice $invoiceRow)
     {
         $this->matchedBsRows[] = $bsRow->id;
 
-        $note .= $bsRow->currency == $bsRow->original_currency ? '' : "\n Different Currency";
-        $note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
+        $this->note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
+        $this->note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
 
         $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
 
@@ -339,14 +323,16 @@ class InvoiceProcessor
             $bsRow->company_customer,
             $bsRow->trans_date,
             $this->getBankAccountId((int)$bsRow->datev_account_number),
-            $note,
+            $this->note,
             $invoiceRow->name,
             $bsRow->amount,
             $bsRow->purpose_of_use
         ];
+
+        $this->note = '';
     }
 
-    private function exportRowsWithDifference(BankStatement $bsRow, float $difference, string $note)
+    private function exportRowsWithDifference(BankStatement $bsRow, float $difference)
     {
         $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
 
@@ -362,11 +348,38 @@ class InvoiceProcessor
             $bsRow->company_customer,
             $bsRow->trans_date,
             $this->getBankAccountId((int)$bsRow->datev_account_number),
-            $note,
+            $this->note,
             'Not found',
             $bsRow->amount,
             $bsRow->purpose_of_use
         ];
+
+        $this->note = '';
+    }
+
+    private function exportRowsWithNoMatch(BankStatement $bsRow)
+    {
+        $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
+
+        $this->matchedBsRows[] = $bsRow->id;
+
+        $this->export[] = [
+            $bsRow->trans_date,
+            'Not found',
+            'Not found',
+            '',
+            $bsRow->amount,
+            $currency,
+            $bsRow->company_customer,
+            $bsRow->trans_date,
+            $this->getBankAccountId((int)$bsRow->datev_account_number),
+            $this->note,
+            'Not found',
+            $bsRow->amount,
+            $bsRow->purpose_of_use
+        ];
+
+        $this->note = '';
     }
 
     private function isTotalMatches(float $bsTotal, float $openInvoiceTotal) : bool
@@ -401,7 +414,7 @@ class InvoiceProcessor
     {
         if ( $bsRow->currency == $bsRow->original_currency ) {
             if ( $bsRow->amount != $bsRow->original_amount ) {
-                $this->bsAmountNote = '\nBank charge adjusted';
+                $this->note = "Bank charge adjusted\n";
                 return (float)$bsRow->amount;
             }
         }
@@ -420,14 +433,5 @@ class InvoiceProcessor
         }
 
         return $accountNumber;
-    }
-
-    private function getNote(string $note)
-    {
-        if ( !empty($this->bsAmountNote) ) {
-            $note .= $this->bsAmountNote;
-        }
-
-        return $note;
     }
 }
