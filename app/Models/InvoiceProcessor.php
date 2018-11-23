@@ -254,6 +254,7 @@ class InvoiceProcessor
         } elseif (count($invoiceRows) == 1) {
             $openInvoiceRow = $invoiceRows->first();
             if ( $this->isTotalMatches( $amount, (float)$openInvoiceRow->amount_transaction) ) {
+                $this->note = 'Invoice matched based on similar name';
                 $this->exportRowsWithMatch($unmatchedBsRow, $openInvoiceRow);
             } else {
                 $this->note = 'Missing invoice details';
@@ -277,11 +278,7 @@ class InvoiceProcessor
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $invoiceRow)
     {
         $this->matchedBsRows[] = $bsRow->id;
-
-        $this->note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
-        $this->note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
-
-        $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
+        $this->updateNote($bsRow, $invoiceRow);
 
         $this->export[] = [
             $bsRow->trans_date,
@@ -289,7 +286,7 @@ class InvoiceProcessor
             $invoiceRow->invoice,
             '',
             $invoiceRow->amount_transaction,
-            $currency,
+            $this->getCurrency($bsRow),
             $bsRow->company_customer,
             $bsRow->trans_date,
             $this->getBankAccountId((int)$bsRow->datev_account_number),
@@ -307,11 +304,7 @@ class InvoiceProcessor
     private function exportRowsWithMultipleMatch(BankStatement $bsRow, OpenInvoice $invoiceRow)
     {
         $this->matchedBsRows[] = $bsRow->id;
-
-        $this->note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
-        $this->note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
-
-        $currency = empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
+        $this->updateNote($bsRow, $invoiceRow);
 
         $this->export[] = [
             $bsRow->trans_date,
@@ -319,7 +312,7 @@ class InvoiceProcessor
             '',
             '',
             $invoiceRow->amount_transaction,
-            $currency,
+            $this->getCurrency($bsRow),
             $bsRow->company_customer,
             $bsRow->trans_date,
             $this->getBankAccountId((int)$bsRow->datev_account_number),
@@ -433,5 +426,16 @@ class InvoiceProcessor
         }
 
         return $accountNumber;
+    }
+
+    private function getCurrency(BankStatement $bsRow)
+    {
+        return empty($bsRow->original_currency) ? $bsRow->currency : $bsRow->original_currency;
+    }
+
+    private function updateNote(BankStatement $bsRow, OpenInvoice $invoiceRow)
+    {
+        $this->note .= $bsRow->currency == $bsRow->original_currency ? '' : "\nDifferent Currency";
+        $this->note .= $invoiceRow->currency == $bsRow->original_currency ? '' : "\nDifference in invoice currency";
     }
 }
