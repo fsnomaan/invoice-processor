@@ -1,33 +1,19 @@
+#About the app
+This is a LARAVEL app with MYSQL backend. 
+The application matches invoices against bank statement, which normally takes half-a-day to complete manually.
+The tool does it within a minute.
+#How to deploy 
+This tool using  [PHP deployer](https://deployer.org/) to deploy.
+Please read the documentation before proceeding. You may need to host the code in GITHUB and have your ssh key added to the PRODUCTION host. You may also need to add the host ssh key to GITHUB for DEPLOYER to get the code.
 
-1. insert after perfomring the following conditions:
-    a hyphen after 1125. i.e
-        preg_replace("/1125 /", "1125-", $value);
-        preg_replace("/1125 - /", "1125-", $value);
-        preg_replace("/1125CHECK FOR NUMBER/", "1125-", $value);
-        preg_replace("/1125- /", "1125-", $value);
-
-2. insert open invoice where amount_transaction_currency > 0;
-
-3. for each of the invoice look up bank statement for matching 'purpose_of_use'
-    multiple invoice from 'open invoice' can be found in 'bank statement'
-    the sum total('amount_transaction_currency') of the invoices from 'open invoice' will match the 'original_amount' in 'bank statement'
-
-export the result
-    i.e select trans_date, '13002', purpose_of_use, '', '1.68', original_currency, company_customer, trans_date, '01'
-from bank_statement where original_amount = 1.68;
-
-===========
-
-for point 1:
-- remove new lines before insert
-
-for point 2:
-- check number format for amount
-
-for point 3:
-- get rows from 'bank statement' where 'purpose of use' contains mathcing inovice pattern
-- create an array of invoices from it
-- find rows from 'open invoice' where invoices matches the array of invoice
-- sum the rows from 'open invoice'
-- check if the sum matches the total from the row in 'bank statement'
-- write to the export csv
+###Deploying database:
+ - Create mysql database and mysql user in a different host or same host.
+ - Update the mysql config in (config/database.php)
+ 
+###Deploying the app:
+ - Update deploy.php by replacing *nothingbutsales* with your hostname
+ - Execute `dep deploy production` from terminal
+ - You can use `-v -vv or -vvv` for different verbose mode
+ - You can do the same for the `test` environment too.
+ 
+###Please follow the [PHP deployer](https://deployer.org/) documentation for any issue.
