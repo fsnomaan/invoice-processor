@@ -16,4 +16,26 @@ Please read the documentation before proceeding. You may need to host the code i
  - You can use `-v -vv or -vvv` for different verbose mode
  - You can do the same for the `test` environment too.
  
+###Some deployment issue:
+- if your laravel.log shows `no encryption key` exception, please follow, https://stackoverflow.com/questions/44839648/no-application-encryption-key-has-been-specified
+- sample virtualhost config
+```
+<VirtualHost *:80>
+        ServerAdmin webmaster@localhost
+        DocumentRoot /home/apps/invoice-processor/app/current/public
+	ServerName invoice-processor.nothingbutsales.co.uk
+	ServerAlias www.invoice-processor.nothingbutsales.co.uk
+
+	<Directory /home/apps/invoice-processor/app/current/public>
+          Options indexes FollowSymLinks
+          AllowOverride All
+          Order allow,deny
+ 	  Allow from all
+	  Require all granted
+        </Directory>
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+```
 ###Please follow the [PHP deployer](https://deployer.org/) documentation for any issue.
