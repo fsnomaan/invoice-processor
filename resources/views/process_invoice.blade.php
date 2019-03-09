@@ -4,9 +4,10 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12" align="center">
-            <h1 class="bg-info text-white mb-3" align="center">Invoice Matching Processor</h1>
+            <h2 class="m-3 bg-light" align="left">Invoice Matching Processor</h2><hr>
         </div>
     </div>
+
     <div class="row pb-3">
         <div class="col-sm-12" align="center">
             @if ($errors->any())
@@ -38,7 +39,7 @@
                 <label class="custom-file-label" for="customFile">Select Open Invoices</label>
             </div>
             <div class="form-group mt-3">
-                <button type="submit" class="btn btn-primary pull-right">Match Invoices</button>
+                <button type="submit" class="btn btn-primary float-right">Match Invoices</button>
             </div>
             {{ Form::close() }}
         </div>
@@ -50,15 +51,15 @@
                 {!! Form::open(['url' => '/map-company-name']) !!}
                 {{ Form::open(array('action' => 'MappingController@mapCompanyName')) }}
 
-                <table class="table-condensed" style="width: 100%;">
-                    <thead class="bg-dark text-white-50">
+                <table class="table-condensed option" style="width: 100%;">
+                    <thead class="bg-info">
                     <tr>
-                        <th colspan="3" class="bg-dark border-bottom text-white text-center">Customer Name Mapping</th>
+                        <th colspan="3" class="border-bottom text-white text-center">Customer Name Mapping</th>
                     </tr>
                     <tr>
                         <th scope="col" class="text-center">Company Name</th>
                         <th scope="col" class="text-center">Customer Name</th>
-                        <th scope="col" class="text-center">#</th>
+                        <th scope="col" class="text-center"></th>
                     </tr>
                     </thead>
                     @if(isset($companyNames))
@@ -67,8 +68,8 @@
                                 <td class="text-center">{{ $name }}</td>
                                 <td class="text-center">{{ $mapTo }}</td>
                                 <td>
-                                    <button class="alert-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $name ?>">
-                                        <i class="fa fa-trash"></i>
+                                    <button class="text-danger option" type="submit" name="actionName" value="<?php echo 'remove=>'. $name ?>">
+                                        <i class="fas fa-minus"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -77,7 +78,10 @@
                     <tr>
                         <td class="text-center"> {{ Form::text('mapName') }} </td>
                         <td class="text-center"> {{ Form::text('mapTo') }}</td>
-                        <td><button class="alert-success" type="submit" name="actionName" value="save"><i class="fa fa-check"></i></button></td>
+                        <td><button class="text-success option" type="submit" name="actionName" value="save">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </td>
                     </tr>
                 </table>
                 {{ Form::close() }}
@@ -88,15 +92,15 @@
                 {!! Form::open(['url' => '/map-bank-number']) !!}
                 {{ Form::open(array('action' => 'MappingController@mapBankAccountNumber')) }}
 
-                <table class="table-condensed" style="width: 100%;">
-                    <thead class="bg-dark text-white-50">
+                <table class="table-condensed option" style="width: 100%;">
+                    <thead class="bg-info">
                     <tr>
-                        <th colspan="3" class="bg-dark border-bottom text-white text-center">Bank Account Mapping</th>
+                        <th colspan="3" class="border-bottom text-white text-center">Bank Account Mapping</th>
                     </tr>
                     <tr>
                         <th scope="col" class="text-center">Bank Account Number</th>
                         <th scope="col" class="text-center">Bank Account Id</th>
-                        <th scope="col" class="text-center">#</th>
+                        <th scope="col" class="text-center"></th>
                     </tr>
                     </thead>
                     @if(isset($bankAccounts))
@@ -105,8 +109,8 @@
                                 <td class="text-center">{{ $number }}</td>
                                 <td class="text-center">{{ $mapTo }}</td>
                                 <td>
-                                    <button class="alert-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $number ?>">
-                                        <i class="fa fa-trash"></i>
+                                    <button class="option text-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $number ?>">
+                                        <i class="fas fa-minus"></i>
                                     </button>
                                 </td>
                             </tr>
@@ -115,7 +119,10 @@
                     <tr>
                         <td class="text-center"> {{ Form::text('mapNumber') }} </td>
                         <td class="text-center"> {{ Form::text('mapTo') }}</td>
-                        <td><button class="alert-success" type="submit" name="actionName" value="save"><i class="fa fa-check"></i></button></td>
+                        <td><button class="text-success option" type="submit" name="actionName" value="save">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </td>
                     </tr>
                 </table>
                 {{ Form::close() }}

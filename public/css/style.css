@@ -1,0 +1,22 @@
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+table.option tr th {
+    font-size: 10px;
+    height: 20px !important;
+}
+
+table.option tr td {
+    font-size: 10px;
+}
+
+button.option {
+    background:none!important;
+    color:inherit;
+    border:none;
+    padding:0!important;
+    font: inherit;
+    cursor: pointer;
+    margin-top: 2px;
+}
