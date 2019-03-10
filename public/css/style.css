@@ -11,6 +11,9 @@ table.option tr td {
     font-size: 13px;
 }
 
+label.custom-file-label {
+    color: grey;
+}
 button.option {
     background:none!important;
     color:inherit;

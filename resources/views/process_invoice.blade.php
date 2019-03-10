@@ -25,10 +25,10 @@
 
             {{ Form::open(array('action' => 'ProcessInvoiceController@processInvoice')) }}
             <div class="form-group">
-                <input type="text" class="form-control" name="invoiceFirstPart" placeholder="Enter first part of invoice i.e 1125">
+                <input type="text" class="form-control" name="invoiceFirstPart" placeholder="Enter invoice prefix">
             </div>
             <div class="form-group">
-                <input type="text" class="form-control" name="separator" placeholder="Please define separator. Default is ;">
+                <input type="text" class="form-control" name="separator" placeholder="Specify field separator. Default is ;">
             </div>
             <div class="custom-file">
                 <input type="file" class="custom-file-input" name="bankStatement">
