@@ -3,12 +3,12 @@ body {
 }
 
 table.option tr th {
-    font-size: 10px;
+    font-size: 11px;
     height: 20px !important;
 }
 
 table.option tr td {
-    font-size: 10px;
+    font-size: 11px;
 }
 
 button.option {
