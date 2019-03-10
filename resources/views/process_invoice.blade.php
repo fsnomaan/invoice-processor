@@ -51,7 +51,7 @@
                 {!! Form::open(['url' => '/map-company-name']) !!}
                 {{ Form::open(array('action' => 'MappingController@mapCompanyName')) }}
 
-                <table class="table-condensed option" style="width: 100%;">
+                <table class="table-condensed table-hover option" style="width: 100%;">
                     <thead class="bg-info">
                     <tr>
                         <th colspan="3" class="border-bottom text-white text-center">Customer Name Mapping</th>
@@ -65,8 +65,8 @@
                     @if(isset($companyNames))
                         @foreach ($companyNames as $name => $mapTo)
                             <tr scope="row">
-                                <td class="text-center">{{ $name }}</td>
-                                <td class="text-center">{{ $mapTo }}</td>
+                                <td class="text-left">{{ $name }}</td>
+                                <td class="text-left">{{ $mapTo }}</td>
                                 <td>
                                     <button title="Remove Mapping" class="text-danger option" type="submit" name="actionName" value="<?php echo 'remove=>'. $name ?>">
                                         <i class="fas fa-minus"></i>
@@ -76,8 +76,8 @@
                         @endforeach
                     @endif
                     <tr>
-                        <td class="text-center"> {{ Form::text('mapName') }} </td>
-                        <td class="text-center"> {{ Form::text('mapTo') }}</td>
+                        <td class="text-left"> {{ Form::text('mapName', null, array('size'=>30)) }} </td>
+                        <td class="text-left"> {{ Form::text('mapTo', null, array('size'=>30)) }}</td>
                         <td><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
                                 <i class="fas fa-plus"></i>
                             </button>
@@ -92,7 +92,7 @@
                 {!! Form::open(['url' => '/map-bank-number']) !!}
                 {{ Form::open(array('action' => 'MappingController@mapBankAccountNumber')) }}
 
-                <table class="table-condensed option" style="width: 100%;">
+                <table class="table-condensed table-hover option" style="width: 100%;">
                     <thead class="bg-info">
                     <tr>
                         <th colspan="3" class="border-bottom text-white text-center">Bank Account Mapping</th>

@@ -1,7 +1,6 @@
 body {
     font-family: 'Roboto', sans-serif;
 }
-
 table.option tr th {
     font-size: 13px;
     height: 20px !important;
@@ -9,6 +8,7 @@ table.option tr th {
 
 table.option tr td {
     font-size: 13px;
+    padding: 3px;
 }
 
 label.custom-file-label {
