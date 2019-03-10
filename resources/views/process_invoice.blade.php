@@ -57,8 +57,8 @@
                         <th colspan="3" class="border-bottom text-white text-center">Customer Name Mapping</th>
                     </tr>
                     <tr>
-                        <th scope="col" class="text-center">Company Name</th>
-                        <th scope="col" class="text-center">Customer Name</th>
+                        <th scope="col" class="text-center text-white">Company Name</th>
+                        <th scope="col" class="text-center text-white">Customer Name</th>
                         <th scope="col" class="text-center"></th>
                     </tr>
                     </thead>
@@ -98,8 +98,8 @@
                         <th colspan="3" class="border-bottom text-white text-center">Bank Account Mapping</th>
                     </tr>
                     <tr>
-                        <th scope="col" class="text-center">Bank Account Number</th>
-                        <th scope="col" class="text-center">Bank Account Id</th>
+                        <th scope="col" class="text-center text-white">Bank Account Number</th>
+                        <th scope="col" class="text-center text-white">Bank Account Id</th>
                         <th scope="col" class="text-center"></th>
                     </tr>
                     </thead>
