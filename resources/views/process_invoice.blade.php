@@ -68,7 +68,7 @@
                                 <td class="text-center">{{ $name }}</td>
                                 <td class="text-center">{{ $mapTo }}</td>
                                 <td>
-                                    <button class="text-danger option" type="submit" name="actionName" value="<?php echo 'remove=>'. $name ?>">
+                                    <button title="Remove Mapping" class="text-danger option" type="submit" name="actionName" value="<?php echo 'remove=>'. $name ?>">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                 </td>
@@ -78,7 +78,7 @@
                     <tr>
                         <td class="text-center"> {{ Form::text('mapName') }} </td>
                         <td class="text-center"> {{ Form::text('mapTo') }}</td>
-                        <td><button class="text-success option" type="submit" name="actionName" value="save">
+                        <td><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </td>
@@ -109,7 +109,7 @@
                                 <td class="text-center">{{ $number }}</td>
                                 <td class="text-center">{{ $mapTo }}</td>
                                 <td>
-                                    <button class="option text-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $number ?>">
+                                    <button title="Remove Mapping" class="option text-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $number ?>">
                                         <i class="fas fa-minus"></i>
                                     </button>
                                 </td>
@@ -119,7 +119,7 @@
                     <tr>
                         <td class="text-center"> {{ Form::text('mapNumber') }} </td>
                         <td class="text-center"> {{ Form::text('mapTo') }}</td>
-                        <td><button class="text-success option" type="submit" name="actionName" value="save">
+                        <td><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </td>
