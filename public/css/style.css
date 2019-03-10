@@ -1,18 +1,32 @@
 body {
     font-family: 'Roboto', sans-serif;
+    background: #fff;
 }
+
+h2.logo{
+    color: rgb(22, 142, 234);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
 table.option tr th {
     font-size: 13px;
     height: 20px !important;
+    padding: 5px;
 }
 
 table.option tr td {
     font-size: 13px;
-    padding: 3px;
+    padding-left: 5px;
+    padding-bottom: 2px;
 }
 
 label.custom-file-label {
     color: grey;
+}
+
+input.custom-file-input{
+    cursor: pointer;
 }
 button.option {
     background:none!important;

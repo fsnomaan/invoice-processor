@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12" align="center">
-            <h2 class="m-3 bg-light" align="left">Invoice Matching Processor</h2><hr>
+            <h2 class="m-3 logo" align="left"><strong>Smart Allocation</strong></h2><hr>
         </div>
     </div>
 
@@ -25,10 +25,10 @@
 
             {{ Form::open(array('action' => 'ProcessInvoiceController@processInvoice')) }}
             <div class="form-group">
-                <input type="text" class="form-control" name="invoiceFirstPart" placeholder="Enter invoice prefix">
+                <input type="text" class="form-control" name="invoiceFirstPart" placeholder="Enter invoice prefix, i.e 1125 -">
             </div>
             <div class="form-group">
-                <input type="text" class="form-control" name="separator" placeholder="Specify field separator. Default is ;">
+                <input type="text" class="form-control" name="separator" placeholder="Enter delimiter. Default is ;">
             </div>
             <div class="custom-file">
                 <input type="file" class="custom-file-input" name="bankStatement">
@@ -54,12 +54,12 @@
                 <table class="table-condensed table-hover option" style="width: 100%;">
                     <thead class="bg-info">
                     <tr>
-                        <th colspan="3" class="border-bottom text-white text-center">Customer Name Mapping</th>
+                        <th colspan="3" class="border-bottom text-white text-center bg-primary">Customer Name Mapping</th>
                     </tr>
                     <tr>
-                        <th scope="col" class="text-center text-white">Company Name</th>
-                        <th scope="col" class="text-center text-white">Customer Name</th>
-                        <th scope="col" class="text-center"></th>
+                        <th scope="col" class="text-left text-white bg-primary">Statement Name</th>
+                        <th scope="col" class="text-left text-white bg-primary">Customer Name</th>
+                        <th scope="col" class="text-left bg-primary"></th>
                     </tr>
                     </thead>
                     @if(isset($companyNames))
@@ -67,7 +67,7 @@
                             <tr scope="row">
                                 <td class="text-left">{{ $name }}</td>
                                 <td class="text-left">{{ $mapTo }}</td>
-                                <td>
+                                <td class="text-right">
                                     <button title="Remove Mapping" class="text-danger option" type="submit" name="actionName" value="<?php echo 'remove=>'. $name ?>">
                                         <i class="fas fa-minus"></i>
                                     </button>
@@ -78,7 +78,7 @@
                     <tr>
                         <td class="text-left"> {{ Form::text('mapName', null, array('size'=>30)) }} </td>
                         <td class="text-left"> {{ Form::text('mapTo', null, array('size'=>30)) }}</td>
-                        <td><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
+                        <td class="text-right"><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </td>
@@ -95,20 +95,20 @@
                 <table class="table-condensed table-hover option" style="width: 100%;">
                     <thead class="bg-info">
                     <tr>
-                        <th colspan="3" class="border-bottom text-white text-center">Bank Account Mapping</th>
+                        <th colspan="3" class="border-bottom text-white text-center bg-primary">Bank Account Mapping</th>
                     </tr>
                     <tr>
-                        <th scope="col" class="text-center text-white">Bank Account Number</th>
-                        <th scope="col" class="text-center text-white">Bank Account Id</th>
-                        <th scope="col" class="text-center"></th>
+                        <th scope="col" class="text-left bg-primary text-white">Statement Account Number</th>
+                        <th scope="col" class="text-left bg-primary text-white">Bank Account Id</th>
+                        <th scope="col" class="text-left bg-primary"></th>
                     </tr>
                     </thead>
                     @if(isset($bankAccounts))
                         @foreach ($bankAccounts as $number => $mapTo)
                             <tr scope="row">
-                                <td class="text-center">{{ $number }}</td>
-                                <td class="text-center">{{ $mapTo }}</td>
-                                <td>
+                                <td class="text-left">{{ $number }}</td>
+                                <td class="text-left">{{ $mapTo }}</td>
+                                <td class="text-right">
                                     <button title="Remove Mapping" class="option text-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $number ?>">
                                         <i class="fas fa-minus"></i>
                                     </button>
@@ -117,9 +117,9 @@
                         @endforeach
                     @endif
                     <tr>
-                        <td class="text-center"> {{ Form::text('mapNumber') }} </td>
-                        <td class="text-center"> {{ Form::text('mapTo') }}</td>
-                        <td><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
+                        <td class="text-left"> {{ Form::text('mapNumber') }} </td>
+                        <td class="text-left"> {{ Form::text('mapTo') }}</td>
+                        <td class="text-right"><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
                                 <i class="fas fa-plus"></i>
                             </button>
                         </td>
