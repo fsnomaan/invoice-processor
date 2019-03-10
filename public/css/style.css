@@ -5,8 +5,8 @@ body {
 
 h2.logo{
     color: rgb(22, 142, 234);
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: 2rem;
+    font-weight: 700 !important;
 }
 
 table.option tr th {
