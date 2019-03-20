@@ -11,7 +11,7 @@
 */
 
 Route::get(
-    '/{userName?}',
+    '/user/{userName?}',
     'ProcessInvoiceController@index'
 )->where('userName', '[A-Za-z]+');
 
@@ -32,3 +32,7 @@ Route::match(
     '/map-bank-number',
     'MappingController@mapBankAccountNumber'
 );
+
+Route::group(['prefix' => 'admin'], function () {
+    Voyager::routes();
+});
