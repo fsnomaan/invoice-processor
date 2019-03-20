@@ -15,6 +15,7 @@ class CreateBankStatementTable extends Migration
     {
         Schema::create('bank_statement', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('user_id');
             $table->mediumText("trans_date");
             $table->mediumText("valuta");
             $table->mediumText("datev_account_number");
@@ -38,6 +39,7 @@ class CreateBankStatementTable extends Migration
             $table->mediumText("mandate_reference");
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+            $table->foreign('user_id')->references('user_id')->on('users');
         });
     }
 

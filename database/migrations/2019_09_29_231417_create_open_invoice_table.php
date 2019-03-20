@@ -15,6 +15,7 @@ class CreateOpenInvoiceTable extends Migration
     {
         Schema::create('open_invoice', function (Blueprint $table) {
             $table->increments('id');
+            $table->unsignedInteger('user_id');
             $table->mediumText("customer_account");
             $table->mediumText("name");
             $table->mediumText("voucher");
@@ -27,6 +28,7 @@ class CreateOpenInvoiceTable extends Migration
             $table->mediumText("business_unit");
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
+            $table->foreign('user_id')->references('user_id')->on('users');
         });
     }
 

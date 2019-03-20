@@ -10,8 +10,25 @@
 |
 */
 
-Route::get('/','ProcessInvoiceController@index');
+Route::get(
+    '/{userName?}',
+    'ProcessInvoiceController@index'
+)->where('userName', '[A-Za-z]+');
 
-Route::match(['get', 'post'], '/process-invoice','ProcessInvoiceController@processInvoice');
-Route::match(['get', 'post'], '/map-company-name','MappingController@mapCompanyName');
-Route::match(['get', 'post'], '/map-bank-number','MappingController@mapBankAccountNumber');
+Route::match(
+    ['get', 'post'],
+    '/process-invoice',
+    'ProcessInvoiceController@processInvoice'
+);
+
+Route::match(
+    ['get', 'post'],
+    '/map-company-name',
+    'MappingController@mapCompanyName'
+);
+
+Route::match(
+    ['get', 'post'],
+    '/map-bank-number',
+    'MappingController@mapBankAccountNumber'
+);

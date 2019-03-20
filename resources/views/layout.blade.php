@@ -7,7 +7,13 @@
     <body>
     <div id="app" class="container">
     @section('content')
-            <h1>Welcome to Invoice Processor</h1>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-12" align="center">
+                <h2 class="m-3 logo" align="left"><strong>Smart Allocation</strong></h2><hr>
+            </div>
+        </div>
+    </div>
     @show
     </div>
     </body>

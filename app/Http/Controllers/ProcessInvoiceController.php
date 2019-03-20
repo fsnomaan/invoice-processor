@@ -50,20 +50,26 @@ class ProcessInvoiceController extends Controller
         $this->bankAccount = $bankAccount;
     }
 
-    public function index(Request $request)
+    public function index(Request $request, $userName=null)
     {
-        $response = [
-            'companyNames' => $this->companyName->getNames(),
-            'bankAccounts' => $this->bankAccount->getAccounts(),
-            'success' => $request->message
-        ];
 
-        return view('process_invoice')->with($response);
+        if ($userName && $this->isValidUserName($userName)) {
+            $response = [
+                'userName' => $userName,
+                'companyNames' => $this->companyName->getNames(),
+                'bankAccounts' => $this->bankAccount->getAccounts(),
+                'success' => $request->message
+            ];
+
+            return view('process_invoice')->with($response);
+        }
+
+        return view('layout');
     }
+
 
     public function processInvoice(Request $request)
     {
-
         $this->validateForm($request);
 
         $this->invoicePrimary = $request->invoiceFirstPart;
@@ -153,5 +159,10 @@ class ProcessInvoiceController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="export_'.date("Ymd_Hi").'.csv"',
         ]);
+    }
+
+    private function isValidUserName(string $userName): string
+    {
+        return true;
     }
 }
