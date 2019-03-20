@@ -11,9 +11,9 @@
 */
 
 Route::get(
-    '/user/{userName?}',
+    '/{userName?}',
     'ProcessInvoiceController@index'
-)->where('userName', '[A-Za-z]+');
+)->where('userName', '(?!admin)[A-Za-z]+');
 
 Route::match(
     ['get', 'post'],
