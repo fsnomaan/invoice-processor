@@ -8,6 +8,7 @@ use App\Models\InvoiceProcessor;
 use App\Models\StatementImporter;
 use Illuminate\Http\Request;
 use App\Models\CompanyName;
+use App\User;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProcessInvoiceController extends Controller
@@ -36,28 +37,33 @@ class ProcessInvoiceController extends Controller
     /** @var BankAccount */
     private $bankAccount;
 
+    /** @var User */
+    private $user;
+
     public function __construct(
         StatementImporter $statementImporter,
         InvoiceImporter $invoiceImporter,
         CompanyName $companyName,
         BankAccount $bankAccount,
-        InvoiceProcessor $invoiceProcessor
+        InvoiceProcessor $invoiceProcessor,
+        User $user
     ) {
         $this->statementImporter = $statementImporter;
         $this->invoiceImporter = $invoiceImporter;
         $this->companyName = $companyName;
         $this->invoiceProcessor = $invoiceProcessor;
         $this->bankAccount = $bankAccount;
+        $this->user = $user;
     }
 
     public function index(Request $request, $userName=null)
     {
-
-        if ($userName && $this->isValidUserName($userName)) {
+        if ($userName && $userId = $this->user->getIdByName($userName)) {
             $response = [
                 'userName' => $userName,
-                'companyNames' => $this->companyName->getNames(),
-                'bankAccounts' => $this->bankAccount->getAccounts(),
+                'userId' => $userId,
+                'companyNames' => $this->companyName->getNames($userId),
+                'bankAccounts' => $this->bankAccount->getAccounts($userId),
                 'success' => $request->message
             ];
 
@@ -80,19 +86,19 @@ class ProcessInvoiceController extends Controller
             $path = $file->getRealPath();
             $this->statementImporter->setSeparator($this->separator);
             $this->statementImporter->setInvoicePrimary($this->invoicePrimary);
-            $this->statementImporter->importBankStatement($path);
+            $this->statementImporter->importBankStatement($path, $request->userId);
         }
 
         if ($request->hasFile('openInvoice') && $request->file('openInvoice')->isValid()) {
             $file = $request->file('openInvoice');
             $path = $file->getRealPath();
             $this->invoiceImporter->setSeparator($this->separator);
-            $this->invoiceImporter->importOpenInvoice($path);
+            $this->invoiceImporter->importOpenInvoice($path, $request->userId);
         }
 
-        $this->export = $this->invoiceProcessor->processInvoice();
+        $this->export = $this->invoiceProcessor->processInvoice($request->userId);
 
-        return $this->streamResponse();
+        return $this->streamResponse($this->user->getNameById($request->userId));
     }
 
 
@@ -119,7 +125,7 @@ class ProcessInvoiceController extends Controller
         $this->validate($request, $rules, $customMessages);
     }
 
-    private function streamResponse()
+    private function streamResponse(string $userName)
     {
         $columnHeadings = [
             'Date',
@@ -157,12 +163,7 @@ class ProcessInvoiceController extends Controller
             fclose($handle);
         }, 200, [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="export_'.date("Ymd_Hi").'.csv"',
+            'Content-Disposition' => 'attachment; filename="export_'.$userName.'_'.date("Ymd_Hi").'.csv"',
         ]);
-    }
-
-    private function isValidUserName(string $userName): string
-    {
-        return true;
     }
 }

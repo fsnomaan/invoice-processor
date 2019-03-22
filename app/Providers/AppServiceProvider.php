@@ -12,7 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\ProcessInvoiceController;
 use App\Models\BankStatement;
 use App\Models\OpenInvoice;
-
+use App\User as AppUser;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -64,7 +64,8 @@ class AppServiceProvider extends ServiceProvider
                 resolve(InvoiceImporter::class),
                 resolve(CompanyName::class),
                 resolve(BankAccount::class),
-                resolve(InvoiceProcessor::class)
+                resolve(InvoiceProcessor::class),
+                resolve(AppUser::class )
             );
         });
         resolve(InvoiceProcessor::class);

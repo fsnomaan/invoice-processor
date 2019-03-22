@@ -14,13 +14,18 @@ class StatementImporter
     /** @var string  */
     private $separator = ';';
 
+    /** @var int $userId */
+    private $userId;
+
     public function __construct(BankStatement $bs)
     {
         $this->bs = $bs;
     }
 
-    public function importBankStatement($path): bool
+    public function importBankStatement($path, int $userId): bool
     {
+        $this->userId = $userId;
+        $this->refreshTable($this->userId);
         $dataTable = $this->getCsvData($path);
         $dataTable = $this->sanitize($dataTable);
         $dataTable = $this->removeWithBookingText($dataTable, 'CASH CONCENTRATING BUCHUNG');
@@ -40,16 +45,22 @@ class StatementImporter
         return true;
     }
 
+    private function refreshTable(int $userId)
+    {
+        $this->bs->deleteById($userId);
+    }
+
     private function getCsvData($path)
     {
         $dataTable = [];
-        $this->bs->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
             $heading = fgetcsv($h, 1000, $this->separator);
             while (($data = fgetcsv($h, 1000, $this->separator)) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
                 try{
-                    $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                    $kvPair = array_combine(array_keys(ColumnNames::MAP), $data);
+                    $kvPair['user_id'] = $this->userId;
+                    $dataTable[] = $kvPair;
                 } catch (\Exception $e) {
                     dd($e->getMessage(), $data);
                 }

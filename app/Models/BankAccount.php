@@ -8,8 +8,8 @@ class BankAccount extends Model
 {
     protected $table = 'bank_account';
 
-    public function getAccounts()
+    public function getAccounts(int $userId)
     {
-        return Model::pluck('bank_acc_id', 'bank_acc_number')->toArray();
+        return Model::where('user_id', $userId)->pluck('bank_acc_id', 'bank_acc_number')->toArray();
     }
 }

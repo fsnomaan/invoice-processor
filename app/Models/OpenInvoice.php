@@ -38,6 +38,10 @@ class OpenInvoice extends Model
         $results = Model::where('amount_transaction', trim($total))
             ->where('name', 'LIKE', '%' . $name . '%')->get();
         return $results;
+    }
 
+    public function deleteById(int $userId)
+    {
+        Model::where('user_id', $userId)->delete();
     }
 }

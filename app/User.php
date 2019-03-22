@@ -3,8 +3,6 @@
 namespace App;
 
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends \TCG\Voyager\Models\User
 {
@@ -27,4 +25,19 @@ class User extends \TCG\Voyager\Models\User
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    public function getIdByName(string $userName):?int
+    {
+        $user = User::where('name', '=', $userName)->first();
+        if ($user) {
+            return $user->id;
+        }
+
+        return null;
+    }
+
+    public function getNameById(int $userId): string
+    {
+        return User::where('id', '=', $userId)->first()->name;
+    }
 }

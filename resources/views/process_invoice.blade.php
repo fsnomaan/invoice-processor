@@ -4,7 +4,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-sm-12" align="center">
-            <h2 class="m-3 logo" align="left"><strong>Smart Allocation</strong></h2><hr>
+            <h2 class="m-3 logo" align="left"><strong>Smart Allocation <i class="userName">for {{ $userName }}</i></strong></h2><hr>
         </div>
     </div>
 
@@ -39,6 +39,7 @@
                 <label class="custom-file-label" for="customFile">Select Open Invoices</label>
             </div>
             <div class="form-group mt-3">
+                <input type="hidden" name="userId" value="{{ $userId }}">
                 <button type="submit" class="btn btn-primary float-right">Match Invoices</button>
             </div>
             {{ Form::close() }}
@@ -78,6 +79,7 @@
                     <tr>
                         <td class="text-left"> {{ Form::text('mapName', null, array('size'=>30)) }} </td>
                         <td class="text-left"> {{ Form::text('mapTo', null, array('size'=>30)) }}</td>
+                        <input type="hidden" name="userId" value="{{ $userId }}">
                         <td class="text-right"><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
                                 <i class="fas fa-plus"></i>
                             </button>
@@ -119,6 +121,7 @@
                     <tr>
                         <td class="text-left"> {{ Form::text('mapNumber') }} </td>
                         <td class="text-left"> {{ Form::text('mapTo') }}</td>
+                        <input type="hidden" name="userId" value="{{ $userId }}">
                         <td class="text-right"><button title="Add Mapping" class="text-success option" type="submit" name="actionName" value="save">
                                 <i class="fas fa-plus"></i>
                             </button>

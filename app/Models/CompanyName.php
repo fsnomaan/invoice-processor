@@ -8,8 +8,8 @@ class CompanyName extends Model
 {
     protected $table = 'company_name';
 
-    public function getNames()
+    public function getNames(int $userId)
     {
-        return Model::pluck('map_to', 'name')->toArray();
+        return Model::where('user_id', $userId)->pluck('map_to', 'name')->toArray();
     }
 }

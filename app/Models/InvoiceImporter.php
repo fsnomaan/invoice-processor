@@ -8,15 +8,21 @@ class InvoiceImporter
     /** @var OpenInvoice  */
     private $openInvoice;
 
+    /** @var string $separator */
     private $separator = ';';
+
+    /** @var int $userId */
+    private $userId;
 
     public function __construct(OpenInvoice $openInvoice)
     {
         $this->openInvoice = $openInvoice;
     }
 
-    public function importOpenInvoice($path)
+    public function importOpenInvoice($path, int $userId)
     {
+        $this->userId = $userId;
+        $this->refreshTable($userId);
         $dataTable = $this->getCsvData($path);
         $dataTable = $this->sanitize($dataTable);
 
@@ -32,16 +38,22 @@ class InvoiceImporter
         return true;
     }
 
+    private function refreshTable(int $userId)
+    {
+        $this->openInvoice->deleteById($userId);
+    }
+
     private function getCsvData($path)
     {
         $dataTable = [];
-        $this->openInvoice->truncate();
         if (($h = fopen($path, "r")) !== FALSE) {
             $heading = fgetcsv($h, 1000, $this->separator);
             while (($data = fgetcsv($h, 1000, $this->separator)) !== FALSE) {
                 $data = array_slice($data, 0, count(ColumnNames::MAP));
                 try {
-                    $dataTable[] = array_combine(array_keys(ColumnNames::MAP), $data);
+                    $kvPair = array_combine(array_keys(ColumnNames::MAP), $data);;
+                    $kvPair['user_id'] = $this->userId;
+                    $dataTable[] = $kvPair;
                 } catch (\Exception $e) {
                     dd($e);
                 }

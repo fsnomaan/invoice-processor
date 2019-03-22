@@ -20,4 +20,9 @@ class BankStatement extends Model
         return Model::whereNotIn('id', $ids)
             ->get();
     }
+
+    public function deleteById(int $userId)
+    {
+        Model::where('user_id', $userId)->delete();
+    }
 }

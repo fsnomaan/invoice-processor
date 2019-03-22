@@ -31,6 +31,9 @@ class InvoiceProcessor
     /** @var string */
     private $note = '';
 
+    /** @var int $userId */
+    private $userId;
+
     public function __construct(
         BankStatement $bs,
         OpenInvoice $openInvoice,
@@ -45,9 +48,10 @@ class InvoiceProcessor
 
     }
 
-    public function processInvoice() :array
+    public function processInvoice(int $userId) :array
     {
-        $this->bankAccountMap = $this->bankAccount->getAccounts();
+        $this->userId = $userId;
+        $this->bankAccountMap = $this->bankAccount->getAccounts($this->userId);
 
         $this->invoices = $this->openInvoice->getAllInvoices()->toArray();
         foreach ($this->invoices as $key => $invoice) {
@@ -387,7 +391,7 @@ class InvoiceProcessor
 
     private function getCompanyCustomerName(string $name) : string
     {
-        $map = $this->companyName->getNames();
+        $map = $this->companyName->getNames($this->userId);
 
         if (array_key_exists($name, $map) ) {
             return $map[$name];

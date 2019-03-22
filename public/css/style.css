@@ -9,6 +9,10 @@ h2.logo{
     font-weight: 700 !important;
 }
 
+h2 i.userName{
+    font-size: 20px;
+}
+
 table.option tr th {
     font-size: 13px;
     height: 20px !important;
