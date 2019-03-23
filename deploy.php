@@ -4,8 +4,7 @@ namespace Deployer;
 require 'recipe/laravel.php';
 
 // Project name
-set('application', 'invoice-processor');
-set('test-application', 'test-invoice-processor');
+set('application', 'smart-allocation');
 
 // Project repository
 set('repository', 'git@bitbucket.org:mmrs151/invoice-processing.git');
@@ -21,13 +20,8 @@ add('shared_dirs', []);
 add('writable_dirs', []);
 
 
-// Hosts
-host('test')
-    ->hostname('nothingbutsales')
-    ->set('deploy_path', '/home/apps/{{test-application}}/app');
-
 host('production')
-    ->hostname('nothingbutsales')
+    ->hostname('feedomise')
     ->set('deploy_path', '/home/apps/{{application}}/app');
     
 // Tasks
