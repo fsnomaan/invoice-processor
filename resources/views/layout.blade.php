@@ -10,7 +10,17 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-12" align="center">
-                <h2 class="m-3 logo" align="left"><strong>Smart Allocation</strong></h2><hr>
+                <h2 class="m-3 logo" align="left"><strong><a href="/">Smart Allocation</a></strong></h2><hr>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12" align="center">
+                <img src="{{ asset('image/process.png') }}" height="80%">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                    <a href="mailto:info@smart-allocation.com?subject=Request a demo for Smart Allocation" class="btn btn-info float-right">Request a demo</a>
             </div>
         </div>
     </div>

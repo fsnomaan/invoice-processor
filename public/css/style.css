@@ -3,6 +3,10 @@ body {
     background: #fff;
 }
 
+a:hover{
+    text-decoration: none;
+}
+
 h2.logo{
     color: rgb(22, 142, 234);
     font-size: 2rem;
@@ -32,6 +36,7 @@ label.custom-file-label {
 input.custom-file-input{
     cursor: pointer;
 }
+
 button.option {
     background:none!important;
     color:inherit;
