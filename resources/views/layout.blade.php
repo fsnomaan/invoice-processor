@@ -20,7 +20,12 @@
         </div>
         <div class="row">
             <div class="col-sm-12">
-                    <a href="mailto:info@smart-allocation.com?subject=Request a demo for Smart Allocation" class="btn btn-info float-right">Request a demo</a>
+                    <a
+                        target="_new" 
+                        href="
+                            mailto:info@smart-allocation.com?subject=Request a demo for Smart Allocation&body=WE DO NOT SAVE CLIENT DATA ANYWHERE" 
+                        class="btn btn-info float-right">Request a demo
+                    </a>
             </div>
         </div>
     </div>
