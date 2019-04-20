@@ -56,9 +56,18 @@ class ProcessInvoiceController extends Controller
         $this->user = $user;
     }
 
-    public function index(Request $request, $userName=null)
+    public function index(Request $request)
     {
-        if ($userName && $userId = $this->user->getIdByName($userName)) {
+        if ($request->user()) {
+            $userId = $request->user()->id;
+            $userName = $request->user()->name;
+            // foreach($this->companyName->getNames($userId) as $company) {
+            //     echo $company->id;
+            //     echo $company->name;
+            //     echo $company->map_to;
+            //     echo 'hello';
+            // }
+            // die('bar');
             $response = [
                 'userName' => $userName,
                 'userId' => $userId,
@@ -66,11 +75,10 @@ class ProcessInvoiceController extends Controller
                 'bankAccounts' => $this->bankAccount->getAccounts($userId),
                 'success' => $request->message
             ];
-
             return view('process_invoice')->with($response);
         }
 
-        return view('layout');
+        return view('home');
     }
 
 

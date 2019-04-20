@@ -10,6 +10,6 @@ class CompanyName extends Model
 
     public function getNames(int $userId)
     {
-        return Model::where('user_id', $userId)->pluck('map_to', 'name')->toArray();
+        return Model::where('user_id', $userId)->get();
     }
 }

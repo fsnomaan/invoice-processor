@@ -6,6 +6,8 @@ use App\Models\BankAccount;
 use App\Models\CompanyName;
 use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 
 class MappingController extends Controller
 {
@@ -26,24 +28,36 @@ class MappingController extends Controller
 
     public function mapCompanyName(Request $request)
     {
-        if ($request->actionName == 'save') {
+//        die(var_dump($request->all()));
+        if ($request->action == 'save') {
             $this->companyName->name = $request->mapName;
             $this->companyName->map_to = $request->mapTo;
             $this->companyName->user_id = $request->userId;
             $this->companyName->save();
-            session()->put('notifications','Company name created successfully.');
-            return redirect()->action(
-                'ProcessInvoiceController@index', ['userName' => User::find($request->userId)->name]
-            );
+
+            return Response(
+                json_encode(
+                    [
+                        'message' => 'saved',
+                        'name' => $this->companyName->name,
+                        'map_to' => $this->companyName->map_to,
+                        'id' => DB::getPdo()->lastInsertId(),
+                    ]
+                ),
+                200);
         }
-        $parts = explode('=>',$request->actionName);
-        if ($parts[0]  == 'remove') {
-            $this->companyName::where('name', $parts[1])->delete();
-            session()->put('notifications','Successfully deleted');
-            return redirect()->action(
-                'ProcessInvoiceController@index', ['userName' => User::find($request->userId)->name]
-            );
+
+
+        if ($request->action == 'remove') {
+            $this->companyName::where('id', $request->removeId)->delete();
+            return Response(
+                json_encode(
+                    ['message' => 'removed']
+                ),
+                200);
         }
+
+        exit;
     }
 
     public function mapBankAccountNumber(Request $request)

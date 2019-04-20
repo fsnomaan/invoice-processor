@@ -11,9 +11,9 @@
 */
 
 Route::get(
-    '/{userName?}',
+    '/',
     'ProcessInvoiceController@index'
-)->where('userName', '(?!admin)[A-Za-z]+');
+);
 
 Route::match(
     ['get', 'post'],
@@ -36,3 +36,6 @@ Route::match(
 Route::group(['prefix' => 'admin'], function () {
     Voyager::routes();
 });
+Auth::routes();
+
+Route::get('/home', 'ProcessInvoiceController@index')->name('home');
