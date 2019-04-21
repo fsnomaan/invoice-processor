@@ -73,7 +73,7 @@
                                         <td class="text-left">{{ $company->name }}</td>
                                         <td class="text-left">{{ $company->map_to }}</td>
                                         <td class="text-left">
-                                        <button type="submit" value="remove" id="removeCompanyName-{{$company->id}}" name="removeCompanyName-{{$company->id}}" title="Remove Mapping" class="text-danger" data-id="{{ $company->id }}">
+                                        <button type="submit" value="remove" title="Remove Mapping" class="text-danger" data-id="{{ $company->id }}">
                                             <i class="fas fa-minus"></i>
                                         </button>
                                         </td>
