@@ -8,9 +8,8 @@ a:hover{
 }
 
 h3.logo{
-    color: rgb(22, 142, 234);
-    font-size: 1.5rem;
-    font-weight: 600;
+    max-width: 200px;
+    height: 65px;
 }
 
 h2 i.userName{

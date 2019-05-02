@@ -30,7 +30,8 @@
             <div class="container">
                 <a class="navbar-brand" href="{{ url('/') }}">
                     <h3 class="logo">
-                        {{ config('app.name', 'Smart Allocation') }}
+                        <img src="{{ asset('image/logo.png') }}" height="80%">
+
                     </h3>
                 </a>    
                 <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
