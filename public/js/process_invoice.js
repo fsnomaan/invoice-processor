@@ -13,8 +13,7 @@ $( document ).ready(function() {
         };
 
         var mapCompanyName = function() {
-            $.noConflict();
-            $('#table_id').DataTable();
+
             $('#frm-map-company-name').on('click', 'button', function(e){
                 var thisButton = $(this);
                 e.preventDefault();
@@ -42,8 +41,47 @@ $( document ).ready(function() {
                         if (response.message === 'removed') {
                             thisButton.parents("tr:first").remove();
                         } else if (response.message === 'saved') {
-                            // $('#frm-map-company-name').trigger("reset");
-                            $("#table_id").load(window.location + " #table_id");
+                            $("#tbl-map-company").load(window.location + " #tbl-map-company");
+                        }
+                    },
+                    error: function (data) {
+                        console.log('Error:', data);
+                    }
+                });
+                return false;
+            });
+        };
+
+        var mapBankAccount = function() {
+
+            $('#frm-map-account').on('click', 'button', function(e){
+                var thisButton = $(this);
+                e.preventDefault();
+                var formData = '';
+                var action = $(this).attr("value");
+                if (action === 'remove') {
+                    formData = $('#frm-map-account').serialize() + "&action=" + action + '&removeId=' + $(this).data('id');
+                } else if (action === 'save') {
+                    formData = $('#frm-map-account').serialize() + "&action=" + action
+                }
+
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+                $.ajax({
+                    thisButton: thisButton,
+                    url: '/map-bank-number',
+                    method: 'post',
+                    data: formData,
+                    success: function(response){
+                        response = JSON.parse(response);
+                        console.log(response);
+                        if (response.message === 'removed') {
+                            thisButton.parents("tr:first").remove();
+                        } else if (response.message === 'saved') {
+                            $("#tbl-map-account").load(window.location + " #tbl-map-account");
                         }
                     },
                     error: function (data) {
@@ -57,10 +95,12 @@ $( document ).ready(function() {
         return {
             displayFileName: displayFileName,
             mapCompanyName: mapCompanyName,
+            mapBankAccount: mapBankAccount,
         };
 
     })();
     
     processInvoice.displayFileName();
     processInvoice.mapCompanyName();
+    processInvoice.mapBankAccount();
 });

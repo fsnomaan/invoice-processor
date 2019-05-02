@@ -49,7 +49,7 @@
                 <div class="col-sm-4 offset-4 mb-3">
                     <div class="mappingTable">
                         <form method="POST" accept-charset="UTF-8" name="frm-map-company-name" id="frm-map-company-name">
-                        <table id="table_id" class="table-condensed table-hover option" style="width: 100%;">
+                        <table id="tbl-map-company" class="table-condensed table-hover option" style="width: 100%;">
                             <thead>
                             <tr>
                                 <th scope="col" class="text-left">Statement Name</th>
@@ -62,7 +62,7 @@
                                 <td class="text-left"> {{ Form::text('mapTo', null, array('size'=>30)) }}</td>
                                 <input type="hidden" name="userId" value="{{ $userId }}">
                                 <td class="text-right">
-                                    <button type="submit" value="save" id="mapCompanyName" title="Add Mapping" class="text-primary">
+                                    <button type="submit" value="save" id="mapCompanyName" title="Add Mapping" class="text-primary option">
                                         <i class="fas fa-plus"></i>
                                     </button>
                                 </td>
@@ -72,8 +72,8 @@
                                     <tr scope="row">
                                         <td class="text-left">{{ $company->name }}</td>
                                         <td class="text-left">{{ $company->map_to }}</td>
-                                        <td class="text-left">
-                                        <button type="submit" value="remove" title="Remove Mapping" class="text-danger" data-id="{{ $company->id }}">
+                                        <td class="text-right">
+                                        <button type="submit" value="remove" title="Remove Mapping" class="text-danger option" data-id="{{ $company->id }}">
                                             <i class="fas fa-minus"></i>
                                         </button>
                                         </td>
@@ -90,10 +90,8 @@
             <div class="row">
                 <div class="col-sm-4 offset-4 mb-3">
                     <div class="mappingTable">
-                        {!! Form::open(['url' => '/map-bank-number', 'name' => 'frm-map-bank-number', 'id' => 'frm-map-bank-number']) !!}
-                        {{ Form::open(array('action' => 'MappingController@mapBankAccountNumber')) }}
-
-                        <table class="table-condensed table-hover option" style="width: 100%;">
+                        <form method="POST" accept-charset="UTF-8" name="frm-map-account" id="frm-map-account">
+                            <table id="tbl-map-account" class="table-condensed table-hover option" style="width: 100%;">
                             <thead>
                             <tr>
                                 <th scope="col" class="text-left">Statement Account Number</th>
@@ -101,29 +99,29 @@
                                 <th scope="col" class="text-left"></th>
                             </tr>
                             </thead>
+                            <tr>
+                                <td class="text-left"> {{ Form::text('mapNumber') }} </td>
+                                <td class="text-left"> {{ Form::text('mapTo') }}</td>
+                                <input type="hidden" name="userId" value="{{ $userId }}">
+                                <td class="text-right">
+                                    <button type="submit" value="save" title="Add Mapping" class="text-primary option">
+                                        <i class="fa fa-plus" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                            </tr>
                             @if(isset($bankAccounts))
-                                @foreach ($bankAccounts as $number => $mapTo)
+                                @foreach ($bankAccounts as $account)
                                     <tr scope="row">
-                                        <td class="text-left">{{ $number }}</td>
-                                        <td class="text-left">{{ $mapTo }}</td>
+                                        <td class="text-left">{{ $account->bank_acc_number }}</td>
+                                        <td class="text-left">{{ $account->bank_acc_id }}</td>
                                         <td class="text-right">
-                                            <button id="removeAccountNumber" title="Remove Mapping" class="option text-danger" type="submit" name="actionName" value="<?php echo 'remove=>'. $number ?>">
+                                            <button type="submit" value="remove" title="Remove Mapping" class="text-danger option" data-id="{{ $account->id }}">
                                                 <i class="fas fa-minus"></i>
                                             </button>
                                         </td>
                                     </tr>
                                 @endforeach
                             @endif
-                            <tr>
-                                <td class="text-left"> {{ Form::text('mapNumber') }} </td>
-                                <td class="text-left"> {{ Form::text('mapTo') }}</td>
-                                <input type="hidden" name="userId" value="{{ $userId }}">
-                                <td class="text-right">
-                                    <button id="mapAccountNumber" title="Add Mapping" class="text-primary option" type="submit" name="actionName" value="save">
-                                    <i class="fas fa-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
                         </table>
                         {{ Form::close() }}
                     </div>
