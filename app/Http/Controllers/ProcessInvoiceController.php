@@ -23,7 +23,7 @@ class ProcessInvoiceController extends Controller
     private $companyName;
 
     /** @var string  */
-    private $separator = ';';
+    private $separator = ',';
 
     /** @var string */
     private $invoicePrimary;
@@ -159,13 +159,13 @@ class ProcessInvoiceController extends Controller
             return $a['bank statement total'] <=> $b['bank statement total'];
         });
 
-        return new StreamedResponse(function() use ($columnHeadings, $sortedExport, $userName){
+        return new StreamedResponse(function() use ($columnHeadings, $sortedExport){
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, $columnHeadings, $this->getFileSeparatorByUser($userName));
+            fputcsv($handle, $columnHeadings, $this->separator);
 
             foreach ($sortedExport as $row) {
-                fputcsv($handle, $row, $this->getFileSeparatorByUser($userName));
+                fputcsv($handle, $row, $this->separator);
             }
 
             fclose($handle);
@@ -173,14 +173,5 @@ class ProcessInvoiceController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="export_'.$userName.'_'.date("Ymd_Hi").'.csv"',
         ]);
-    }
-
-    private function getFileSeparatorByUser($userName): string
-    {
-        if ($userName == 'dummy') {
-            return ',';
-        }
-
-        return ';';
     }
 }
