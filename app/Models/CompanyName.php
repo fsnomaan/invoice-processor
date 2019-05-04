@@ -12,4 +12,9 @@ class CompanyName extends Model
     {
         return Model::where('user_id', $userId)->get();
     }
+
+    public function getNamesMap(int $userId)
+    {
+        return Model::where('user_id', $userId)->pluck('map_to', 'name')->toArray();
+    }
 }

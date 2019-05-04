@@ -391,7 +391,7 @@ class InvoiceProcessor
 
     private function getCompanyCustomerName(string $name) : string
     {
-        $map = $this->companyName->getNames($this->userId);
+        $map = $this->companyName->getNamesMap($this->userId);
 
         if (array_key_exists($name, $map) ) {
             return $map[$name];
