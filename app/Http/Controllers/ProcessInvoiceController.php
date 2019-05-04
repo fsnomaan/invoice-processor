@@ -154,13 +154,13 @@ class ProcessInvoiceController extends Controller
             return $a['bank statement total'] <=> $b['bank statement total'];
         });
 
-        return new StreamedResponse(function() use ($columnHeadings, $sortedExport){
+        return new StreamedResponse(function() use ($columnHeadings, $sortedExport, $userName){
             $handle = fopen('php://output', 'w');
 
-            fputcsv($handle, $columnHeadings, ';');
+            fputcsv($handle, $columnHeadings, $this->getFileSeparatorByUser($userName));
 
             foreach ($sortedExport as $row) {
-                fputcsv($handle, $row, ';');
+                fputcsv($handle, $row, $this->getFileSeparatorByUser($userName));
             }
 
             fclose($handle);
@@ -168,5 +168,14 @@ class ProcessInvoiceController extends Controller
             'Content-Type' => 'text/csv',
             'Content-Disposition' => 'attachment; filename="export_'.$userName.'_'.date("Ymd_Hi").'.csv"',
         ]);
+    }
+
+    private function getFileSeparatorByUser($userName): string
+    {
+        if ($userName == 'dummy') {
+            return ',';
+        }
+
+        return ';';
     }
 }
