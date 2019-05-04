@@ -61,13 +61,7 @@ class ProcessInvoiceController extends Controller
         if ($request->user()) {
             $userId = $request->user()->id;
             $userName = $request->user()->name;
-            // foreach($this->companyName->getNames($userId) as $company) {
-            //     echo $company->id;
-            //     echo $company->name;
-            //     echo $company->map_to;
-            //     echo 'hello';
-            // }
-            // die('bar');
+
             $response = [
                 'userName' => $userName,
                 'userId' => $userId,
@@ -105,7 +99,8 @@ class ProcessInvoiceController extends Controller
         }
 
         $this->export = $this->invoiceProcessor->processInvoice($request->userId);
-
+        
+        // @todo  truncate user data 
         return $this->streamResponse($this->user->getNameById($request->userId));
     }
 

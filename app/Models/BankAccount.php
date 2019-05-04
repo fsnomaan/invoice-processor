@@ -13,4 +13,9 @@ class BankAccount extends Model
         // return Model::where('user_id', $userId)->pluck('bank_acc_id', 'bank_acc_number')->toArray();
         return Model::where('user_id', $userId)->get();
     }
+
+    public function getAccountsMap(int $userId)
+    {
+        return Model::where('user_id', $userId)->pluck('bank_acc_id', 'bank_acc_number')->toArray();
+    }
 }

@@ -51,7 +51,7 @@ class InvoiceProcessor
     public function processInvoice(int $userId) :array
     {
         $this->userId = $userId;
-        $this->bankAccountMap = $this->bankAccount->getAccounts($this->userId);
+        $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
 
         $this->invoices = $this->openInvoice->getAllInvoices()->toArray();
         foreach ($this->invoices as $key => $invoice) {
@@ -293,7 +293,7 @@ class InvoiceProcessor
             $this->getCurrency($bsRow),
             $bsRow->company_customer,
             $bsRow->trans_date,
-            $this->getBankAccountId((int)$bsRow->datev_account_number),
+            $this->getBankAccountId($bsRow->datev_account_number),
             $this->note,
             $invoiceRow->name,
             $bsRow->amount,
@@ -319,7 +319,7 @@ class InvoiceProcessor
             $this->getCurrency($bsRow),
             $bsRow->company_customer,
             $bsRow->trans_date,
-            $this->getBankAccountId((int)$bsRow->datev_account_number),
+            $this->getBankAccountId($bsRow->datev_account_number),
             $this->note,
             $invoiceRow->name,
             $bsRow->amount,
@@ -344,7 +344,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            $this->getBankAccountId((int)$bsRow->datev_account_number),
+            $this->getBankAccountId($bsRow->datev_account_number),
             $this->note,
             'Not found',
             $bsRow->amount,
@@ -369,7 +369,7 @@ class InvoiceProcessor
             $currency,
             $bsRow->company_customer,
             $bsRow->trans_date,
-            $this->getBankAccountId((int)$bsRow->datev_account_number),
+            $this->getBankAccountId($bsRow->datev_account_number),
             $this->note,
             'Not found',
             $bsRow->amount,
@@ -423,7 +423,7 @@ class InvoiceProcessor
         return (float)$bsRow->original_amount;
     }
 
-    private function getBankAccountId(int $accountNumber)
+    private function getBankAccountId(string $accountNumber)
     {
         if ( isset($this->bankAccountMap[$accountNumber])) {
             return $this->bankAccountMap[$accountNumber];
