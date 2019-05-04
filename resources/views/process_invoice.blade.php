@@ -26,7 +26,7 @@
                         <input type="text" class="form-control" name="invoiceFirstPart" placeholder="Enter invoice prefix, i.e 1125 -">
                     </div>
                     <div class="form-group">
-                        <input type="text" class="form-control" name="separator" placeholder="Enter delimiter. Default is ;">
+                        <input type="text" class="form-control" name="separator" placeholder="Enter delimiter">
                     </div>
                     <div class="custom-file">
                         <input type="file" class="custom-file-input" name="bankStatement">

@@ -100,7 +100,10 @@ class ProcessInvoiceController extends Controller
 
         $this->export = $this->invoiceProcessor->processInvoice($request->userId);
         
-        // @todo  truncate user data 
+        // remove user data from database before export
+        $this->statementImporter->truncateDBForUser($request->userId);
+        $this->invoiceImporter->truncateDBForUser($request->userId);
+
         return $this->streamResponse($this->user->getNameById($request->userId));
     }
 
@@ -109,6 +112,8 @@ class ProcessInvoiceController extends Controller
     {
         $rules = [
             'invoiceFirstPart' => '
+                required',
+            'separator' => '
                 required',
             'bankStatement' => '
                 required

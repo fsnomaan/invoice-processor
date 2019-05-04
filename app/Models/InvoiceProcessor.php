@@ -62,6 +62,8 @@ class InvoiceProcessor
             $this->createExportRowWithPartialInvoice($invoice, $this->invoices);
         }
 
+        unset($this->invoices);
+
         $this->exportRowsForMissingInvoices();
 
         return $this->export;
@@ -85,7 +87,10 @@ class InvoiceProcessor
             } else {
                 $this->exportRowsForUnmatchedTotal($bsRow, $openInvoiceRows, $openInvoiceTotal);
             }
+            unset($openInvoiceRows);
         }
+
+        unset($bsRow);
     }
 
     private function getMatchingInvoices(BankStatement $bsRow, array &$invoices) : array
@@ -141,6 +146,8 @@ class InvoiceProcessor
             $this->note = 'Please find invoice manually';
             $this->exportRowsWithDifference($bsRow, $differenceInTotal);
         }
+
+        unset($differenceInvoices);
     }
 
     private function createExportRowWithPartialInvoice(string $invoiceNumber, array &$invoices)
@@ -165,7 +172,9 @@ class InvoiceProcessor
                         $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                     }
                 }
+                unset($openInvoiceRow);
             }
+            unset($bsRow);
         }
     }
 
@@ -225,11 +234,18 @@ class InvoiceProcessor
                     $this->note = 'Multiple invoice found';
                     $this->exportRowsWithNoMatch($unmatchedBsRow);
                 }
+
+                unset($invoiceRowByName);
+
             } else {
                 $this->note = 'Missing invoice details';
                 $this->exportRowsWithNoMatch($unmatchedBsRow);
             }
+
+            unset($invoices);
         }
+
+        unset($differenceInvoices);
     }
 
     private function processRowsWithSimilarName(BankStatement $unmatchedBsRow, Collection $invoiceRows)

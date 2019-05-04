@@ -22,12 +22,12 @@ class InvoiceImporter
     public function importOpenInvoice($path, int $userId)
     {
         $this->userId = $userId;
-        $this->refreshTable($userId);
+        $this->truncateDbForUser($userId);
         $dataTable = $this->getCsvData($path);
         $dataTable = $this->sanitize($dataTable);
 
         try {
-            foreach (array_chunk($dataTable,1000) as $t) {
+            foreach (array_chunk($dataTable, 1000) as $t) {
                 $this->openInvoice->insert($t);
             }
         } catch(\Exception $e) {
@@ -35,10 +35,12 @@ class InvoiceImporter
             return false;
         }
 
+        unset($dataTable);
+        
         return true;
     }
 
-    private function refreshTable(int $userId)
+    public function truncateDbForUser(int $userId)
     {
         $this->openInvoice->deleteById($userId);
     }

@@ -28,7 +28,6 @@ class MappingController extends Controller
 
     public function mapCompanyName(Request $request)
     {
-//        die(var_dump($request->all()));
         if ($request->action == 'save') {
             $this->companyName->name = $request->mapName;
             $this->companyName->map_to = $request->mapTo;
@@ -62,7 +61,6 @@ class MappingController extends Controller
 
     public function mapBankAccountNumber(Request $request)
     {
-        //        die(var_dump($request->all()));
         if ($request->action == 'save') {
             $this->bankAccount->bank_acc_number = $request->mapNumber;
             $this->bankAccount->bank_acc_id = $request->mapTo;

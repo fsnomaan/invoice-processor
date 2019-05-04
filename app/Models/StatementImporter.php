@@ -25,7 +25,7 @@ class StatementImporter
     public function importBankStatement($path, int $userId): bool
     {
         $this->userId = $userId;
-        $this->refreshTable($this->userId);
+        $this->truncateDBForUser($this->userId);
         $dataTable = $this->getCsvData($path);
         $dataTable = $this->sanitize($dataTable);
         $dataTable = $this->removeWithBookingText($dataTable, 'CASH CONCENTRATING BUCHUNG');
@@ -34,7 +34,7 @@ class StatementImporter
         $dataTable = $this->removeNegativeAmount($dataTable);
 
         try {
-            foreach (array_chunk($dataTable,1000) as $t) {
+            foreach (array_chunk($dataTable, 1000) as $t) {
                 $this->bs->insert($t);
             }
         } catch(\Exception $e) {
@@ -42,10 +42,11 @@ class StatementImporter
             return false;
         }
 
+        unset($dataTable);
         return true;
     }
 
-    private function refreshTable(int $userId)
+    public function truncateDBForUser(int $userId)
     {
         $this->bs->deleteById($userId);
     }
