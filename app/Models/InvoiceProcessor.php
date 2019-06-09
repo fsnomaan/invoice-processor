@@ -62,8 +62,6 @@ class InvoiceProcessor
             $this->createExportRowWithPartialInvoice($invoice, $this->invoices);
         }
 
-        unset($this->invoices);
-
         $this->exportRowsForMissingInvoices();
 
         return $this->export;

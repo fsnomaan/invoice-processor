@@ -38,7 +38,6 @@ class StatementImporter
                 $this->bs->insert($t);
             }
         } catch(\Exception $e) {
-            dd($e);
             return false;
         }
 
