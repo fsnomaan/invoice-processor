@@ -5,9 +5,10 @@ namespace App\Providers;
 use App\Http\Controllers\MappingController;
 use App\Models\BankAccount;
 use App\Models\CompanyName;
-use App\Models\InvoiceImporter;
+use App\Models\Importer\InvoiceImporter;
 use App\Models\InvoiceProcessor;
-use App\Models\StatementImporter;
+use App\Models\Importer\StatementImporter;
+use App\Models\XmlStatementImporter;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\ProcessInvoiceController;
 use App\Models\BankStatement;
@@ -33,6 +34,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->app->bind(XmlStatementImporter::class, function () {
+            return new XmlStatementImporter(resolve(BankStatement::class));
+        });
+        resolve(XmlStatementImporter::class);
+
         $this->app->bind(StatementImporter::class, function () {
             return new StatementImporter(resolve(BankStatement::class));
         });
@@ -61,6 +67,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ProcessInvoiceController::class, function () {
             return new ProcessInvoiceController(
                 resolve(StatementImporter::class),
+                resolve(XmlStatementImporter::class),
                 resolve(InvoiceImporter::class),
                 resolve(CompanyName::class),
                 resolve(BankAccount::class),

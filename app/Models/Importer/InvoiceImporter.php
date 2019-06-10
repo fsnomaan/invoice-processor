@@ -1,7 +1,7 @@
 <?php
-namespace App\Models;
+namespace App\Models\Importer;
 
-use App\Models\ColumnNames\OpenInvoice  as ColumnNames;
+use App\Models\OpenInvoice;
 
 class InvoiceImporter
 {
@@ -51,9 +51,8 @@ class InvoiceImporter
         if (($h = fopen($path, "r")) !== FALSE) {
             $heading = fgetcsv($h, 1000, $this->separator);
             while (($data = fgetcsv($h, 1000, $this->separator)) !== FALSE) {
-                $data = array_slice($data, 0, count(ColumnNames::MAP));
                 try {
-                    $kvPair = array_combine(array_keys(ColumnNames::MAP), $data);;
+                    $kvPair = array_combine($heading, $data);;
                     $kvPair['user_id'] = $this->userId;
                     $dataTable[] = $kvPair;
                 } catch (\Exception $e) {
@@ -69,12 +68,8 @@ class InvoiceImporter
     private function sanitize($dataTable)
     {
         foreach($dataTable as $k => $dt) {
-            $dataTable[$k]['Description'] = utf8_encode($dataTable[$k]['Description']);
-            $dataTable[$k]['name'] = utf8_encode($dataTable[$k]['name']);
-            $dataTable[$k]['amount_transaction'] = floatval(str_replace(',', '', $dt['amount_transaction']));
-            if ($dataTable[$k]['amount_transaction'] < 0 ) {
-                unset($dataTable[$k]);
-            }
+            $dataTable[$k] = array_map('trim', $dt);
+            $dataTable[$k]['open_amount'] = floatval(str_replace(",","",$dt['open_amount']));
         }
 
         return $dataTable;

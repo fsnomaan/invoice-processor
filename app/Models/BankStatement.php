@@ -10,7 +10,7 @@ class BankStatement extends Model
 
     public function getRowsLikeInvoice(string $invoice)
     {
-        return Model::where('purpose_of_use', 'LIKE', '%' . $invoice . '%')
+        return Model::where('payment_ref', 'LIKE', '%' . $invoice . '%')
             ->first();
 
     }

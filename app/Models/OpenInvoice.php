@@ -11,12 +11,12 @@ class OpenInvoice extends Model
 
     public function getRowsFromInvoices(array $invoices)
     {
-        return Model::whereIn('invoice', $invoices)->get();
+        return Model::whereIn('invoice_number', $invoices)->get();
     }
 
     public function getAllInvoices()
     {
-        return Model::where('invoice', '<>', '')->pluck('invoice');
+        return Model::where('invoice_number', '<>', '')->pluck('invoice_number');
     }
 
     public function getInvoiceByAmount(float $amount, array $excludeInvoices=null)

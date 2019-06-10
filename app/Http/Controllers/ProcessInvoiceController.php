@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\BankAccount;
-use App\Models\InvoiceImporter;
+use App\Models\Importer\InvoiceImporter;
 use App\Models\InvoiceProcessor;
-use App\Models\StatementImporter;
+use App\Models\Importer\StatementImporter;
+use App\Models\XmlStatementImporter;
 use Illuminate\Http\Request;
 use App\Models\CompanyName;
 use App\User;
@@ -25,9 +26,6 @@ class ProcessInvoiceController extends Controller
     /** @var string  */
     private $separator = ',';
 
-    /** @var string */
-    private $invoicePrimary;
-
     /** @var InvoiceProcessor */
     private $invoiceProcessor;
 
@@ -39,9 +37,14 @@ class ProcessInvoiceController extends Controller
 
     /** @var User */
     private $user;
+    /**
+     * @var XmlStatementImporter
+     */
+    private $xmlStatementImporter;
 
     public function __construct(
         StatementImporter $statementImporter,
+        XmlStatementImporter $xmlStatementImporter,
         InvoiceImporter $invoiceImporter,
         CompanyName $companyName,
         BankAccount $bankAccount,
@@ -54,6 +57,7 @@ class ProcessInvoiceController extends Controller
         $this->invoiceProcessor = $invoiceProcessor;
         $this->bankAccount = $bankAccount;
         $this->user = $user;
+        $this->xmlStatementImporter = $xmlStatementImporter;
     }
 
     public function index(Request $request)
@@ -80,15 +84,17 @@ class ProcessInvoiceController extends Controller
     {
         $this->validateForm($request);
 
-        $this->invoicePrimary = $request->invoiceFirstPart;
         $this->separator = empty($request->separator) ? $this->separator : $request->separator;
 
         if ($request->hasFile('bankStatement') && $request->file('bankStatement')->isValid()) {
             $file = $request->file('bankStatement');
             $path = $file->getRealPath();
             $this->statementImporter->setSeparator($this->separator);
-            $this->statementImporter->setInvoicePrimary($this->invoicePrimary);
-            $this->statementImporter->importBankStatement($path, $request->userId);
+            if ($file->getClientMimeType() == 'text/xml' || $file->getMimeType() == 'text/xml') {
+                $this->xmlStatementImporter->importBankStatement($path, $request->userId);
+            } else {
+                $this->statementImporter->importBankStatement($path, $request->userId);
+            }
         }
 
         if ($request->hasFile('openInvoice') && $request->file('openInvoice')->isValid()) {
@@ -111,18 +117,14 @@ class ProcessInvoiceController extends Controller
     private function validateForm($request)
     {
         $rules = [
-            'invoiceFirstPart' => '
-                required',
-            'separator' => '
-                required',
             'bankStatement' => '
                 required
                 |
-                mimetypes:text/plain,text/x-Algol68,application/csv,application/excel,application/vnd.ms-excel,application/vnd.msexcel,text/csv,text/anytext,text/comma-separated-values',
+                mimetypes:text/xml,text/plain,text/x-Algol68,application/csv,application/excel,application/vnd.ms-excel,application/vnd.msexcel,text/csv,text/anytext,text/comma-separated-values',
             'openInvoice' => '
                 required
                 |
-                mimetypes:text/plain,text/x-Algol68,application/csv,application/excel,application/vnd.ms-excel,application/vnd.msexcel,text/csv,text/anytext,text/comma-separated-values',
+                mimetypes:text/xml,text/plain,text/x-Algol68,application/csv,application/excel,application/vnd.ms-excel,application/vnd.msexcel,text/csv,text/anytext,text/comma-separated-values',
         ];
 
         $customMessages = [
@@ -137,19 +139,19 @@ class ProcessInvoiceController extends Controller
     private function streamResponse(string $userName)
     {
         $columnHeadings = [
+            'Bank Payment Line',
             'Date',
-            'Customer',
-            'Invoice number',
-            'Debit',
-            'Credit',
+            'Customer Account',
+            'Invoice Number',
             'Currency',
-            'Bank Statement Name',
-            'Document date',
-            'Bank Account ID',
-            'Notes',
-            'OPOS File Customer Name',
-            'bank statement total',
-            'Bank Statement invoices'
+            'Amount',
+            'Payment Reference',
+            'Payee Name',
+            'ERP Name',
+            'Matching method',
+            'Statement amount',
+            'Invoice open amount',
+            'Partial payment'
         ];
         $sortedExport = [];
         foreach ($this->export as $row) {

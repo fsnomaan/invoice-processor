@@ -31,9 +31,6 @@
                     {{ Form::open(array('url' => '/process-invoice', 'files' => true)) }}
                     {{ Form::open(array('action' => 'ProcessInvoiceController@processInvoice')) }}
                     <div class="form-group">
-                        <input type="text" class="form-control" name="invoiceFirstPart" placeholder="Enter invoice prefix, i.e 1125 -">
-                    </div>
-                    <div class="form-group">
                         <input type="text" class="form-control" name="separator" placeholder="Enter delimiter">
                     </div>
                     <div class="custom-file">
