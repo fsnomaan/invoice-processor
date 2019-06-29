@@ -158,9 +158,9 @@ class ProcessInvoiceController extends Controller
             $sortedExport[] = array_combine($columnHeadings, $row);
         }
 
-        usort($sortedExport, function($a, $b) {
-            return $a['Amount'] <=> $b['Amount'];
-        });
+//        usort($sortedExport, function($a, $b) {
+//            return $a['Amount'] <=> $b['Amount'];
+//        });
 
         return new StreamedResponse(function() use ($columnHeadings, $sortedExport){
             $handle = fopen('php://output', 'w');
