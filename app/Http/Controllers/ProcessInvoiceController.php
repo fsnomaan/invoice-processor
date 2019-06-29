@@ -159,7 +159,7 @@ class ProcessInvoiceController extends Controller
         }
 
         usort($sortedExport, function($a, $b) {
-            return $a['bank statement total'] <=> $b['bank statement total'];
+            return $a['Amount'] <=> $b['Amount'];
         });
 
         return new StreamedResponse(function() use ($columnHeadings, $sortedExport){
