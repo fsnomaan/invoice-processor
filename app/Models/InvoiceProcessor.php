@@ -66,6 +66,7 @@ class InvoiceProcessor
 //        }
 //
 //        $this->exportRowsForMissingInvoices();
+//        dd($this->export);
 
         return $this->export;
     }
@@ -79,10 +80,9 @@ class InvoiceProcessor
             $matchingInvoices = $this->getMatchingInvoices($bsRow);
 
             $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoices);
-
             $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
 
-            if ( $this->isTotalMatches((float)$bsRow->amount, $openInvoiceTotal)) {
+            if ( $this->isTotalMatches((float)$bsRow->amount, (float)$openInvoiceTotal)) {
                 foreach($openInvoiceRows as $openInvoiceRow) {
                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'Invoice Number');
                 }
@@ -95,8 +95,7 @@ class InvoiceProcessor
         $matchingInvoices = [];
 
         foreach ($this->invoices as $invoice) {
-
-            if (strpos($bsRow->payment_ref, trim($invoice) ) !== false) {
+            if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoice)) ) !== false) {
                 $matchingInvoices[] = $invoice;
             }
         }
