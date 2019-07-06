@@ -11,7 +11,11 @@ class InvoiceProcessor
     /** @var OpenInvoice */
     private $openInvoice;
 
+    /** @var array */
     private $invoices = [];
+
+    /** @var array  */
+    private $paymentRefs = [];
 
     /** @var array  */
     private $export = [];
@@ -56,6 +60,8 @@ class InvoiceProcessor
         $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
 
         $this->invoices = $this->openInvoice->getAllInvoices()->toArray();
+        $this->paymentRefs = $this->bs->getAllPaymentRefs()->toArray();
+
 
         foreach ($this->invoices as $invoice) {
             $this->matchByInvoiceNumber($invoice);
@@ -76,7 +82,10 @@ class InvoiceProcessor
     {
         $bsRow = $this->bs->getRowsLikeInvoice($invoiceNumber);
 
-        if (! empty($bsRow) ) {
+        if (! empty($bsRow) && in_array($bsRow->payment_ref, $this->paymentRefs)) {
+//            dump($this->paymentRefs);
+//            dump($bsRow->payment_ref);
+            $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
             $matchingInvoices = $this->getMatchingInvoices($bsRow);
 
             $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoices);
@@ -87,6 +96,8 @@ class InvoiceProcessor
                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'Invoice Number');
                 }
             }
+
+            unset($bsRow);
         }
     }
 
@@ -126,7 +137,7 @@ class InvoiceProcessor
             $openInvoiceRow->customer_account,
             $openInvoiceRow->invoice_number,
             $bsRow->currency,
-            $bsRow->amount,
+            $openInvoiceRow->open_amount,
             $bsRow->payment_ref,
             $bsRow->payee_name,
             $openInvoiceRow->customer_name,
@@ -494,12 +505,12 @@ class InvoiceProcessor
 //        return $name;
 //    }
 //
-//    private function deleteElement($element, &$array){
-//        $index = array_search($element, $array);
-//        if($index !== false){
-//            unset($array[$index]);
-//        }
-//    }
+    private function deleteElement($element, &$array){
+        $index = array_search($element, $array);
+        if($index !== false){
+            unset($array[$index]);
+        }
+    }
 //
 //    private function getBsAmount(BankStatement $bsRow)
 //    {

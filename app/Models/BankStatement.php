@@ -25,4 +25,9 @@ class BankStatement extends Model
     {
         Model::where('user_id', $userId)->delete();
     }
+
+    public function getAllPaymentRefs()
+    {
+        return Model::where('payment_ref', '<>', '')->pluck('payment_ref');
+    }
 }
