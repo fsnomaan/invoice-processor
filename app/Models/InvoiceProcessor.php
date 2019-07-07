@@ -84,8 +84,7 @@ class InvoiceProcessor
 
         if (! empty($bsRow) && in_array($bsRow->payment_ref, $this->paymentRefs)) {
             ++$this->exportCount;
-//            dump($this->paymentRefs);
-//            dump($bsRow->payment_ref);
+
             $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
             $matchingInvoices = $this->getMatchingInvoices($bsRow);
 
@@ -96,6 +95,12 @@ class InvoiceProcessor
                 foreach($openInvoiceRows as $openInvoiceRow) {
                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'Invoice Number');
                 }
+            } else {
+                foreach($openInvoiceRows as $openInvoiceRow) {
+                    $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'Invoice Number');
+                }
+                $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
+                $this->exportRowsWithDifference($bsRow, $differenceInTotal, 'No Match Found');
             }
 
             unset($bsRow);
@@ -130,7 +135,7 @@ class InvoiceProcessor
         return $bsTotal == $openInvoiceTotal;
     }
 
-    private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow, string $matchingMethod)
+    private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow, string $message='')
     {
         $this->export[] = [
             $this->exportCount,
@@ -142,13 +147,32 @@ class InvoiceProcessor
             $bsRow->payment_ref,
             $bsRow->payee_name,
             $openInvoiceRow->customer_name,
-            $matchingMethod,
+            $message,
             $bsRow->original_amount,
             $openInvoiceRow->open_amount,
             $this->isPartialPayment() ? 'Yes' : 'No'
         ];
 
         unset($this->invoices[$openInvoiceRow->invoice]);
+    }
+
+    private function exportRowsWithDifference(BankStatement $bsRow, float $difference, string $message='')
+    {
+        $this->export[] = [
+            $this->exportCount,
+            $bsRow->transaction_date,
+            '',
+            '',
+            $bsRow->currency,
+            $difference,
+            $bsRow->payment_ref,
+            $bsRow->payee_name,
+            $bsRow->payee_name,
+            $message,
+            $bsRow->original_amount,
+            '',
+            $this->isPartialPayment() ? 'Yes' : 'No'
+        ];
     }
 
     private function isPartialPayment(): bool
@@ -490,10 +514,10 @@ class InvoiceProcessor
 //        return $bsTotal == $openInvoiceTotal;
 //    }
 //
-//    private function getDifferenceInTotal(float $bsTotal, float $openInvoiceTotal) : float
-//    {
-//        return round(($bsTotal - $openInvoiceTotal), 2);
-//    }
+   private function getDifferenceInTotal(float $bsTotal, float $openInvoiceTotal) : float
+   {
+       return round(($bsTotal - $openInvoiceTotal), 2);
+   }
 //
 //    private function getCompanyCustomerName(string $name) : string
 //    {
