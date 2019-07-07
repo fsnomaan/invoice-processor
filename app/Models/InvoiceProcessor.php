@@ -83,6 +83,7 @@ class InvoiceProcessor
         $bsRow = $this->bs->getRowsLikeInvoice($invoiceNumber);
 
         if (! empty($bsRow) && in_array($bsRow->payment_ref, $this->paymentRefs)) {
+            ++$this->exportCount;
 //            dump($this->paymentRefs);
 //            dump($bsRow->payment_ref);
             $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
@@ -132,7 +133,7 @@ class InvoiceProcessor
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow, string $matchingMethod)
     {
         $this->export[] = [
-            ++$this->exportCount,
+            $this->exportCount,
             $bsRow->transaction_date,
             $openInvoiceRow->customer_account,
             $openInvoiceRow->invoice_number,
