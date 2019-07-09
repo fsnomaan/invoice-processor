@@ -20,7 +20,7 @@ class InvoiceProcessor
     /** @var array  */
     private $export = [];
 
-    private $exportCount = 0;
+    private $bsIndex = 0;
 
     /** @var array  */
     private $matchedBsRows = [];
@@ -67,6 +67,11 @@ class InvoiceProcessor
             $this->matchByInvoiceNumber($invoice);
         }
 
+        $bsRows = $this->bs->getByPaymentRef($this->paymentRefs);
+        foreach ($bsRows as $bsRow) {
+            ++$this->bsIndex;
+            $this->exportRowsWithNoMatch($bsRow, null, 'No Match Found');
+        }
 //        foreach ($this->invoices as $key => $invoice) {
 //            $this->createExportRowWithPartialInvoice($invoice, $this->invoices);
 //        }
@@ -83,7 +88,7 @@ class InvoiceProcessor
         $bsRow = $this->bs->getRowsLikeInvoice($invoiceNumber);
 
         if (! empty($bsRow) && in_array($bsRow->payment_ref, $this->paymentRefs)) {
-            ++$this->exportCount;
+            ++$this->bsIndex;
 
             $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
             $matchingInvoices = $this->getMatchingInvoices($bsRow);
@@ -100,7 +105,7 @@ class InvoiceProcessor
                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'Invoice Number');
                 }
                 $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
-                $this->exportRowsWithDifference($bsRow, $differenceInTotal, 'No Match Found');
+                $this->exportRowsWithNoMatch($bsRow, $differenceInTotal, 'No Match Found');
             }
 
             unset($bsRow);
@@ -138,7 +143,7 @@ class InvoiceProcessor
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow, string $message='')
     {
         $this->export[] = [
-            $this->exportCount,
+            $this->bsIndex,
             $bsRow->transaction_date,
             $openInvoiceRow->customer_account,
             $openInvoiceRow->invoice_number,
@@ -156,10 +161,10 @@ class InvoiceProcessor
         unset($this->invoices[$openInvoiceRow->invoice]);
     }
 
-    private function exportRowsWithDifference(BankStatement $bsRow, float $difference, string $message='')
+    private function exportRowsWithNoMatch(BankStatement $bsRow, float $difference=null, string $message='')
     {
         $this->export[] = [
-            $this->exportCount,
+            $this->bsIndex,
             $bsRow->transaction_date,
             '',
             '',

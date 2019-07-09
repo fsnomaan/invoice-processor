@@ -12,7 +12,6 @@ class BankStatement extends Model
     {
         return Model::where('payment_ref', 'LIKE', '%' . $invoice . '%')
             ->first();
-
     }
 
     public function getUnmatchedRows(array $ids)
@@ -29,5 +28,10 @@ class BankStatement extends Model
     public function getAllPaymentRefs()
     {
         return Model::where('payment_ref', '<>', '')->pluck('payment_ref');
+    }
+
+    public function getByPaymentRef(array $paymentRefs)
+    {
+        return Model::wherein('payment_ref', $paymentRefs)->get();
     }
 }
