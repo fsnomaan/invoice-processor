@@ -67,11 +67,17 @@ class InvoiceProcessor
             $this->matchByInvoiceNumber($invoice);
         }
 
+        foreach ($this->invoices as $invoice) {
+            $this->matchByPartialInvoiceNumber($invoice);
+        }
+
+
         $bsRows = $this->bs->getByPaymentRef($this->paymentRefs);
         foreach ($bsRows as $bsRow) {
             ++$this->bsIndex;
             $this->exportRowsWithNoMatch($bsRow, null, 'No Match Found');
         }
+
 //        foreach ($this->invoices as $key => $invoice) {
 //            $this->createExportRowWithPartialInvoice($invoice, $this->invoices);
 //        }
@@ -83,32 +89,39 @@ class InvoiceProcessor
     }
 
 
-    private function matchByInvoiceNumber($invoiceNumber)
+    private function matchByInvoiceNumber($invoiceNumber, $message='Invoice Number')
     {
         $bsRow = $this->bs->getRowsLikeInvoice($invoiceNumber);
 
         if (! empty($bsRow) && in_array($bsRow->payment_ref, $this->paymentRefs)) {
             ++$this->bsIndex;
 
-            $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
             $matchingInvoices = $this->getMatchingInvoices($bsRow);
-
             $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoices);
             $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
 
             if ( $this->isTotalMatches((float)$bsRow->amount, (float)$openInvoiceTotal)) {
                 foreach($openInvoiceRows as $openInvoiceRow) {
-                    $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'Invoice Number');
+                    $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $message);
                 }
             } else {
                 foreach($openInvoiceRows as $openInvoiceRow) {
-                    $this->exportRowsWithMatch($bsRow, $openInvoiceRow, 'Invoice Number');
+                    $this->exportRowsWithMatch($bsRow, $openInvoiceRow, $message);
                 }
                 $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
                 $this->exportRowsWithNoMatch($bsRow, $differenceInTotal, 'No Match Found');
             }
 
-            unset($bsRow);
+            $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
+        }
+    }
+
+    private function matchByPartialInvoiceNumber(string $invoiceNumber)
+    {
+        preg_match('/\d+/', $invoiceNumber, $invoicePart);
+
+        if ( isset($invoicePart[0]) && ! empty($invoicePart[0])) {
+            $this->matchByInvoiceNumber($invoicePart[0], 'Partial Invoice Number');
         }
     }
 
@@ -121,7 +134,13 @@ class InvoiceProcessor
                 $matchingInvoices[] = $invoice;
             }
         }
-
+        if (empty($matchingInvoices)) {
+            foreach ($this->invoices as $invoice) {
+                if (strpos(strtolower($invoice), trim(strtolower($bsRow->payment_ref)) ) !== false) {
+                    $matchingInvoices[] = $invoice;
+                }
+            }
+        }
         return $matchingInvoices;
     }
 
@@ -158,7 +177,7 @@ class InvoiceProcessor
             $this->isPartialPayment() ? 'Yes' : 'No'
         ];
 
-        unset($this->invoices[$openInvoiceRow->invoice]);
+        $this->deleteElement($openInvoiceRow->invoice_number, $this->invoices);
     }
 
     private function exportRowsWithNoMatch(BankStatement $bsRow, float $difference=null, string $message='')
@@ -535,10 +554,10 @@ class InvoiceProcessor
 //        return $name;
 //    }
 //
-    private function deleteElement($element, &$array){
-        $index = array_search($element, $array);
+    private function deleteElement($needle, &$haystack){
+        $index = array_search($needle, $haystack);
         if($index !== false){
-            unset($array[$index]);
+            unset($haystack[$index]);
         }
     }
 //
