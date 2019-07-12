@@ -12,7 +12,7 @@ class InvoiceProcessor
     private $openInvoice;
 
     /** @var array */
-    private $invoices = [];
+    private $invoiceNumbers = [];
 
     /** @var array  */
     private $paymentRefs = [];
@@ -59,24 +59,27 @@ class InvoiceProcessor
         $this->userId = $userId;
         $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
 
-        $this->invoices = $this->openInvoice->getAllInvoices()->toArray();
+        $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers()->toArray();
         $this->paymentRefs = $this->bs->getAllPaymentRefs()->toArray();
 
-
-        foreach ($this->invoices as $invoice) {
-            $this->matchByInvoiceNumber($invoice);
+        foreach ($this->invoiceNumbers as $invoiceNumber) {
+            $this->matchByInvoiceNumber($invoiceNumber);
         }
 
-        foreach ($this->invoices as $invoice) {
-            $this->matchByPartialInvoiceNumber($invoice);
-        }
+        $this->matchByPartialInvoiceNumber();
 
+        $this->matchByInvoiceTotal();
+
+
+//        dump($this->invoiceNumbers);
+//        dd($this->paymentRefs);
 
         $bsRows = $this->bs->getByPaymentRef($this->paymentRefs);
         foreach ($bsRows as $bsRow) {
             ++$this->bsIndex;
             $this->exportRowsWithNoMatch($bsRow, null, 'No Match Found');
         }
+
 
 //        foreach ($this->invoices as $key => $invoice) {
 //            $this->createExportRowWithPartialInvoice($invoice, $this->invoices);
@@ -111,17 +114,28 @@ class InvoiceProcessor
                 $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
                 $this->exportRowsWithNoMatch($bsRow, $differenceInTotal, 'No Match Found');
             }
-
-            $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
         }
     }
 
-    private function matchByPartialInvoiceNumber(string $invoiceNumber)
+    private function matchByPartialInvoiceNumber()
     {
-        preg_match('/\d+/', $invoiceNumber, $invoicePart);
+        foreach ($this->invoiceNumbers as $invoiceNumber) {
+            preg_match('/[1-9]\d*/', $invoiceNumber, $invoicePart);
 
-        if ( isset($invoicePart[0]) && ! empty($invoicePart[0])) {
-            $this->matchByInvoiceNumber($invoicePart[0], 'Partial Invoice Number');
+            if ( isset($invoicePart[0]) && ! empty($invoicePart[0])) {
+                $this->matchByInvoiceNumber($invoicePart[0], 'Partial Invoice Number');
+            }
+        }
+    }
+
+    private function matchByInvoiceTotal()
+    {
+        $bsRows = $this->bs->getByPaymentRef($this->paymentRefs);
+        foreach ($bsRows as $bsRow) {
+            $invoice = $this->openInvoice->getInvoiceByAmount((float)$bsRow->amount);
+            if (count($invoice) == 1) {
+                $this->exportRowsWithMatch($bsRow, $invoice[0], 'Invoice Total');
+            }
         }
     }
 
@@ -129,13 +143,13 @@ class InvoiceProcessor
     {
         $matchingInvoices = [];
 
-        foreach ($this->invoices as $invoice) {
+        foreach ($this->invoiceNumbers as $invoice) {
             if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoice)) ) !== false) {
                 $matchingInvoices[] = $invoice;
             }
         }
         if (empty($matchingInvoices)) {
-            foreach ($this->invoices as $invoice) {
+            foreach ($this->invoiceNumbers as $invoice) {
                 if (strpos(strtolower($invoice), trim(strtolower($bsRow->payment_ref)) ) !== false) {
                     $matchingInvoices[] = $invoice;
                 }
@@ -177,7 +191,8 @@ class InvoiceProcessor
             $this->isPartialPayment() ? 'Yes' : 'No'
         ];
 
-        $this->deleteElement($openInvoiceRow->invoice_number, $this->invoices);
+        $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
+        $this->deleteElement($openInvoiceRow->invoice_number, $this->invoiceNumbers);
     }
 
     private function exportRowsWithNoMatch(BankStatement $bsRow, float $difference=null, string $message='')
@@ -191,7 +206,7 @@ class InvoiceProcessor
             $difference,
             $bsRow->payment_ref,
             $bsRow->payee_name,
-            $bsRow->payee_name,
+            '',
             $message,
             $bsRow->original_amount,
             '',

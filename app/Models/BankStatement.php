@@ -34,4 +34,10 @@ class BankStatement extends Model
     {
         return Model::wherein('payment_ref', $paymentRefs)->get();
     }
+
+    public function getByTotal($amount)
+    {
+        return Model::where('amount', $amount)->first();
+    }
+
 }

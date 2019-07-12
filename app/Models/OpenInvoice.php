@@ -9,21 +9,24 @@ class OpenInvoice extends Model
 {
     protected $table = 'open_invoice';
 
-    public function getRowsFromInvoices(array $invoices)
+    public function getByInvoiceNumber(string $invoiceNumber)
     {
-        return Model::whereIn('invoice_number', $invoices)->get();
+        return Model::where('invoice_number', $invoiceNumber)->first();
     }
 
-    public function getAllInvoices()
+    public function getRowsFromInvoices(array $invoiceNumbers)
+    {
+        return Model::whereIn('invoice_number', $invoiceNumbers)->get();
+    }
+
+    public function getAllInvoiceNumbers()
     {
         return Model::where('invoice_number', '<>', '')->pluck('invoice_number');
     }
 
-    public function getInvoiceByAmount(float $amount, array $excludeInvoices=null)
+    public function getInvoiceByAmount(float $amount)
     {
-
-        return Model::where('amount_transaction', $amount)
-            ->whereNotIn('invoice', $excludeInvoices)->get();
+        return Model::where('open_amount', $amount)->get();
     }
 
     public function getInvoiceByMatchingName(string $name, array $invoices)
