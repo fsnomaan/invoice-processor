@@ -134,6 +134,7 @@ class InvoiceProcessor
         foreach ($bsRows as $bsRow) {
             $invoice = $this->openInvoice->getInvoiceByAmount((float)$bsRow->amount);
             if (count($invoice) == 1) {
+                ++$this->bsIndex;
                 $this->exportRowsWithMatch($bsRow, $invoice[0], 'Invoice Total');
             }
         }
