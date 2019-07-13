@@ -54,7 +54,9 @@ class InvoiceImporter
                 try {
                     $kvPair = array_combine($heading, $data);;
                     $kvPair['user_id'] = $this->userId;
-                    $dataTable[] = $kvPair;
+                    if ($kvPair['invoice_number']) {
+                        $dataTable[] = $kvPair;
+                    }
                 } catch (\Exception $e) {
                     dd($e);
                 }

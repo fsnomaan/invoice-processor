@@ -107,8 +107,8 @@ class ProcessInvoiceController extends Controller
         $this->export = $this->invoiceProcessor->processInvoice($request->userId);
         
         // remove user data from database before export
-        $this->statementImporter->truncateDBForUser($request->userId);
-        $this->invoiceImporter->truncateDBForUser($request->userId);
+//        $this->statementImporter->truncateDBForUser($request->userId);
+//        $this->invoiceImporter->truncateDBForUser($request->userId);
 
         return $this->streamResponse($this->user->getNameById($request->userId));
     }

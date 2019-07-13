@@ -60,6 +60,7 @@ class InvoiceProcessor
         $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
 
         $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers()->toArray();
+//        dd($this->invoiceNumbers);
         $this->paymentRefs = $this->bs->getAllPaymentRefs()->toArray();
 
         foreach ($this->invoiceNumbers as $invoiceNumber) {
@@ -94,6 +95,7 @@ class InvoiceProcessor
 
     private function matchByInvoiceNumber($invoiceNumber, bool $partial=false)
     {
+//        dump($invoiceNumber);
         $bsRow = $this->bs->getRowsLikeInvoice($invoiceNumber);
 
         if (! empty($bsRow) && in_array($bsRow->payment_ref, $this->paymentRefs)) {
@@ -153,7 +155,12 @@ class InvoiceProcessor
     private function matchByPartialInvoiceNumber()
     {
         foreach ($this->invoiceNumbers as $invoiceNumber) {
-            $this->matchByInvoiceNumber($this->getInvoicePart($invoiceNumber), true);
+//            dump($invoiceNumber);
+            $partInvoice = $this->getInvoicePart($invoiceNumber);
+//            dump($partInvoice);
+            if (! is_null($partInvoice)) {
+                $this->matchByInvoiceNumber($partInvoice, true);
+            }
         }
     }
 
@@ -185,11 +192,11 @@ class InvoiceProcessor
         return $matchingInvoices;
     }
 
-    private function getInvoicePart(string $invoiceNumber): ?int
+    private function getInvoicePart(string $invoiceNumber): ?string
     {
-        preg_match('/[1-9]\d+/', $invoiceNumber, $invoicePart);
+        preg_match('/\d+/', $invoiceNumber, $invoicePart);
         if ( isset($invoicePart[0]) && ! empty($invoicePart[0])) {
-            return (int)$invoicePart;
+            return $invoicePart[0];
         }
 
         return null;
