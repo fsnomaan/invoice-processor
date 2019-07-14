@@ -60,7 +60,6 @@ class InvoiceProcessor
         $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
 
         $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers()->toArray();
-//        dd($this->invoiceNumbers);
         $this->paymentRefs = $this->bs->getAllPaymentRefs()->toArray();
 
         foreach ($this->invoiceNumbers as $invoiceNumber) {
@@ -72,6 +71,7 @@ class InvoiceProcessor
         $this->matchByInvoiceTotal();
 
 
+//        dump($this->export);
 //        dump($this->invoiceNumbers);
 //        dd($this->paymentRefs);
 
@@ -81,22 +81,14 @@ class InvoiceProcessor
             $this->exportRowsWithNoMatch($bsRow, null);
         }
 
-
-//        foreach ($this->invoices as $key => $invoice) {
-//            $this->createExportRowWithPartialInvoice($invoice, $this->invoices);
-//        }
-//
-//        $this->exportRowsForMissingInvoices();
-//        dd($this->export);
-
         return $this->export;
     }
 
 
     private function matchByInvoiceNumber($invoiceNumber, bool $partial=false)
     {
-//        dump($invoiceNumber);
         $bsRow = $this->bs->getRowsLikeInvoice($invoiceNumber);
+
 
         if (! empty($bsRow) && in_array($bsRow->payment_ref, $this->paymentRefs)) {
             ++$this->bsIndex;
@@ -105,6 +97,7 @@ class InvoiceProcessor
 
             if (count($matchingInvoiceNumbers) == 1) {
                 $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
+
                 if ( $this->matchSingleInvoiceTotal($openInvoiceRow, $bsRow) ) {
                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                 } else {
@@ -182,11 +175,16 @@ class InvoiceProcessor
 
         foreach ($this->invoiceNumbers as $invoiceNumber) {
             if ($partial) {
-                $invoiceNumber = $this->getInvoicePart($invoiceNumber);
+                $invoicePart = $this->getInvoicePart($invoiceNumber);
+                if ($invoicePart && (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoicePart)) ) !== false) ) {
+                    $matchingInvoices[] = $invoiceNumber;
+                }
+            } else {
+                if ($invoiceNumber && (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoiceNumber)) ) !== false) ) {
+                    $matchingInvoices[] = $invoiceNumber;
+                }
             }
-            if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoiceNumber)) ) !== false) {
-                $matchingInvoices[] = $invoiceNumber;
-            }
+
         }
 
         return $matchingInvoices;
@@ -194,12 +192,9 @@ class InvoiceProcessor
 
     private function getInvoicePart(string $invoiceNumber): ?string
     {
-        preg_match('/\d+/', $invoiceNumber, $invoicePart);
-        if ( isset($invoicePart[0]) && ! empty($invoicePart[0])) {
-            return $invoicePart[0];
-        }
+        $partial = preg_split('/\D/', $invoiceNumber);
 
-        return null;
+        return end($partial);
     }
 
     private function getOpenInvoicesTotal(Collection $openInvoiceRows) : float
@@ -256,6 +251,7 @@ class InvoiceProcessor
             '',
             $this->isPartialPayment ? 'Yes' : 'No'
         ];
+        $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
     }
 
 /////////////////////////////////////////
