@@ -95,10 +95,11 @@ class InvoiceProcessor
 
             $matchingInvoiceNumbers = $this->getMatchingInvoiceNumbers($bsRow, $partial);
 
-            if (count($matchingInvoiceNumbers) == 1) {
+            if (count($matchingInvoiceNumbers) == 1 && !$partial) {
                 $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
 
                 if ( $this->matchSingleInvoiceTotal($openInvoiceRow, $bsRow) ) {
+                    $this->message = 'Invoice Number';
                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                 } else {
                     $this->message = 'No Match Found';
@@ -116,15 +117,20 @@ class InvoiceProcessor
                         $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                     }
                 } else {
-                    foreach($openInvoiceRows as $openInvoiceRow) {
-                        $this->message = 'Invoice Number';
+                    if ($partial) {
+                        $this->message = 'No Match Found';
+                        $this->exportRowsWithNoMatch($bsRow, null);
+                    } else {
+                        foreach($openInvoiceRows as $openInvoiceRow) {
+                            $this->message = 'Invoice Number';
+                            $this->isPartialPayment = false;
+                            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                        }
+                        $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
+                        $this->message = 'No Match Found';
                         $this->isPartialPayment = false;
-                        $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                        $this->exportRowsWithNoMatch($bsRow, $differenceInTotal);
                     }
-                    $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
-                    $this->message = 'No Match Found';
-                    $this->isPartialPayment = false;
-                    $this->exportRowsWithNoMatch($bsRow, $differenceInTotal);
                 }
             }
         }
@@ -132,7 +138,6 @@ class InvoiceProcessor
 
     private function matchSingleInvoiceTotal($openInvoiceRow, $bsRow, int $bankCharge=30)
     {
-        $this->message = 'Invoice Number';
         if ($openInvoiceRow->open_amount == $bsRow->amount) {
             $this->isPartialPayment = false;
             return true;
