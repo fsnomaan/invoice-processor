@@ -78,6 +78,7 @@ class InvoiceProcessor
         $bsRows = $this->bs->getByPaymentRef($this->paymentRefs);
         foreach ($bsRows as $bsRow) {
             ++$this->bsIndex;
+            $this->message = 'No Match Found';
             $this->exportRowsWithNoMatch($bsRow, null);
         }
 
@@ -153,9 +154,7 @@ class InvoiceProcessor
     private function matchByPartialInvoiceNumber()
     {
         foreach ($this->invoiceNumbers as $invoiceNumber) {
-//            dump($invoiceNumber);
             $partInvoice = $this->getInvoicePart($invoiceNumber);
-//            dump($partInvoice);
             if (! is_null($partInvoice)) {
                 $this->matchByInvoiceNumber($partInvoice, true);
             }
@@ -169,6 +168,8 @@ class InvoiceProcessor
             $invoice = $this->openInvoice->getInvoiceByAmount((float)$bsRow->amount);
             if (count($invoice) == 1) {
                 ++$this->bsIndex;
+                $this->isPartialPayment = false;
+                $this->message = 'Invoice Total';
                 $this->exportRowsWithMatch($bsRow, $invoice[0]);
             }
         }
@@ -237,6 +238,8 @@ class InvoiceProcessor
 
         $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
         $this->deleteElement($openInvoiceRow->invoice_number, $this->invoiceNumbers);
+        $this->message = '';
+        $this->isPartialPayment = false;
     }
 
     private function exportRowsWithNoMatch(BankStatement $bsRow, float $difference=null)
@@ -247,7 +250,7 @@ class InvoiceProcessor
             '',
             '',
             $bsRow->currency,
-            $difference,
+            $difference ? $difference : $bsRow->original_amount,
             $bsRow->payment_ref,
             $bsRow->payee_name,
             '',
@@ -256,7 +259,10 @@ class InvoiceProcessor
             '',
             $this->isPartialPayment ? 'Yes' : 'No'
         ];
+
         $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
+        $this->message = '';
+        $this->isPartialPayment = false;
     }
 
 /////////////////////////////////////////
