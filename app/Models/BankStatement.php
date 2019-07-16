@@ -30,9 +30,14 @@ class BankStatement extends Model
         return Model::where('payment_ref', '<>', '')->pluck('payment_ref');
     }
 
-    public function getByPaymentRef(array $paymentRefs)
+    public function getByPaymentRefs(array $paymentRefs)
     {
         return Model::wherein('payment_ref', $paymentRefs)->get();
+    }
+
+    public function getByEmptyPaymentRefs()
+    {
+        return Model::where('payment_ref', '=', '')->get();
     }
 
     public function getByTotal($amount)

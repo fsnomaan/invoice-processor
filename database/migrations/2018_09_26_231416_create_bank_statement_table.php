@@ -14,7 +14,7 @@ class CreateBankStatementTable extends Migration
     public function up()
     {
         Schema::create('bank_statement', function (Blueprint $table) {
-            $table->increments('id');
+            $table->bigIncrements('id');
             $table->unsignedInteger('user_id');
             $table->mediumText("transaction_date");
             $table->mediumText("amount");
