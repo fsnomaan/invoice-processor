@@ -157,7 +157,7 @@ class InvoiceProcessor
 
     private function matchByInvoiceTotal()
     {
-        $bsRows = $this->bs->getByPaymentRef($this->paymentRefs);
+        $bsRows = $this->bs->getByPaymentRefs($this->paymentRefs);
         foreach ($bsRows as $bsRow) {
             $invoice = $this->openInvoice->getInvoiceByAmount((float)$bsRow->amount);
             if (count($invoice) == 1) {
@@ -215,14 +215,19 @@ class InvoiceProcessor
     private function exportUnmatchedStatementRows()
     {
         $bsRows = $this->bs->getByPaymentRefs($this->paymentRefs);
-        $bsRowsWithEmptyRefs = $this->bs->getByEmptyPaymentRefs();
-        $bsRows = array_merge($bsRows, $bsRowsWithEmptyRefs);
-
         foreach ($bsRows as $bsRow) {
             ++$this->bsIndex;
             $this->message = 'No Match Found';
             $this->exportRowsWithNoMatch($bsRow, null);
         }
+
+        $bsRowsWithEmptyRefs = $this->bs->getByEmptyPaymentRefs();
+        foreach ($bsRowsWithEmptyRefs as $bsRow) {
+            ++$this->bsIndex;
+            $this->message = 'No Match Found';
+            $this->exportRowsWithNoMatch($bsRow, null);
+        }
+
     }
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow)
     {
