@@ -5,6 +5,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 class InvoiceProcessor
 {
+    /** @var int */
+    private $userId;
+
     /** @var BankStatement */
     private $bs;
 
@@ -15,12 +18,10 @@ class InvoiceProcessor
     private $invoiceNumbers = [];
 
     /** @var array  */
-    private $paymentRefs = [];
+    private $bsRowSequence = [];
 
     /** @var array  */
     private $export = [];
-
-    private $bsIndex = 0;
 
     /** @var CompanyName */
     private $companyName;
@@ -36,9 +37,6 @@ class InvoiceProcessor
 
     /** @var bool */
     private $isPartialPayment = false;
-
-    /** @var int $userId */
-    private $userId;
 
     public function __construct(
         BankStatement $bs,
@@ -59,8 +57,8 @@ class InvoiceProcessor
         $this->userId = $userId;
         $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
 
-        $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers()->toArray();
-        $this->paymentRefs = $this->bs->getAllPaymentRefs()->toArray();
+        $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers($userId)->toArray();
+        $this->bsRowSequence = $this->bs->getSequence($userId)->toArray();
 
         foreach ($this->invoiceNumbers as $invoiceNumber) {
             $this->matchByInvoiceNumber($invoiceNumber);
@@ -71,10 +69,10 @@ class InvoiceProcessor
         $this->matchByInvoiceTotal();
 
         $this->exportUnmatchedStatementRows();
-
-//        dump($this->export);
+//        dump($this->bsRowSequence);
 //        dump($this->invoiceNumbers);
-//        dd($this->paymentRefs);
+//        dd($this->export);
+
 
 
         return $this->export;
@@ -82,40 +80,33 @@ class InvoiceProcessor
 
     private function matchByInvoiceNumber($invoiceNumber, bool $partial=false)
     {
-        $bsRow = $this->bs->getRowsLikeInvoice($invoiceNumber);
+        $bsRow = $this->bs->getByInvoiceNumber($invoiceNumber, $this->userId);
 
-
-        if (! empty($bsRow) && in_array($bsRow->payment_ref, $this->paymentRefs)) {
-            ++$this->bsIndex;
+        if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
 
             $matchingInvoiceNumbers = $this->getMatchingInvoiceNumbers($bsRow, $partial);
 
+            // if only one match found
             if (count($matchingInvoiceNumbers) == 1 && !$partial) {
                 $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
 
                 if ( $this->matchSingleInvoiceTotal($openInvoiceRow, $bsRow) ) {
                     $this->message = 'Invoice Number';
                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
-                } else {
-                    $this->message = 'No Match Found';
-                    $this->isPartialPayment = false;
-                    $this->exportRowsWithNoMatch($bsRow, null);
                 }
+                // if more than one match found
             } else {
                 $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
                 $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
 
                 if ( $this->isTotalMatches((float)$bsRow->amount, (float)$openInvoiceTotal)) {
                     foreach($openInvoiceRows as $openInvoiceRow) {
-                        $this->message = 'Invoice Number';
+                        $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
                         $this->isPartialPayment = false;
                         $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                     }
                 } else {
-                    if ($partial) {
-                        $this->message = 'No Match Found';
-                        $this->exportRowsWithNoMatch($bsRow, null);
-                    } else {
+                    if (! $partial) {
                         foreach($openInvoiceRows as $openInvoiceRow) {
                             $this->message = 'Invoice Number';
                             $this->isPartialPayment = false;
@@ -157,11 +148,10 @@ class InvoiceProcessor
 
     private function matchByInvoiceTotal()
     {
-        $bsRows = $this->bs->getByPaymentRefs($this->paymentRefs);
+        $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
             $invoice = $this->openInvoice->getInvoiceByAmount((float)$bsRow->amount);
             if (count($invoice) == 1) {
-                ++$this->bsIndex;
                 $this->isPartialPayment = false;
                 $this->message = 'Invoice Total';
                 $this->exportRowsWithMatch($bsRow, $invoice[0]);
@@ -192,7 +182,7 @@ class InvoiceProcessor
 
     private function getInvoicePart(string $invoiceNumber): ?string
     {
-        $partial = preg_split('/\D/', $invoiceNumber);
+        $partial = preg_split('/\D[0]/', $invoiceNumber);
 
         return end($partial);
     }
@@ -214,25 +204,17 @@ class InvoiceProcessor
 
     private function exportUnmatchedStatementRows()
     {
-        $bsRows = $this->bs->getByPaymentRefs($this->paymentRefs);
+        $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
-            ++$this->bsIndex;
             $this->message = 'No Match Found';
             $this->exportRowsWithNoMatch($bsRow, null);
         }
-
-        $bsRowsWithEmptyRefs = $this->bs->getByEmptyPaymentRefs();
-        foreach ($bsRowsWithEmptyRefs as $bsRow) {
-            ++$this->bsIndex;
-            $this->message = 'No Match Found';
-            $this->exportRowsWithNoMatch($bsRow, null);
-        }
-
     }
+
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow)
     {
         $this->export[] = [
-            $this->bsIndex,
+            $bsRow->sequence,
             $bsRow->transaction_date,
             $openInvoiceRow->customer_account,
             $openInvoiceRow->invoice_number,
@@ -247,7 +229,7 @@ class InvoiceProcessor
             $this->isPartialPayment ? 'Yes' : 'No'
         ];
 
-        $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
+        $this->deleteElement($bsRow->sequence, $this->bsRowSequence);
         $this->deleteElement($openInvoiceRow->invoice_number, $this->invoiceNumbers);
         $this->message = '';
         $this->isPartialPayment = false;
@@ -256,7 +238,7 @@ class InvoiceProcessor
     private function exportRowsWithNoMatch(BankStatement $bsRow, float $difference=null)
     {
         $this->export[] = [
-            $this->bsIndex,
+            $bsRow->sequence,
             $bsRow->transaction_date,
             '',
             '',
@@ -271,7 +253,8 @@ class InvoiceProcessor
             $this->isPartialPayment ? 'Yes' : 'No'
         ];
 
-        $this->deleteElement($bsRow->payment_ref, $this->paymentRefs);
+        $this->deleteElement($bsRow->sequence, $this->bsRowSequence);
+
         $this->message = '';
         $this->isPartialPayment = false;
     }

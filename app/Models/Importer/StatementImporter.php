@@ -32,6 +32,7 @@ class StatementImporter
 
         try {
             foreach (array_chunk($dataTable, 1000) as $t) {
+//                dump($t);
                 $this->bs->insert($t);
             }
         } catch(\Exception $e) {
@@ -52,10 +53,12 @@ class StatementImporter
         $dataTable = [];
         if (($h = fopen($path, "r")) !== FALSE) {
             $heading = fgetcsv($h, 1000, $this->separator);
+            $sequence = 0;
             while (($data = fgetcsv($h, 1000, $this->separator)) !== FALSE) {
                 try{
                     $kvPair = array_combine($heading, $data);
                     $kvPair['user_id'] = $this->userId;
+                    $kvPair['sequence'] = ++$sequence;
                     $dataTable[] = $kvPair;
                 } catch (\Exception $e) {
                     dd($e->getMessage(), $data);

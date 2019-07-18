@@ -19,9 +19,11 @@ class OpenInvoice extends Model
         return Model::whereIn('invoice_number', $invoiceNumbers)->get();
     }
 
-    public function getAllInvoiceNumbers()
+    public function getAllInvoiceNumbers(int $userId)
     {
-        return Model::where('invoice_number', '<>', '')->pluck('invoice_number');
+        return Model::where('invoice_number', '<>', '')
+            ->where('user_id', $userId)
+            ->pluck('invoice_number');
     }
 
     public function getInvoiceByAmount(float $amount)

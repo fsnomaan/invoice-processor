@@ -139,7 +139,7 @@ class ProcessInvoiceController extends Controller
     private function streamResponse(string $userName)
     {
         $columnHeadings = [
-            'Bank Payment Line',
+            'Sequence',
             'Date',
             'Customer Account',
             'Invoice Number',
