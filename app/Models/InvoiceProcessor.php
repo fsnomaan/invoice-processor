@@ -49,7 +49,6 @@ class InvoiceProcessor
         $this->openInvoice = $openInvoice;
         $this->companyName = $companyName;
         $this->bankAccount = $bankAccount;
-
     }
 
     public function processInvoice(int $userId) :array
@@ -166,15 +165,20 @@ class InvoiceProcessor
         foreach ($this->invoiceNumbers as $invoiceNumber) {
             if ($partial) {
                 $invoicePart = $this->getInvoicePart($invoiceNumber);
-                if ($invoicePart && (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoicePart)) ) !== false) ) {
+                if ($invoicePart &&
+                    (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoicePart)) ) !== false) ||
+                    (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoicePart)) ) !== false)
+                ) {
                     $matchingInvoices[] = $invoiceNumber;
                 }
             } else {
-                if ($invoiceNumber && (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoiceNumber)) ) !== false) ) {
+                if ($invoiceNumber &&
+                    (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoiceNumber)) ) !== false) ||
+                    (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoiceNumber)) ) !== false)
+                ) {
                     $matchingInvoices[] = $invoiceNumber;
                 }
             }
-
         }
 
         return $matchingInvoices;

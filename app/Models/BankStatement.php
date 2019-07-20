@@ -11,6 +11,7 @@ class BankStatement extends Model
     public function getByInvoiceNumber(string $invoice, int $userId)
     {
         return Model::where('payment_ref', 'LIKE', '%' . $invoice . '%')
+            ->orwhere('payee_name', 'LIKE', '%' . $invoice . '%')
             ->where('user_id', $userId)
             ->first();
     }
