@@ -54,7 +54,7 @@ class InvoiceProcessor
     public function processInvoice(int $userId) :array
     {
         $this->userId = $userId;
-        $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
+//        $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
 
         $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers($userId)->toArray();
         $this->bsRowSequence = $this->bs->getSequence($userId)->toArray();
@@ -65,14 +65,14 @@ class InvoiceProcessor
 
         $this->matchByPartialInvoiceNumber();
 
-        $this->matchByInvoiceTotal();
+        $this->matchByInvoiceTotalOrName();
 
         $this->exportUnmatchedStatementRows();
+
+
 //        dump($this->bsRowSequence);
 //        dump($this->invoiceNumbers);
 //        dd($this->export);
-
-
 
         return $this->export;
     }
@@ -145,15 +145,35 @@ class InvoiceProcessor
         }
     }
 
-    private function matchByInvoiceTotal()
+    private function matchByInvoiceTotalOrName()
     {
         $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
             $invoice = $this->openInvoice->getInvoiceByAmount((float)$bsRow->amount);
-            if (count($invoice) == 1) {
+            if ( count($invoice) == 1 ) {
                 $this->isPartialPayment = false;
                 $this->message = 'Invoice Total';
                 $this->exportRowsWithMatch($bsRow, $invoice[0]);
+            } elseif ( count($invoice) > 1 ) {
+                $this->matchByCompanyName($bsRow, $invoice);
+            }
+        }
+    }
+
+    private function matchByCompanyName(BankStatement $bsRow, Collection $invoices)
+    {
+        foreach ($invoices as $invoice) {
+//            dump($invoice->customer_name);
+//            dump($bsRow->payment_ref);
+            $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId) ? : $invoice->customer_name;
+//            dump($nameMap);
+
+            if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($nameMap)) ) !== false ||
+                strpos(strtolower($bsRow->payee_name), trim(strtolower($nameMap)) ) !== false
+            ) {
+                $this->message = 'Name Mapping';
+                $this->exportRowsWithMatch($bsRow, $invoice);
+                break;
             }
         }
     }

@@ -17,4 +17,11 @@ class CompanyName extends Model
     {
         return Model::where('user_id', $userId)->pluck('map_to', 'name')->toArray();
     }
+
+    public function getByName(string $name, int $userId)
+    {
+        return Model::where('user_id', $userId)
+            ->where('name', $name)->select('name', 'map_to')
+            ->pluck('map_to', 'name')->first();
+    }
 }
