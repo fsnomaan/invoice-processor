@@ -163,15 +163,17 @@ class InvoiceProcessor
     private function matchByCompanyName(BankStatement $bsRow, Collection $invoices)
     {
         foreach ($invoices as $invoice) {
-//            dump($invoice->customer_name);
-//            dump($bsRow->payment_ref);
-            $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId) ? : $invoice->customer_name;
-//            dump($nameMap);
+            $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId);
+            if ($nameMap) {
+                $this->message = 'Name Mapping';
+            } else {
+                $nameMap = $invoice->customer_name;
+                $this->message = 'Match By Name';
+            }
 
             if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($nameMap)) ) !== false ||
                 strpos(strtolower($bsRow->payee_name), trim(strtolower($nameMap)) ) !== false
             ) {
-                $this->message = 'Name Mapping';
                 $this->exportRowsWithMatch($bsRow, $invoice);
                 break;
             }
