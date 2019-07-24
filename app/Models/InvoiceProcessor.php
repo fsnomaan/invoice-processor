@@ -79,6 +79,10 @@ class InvoiceProcessor
 
     private function matchByInvoiceNumber($invoiceNumber, bool $partial=false)
     {
+        if ( empty($this->bsRowSequence) ) {
+            return;
+        }
+
         $bsRow = $this->bs->getByInvoiceNumber($invoiceNumber, $this->userId);
 
         if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
@@ -216,7 +220,9 @@ class InvoiceProcessor
             }
         }
 
-        return $matchingInvoices;
+        // remove duplicate invoice number
+        return array_keys(array_flip($matchingInvoices));
+
     }
 
     private function getInvoicePart(string $invoiceNumber): ?string
