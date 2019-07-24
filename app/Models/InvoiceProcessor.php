@@ -162,6 +162,8 @@ class InvoiceProcessor
 
     private function matchByCompanyName(BankStatement $bsRow, Collection $invoices)
     {
+        $matchedInvoices = [];
+
         foreach ($invoices as $invoice) {
             $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId);
             if ($nameMap) {
@@ -171,11 +173,20 @@ class InvoiceProcessor
                 $this->message = 'Match By Name';
             }
 
+//            dump(strtolower($bsRow->payment_ref), trim(strtolower($nameMap)));
             if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($nameMap)) ) !== false ||
                 strpos(strtolower($bsRow->payee_name), trim(strtolower($nameMap)) ) !== false
             ) {
-                $this->exportRowsWithMatch($bsRow, $invoice);
-                break;
+                $matchedInvoices[] = $invoice;
+            }
+        }
+
+        if ( $matchedInvoices ) {
+            if (count($matchedInvoices) > 1) {
+                $this->message = 'Multiple Invoices';
+                $this->exportRowsWithNoMatch($bsRow, null, $matchedInvoices[0]);
+            } else{
+                $this->exportRowsWithMatch($bsRow, $matchedInvoices[0]);
             }
         }
     }
@@ -261,18 +272,18 @@ class InvoiceProcessor
         $this->isPartialPayment = false;
     }
 
-    private function exportRowsWithNoMatch(BankStatement $bsRow, float $difference=null)
+    private function exportRowsWithNoMatch(BankStatement $bsRow, float $difference=null, OpenInvoice $invoice=null)
     {
         $this->export[] = [
             $bsRow->sequence,
             $bsRow->transaction_date,
-            '',
+            $invoice ? $invoice->customer_account : '',
             '',
             $bsRow->currency,
             $difference ? $difference : $bsRow->original_amount,
             $bsRow->payment_ref,
             $bsRow->payee_name,
-            '',
+            $invoice ? $invoice->customer_name : '',
             $this->message,
             $bsRow->original_amount,
             '',

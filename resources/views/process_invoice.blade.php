@@ -21,6 +21,9 @@
         <li class="nav-item">
             <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Bank Account Mapping</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
+        </li>
   </ul>
 </div>
 <div class="container-flex mt-3">
@@ -133,6 +136,18 @@
                 </div>
             </div>
         </div>
+      <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+          <div class="row">
+              <div class="col-sm-4 offset-4 mb-3">
+                  <div class="mappingTable">
+                      <form method="POST" accept-charset="UTF-8" name="frm-map-account" id="frm-map-account">
+                          <table id="tbl-map-account" class="table-condensed table-hover option" style="width: 100%;">
+                          </table>
+                      {{ Form::close() }}
+                  </div>
+              </div>
+          </div>
+      </div>
     </div>
 </div>
 @stop
