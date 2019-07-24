@@ -5,6 +5,32 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * App\Models\OpenInvoice
+ *
+ * @property int $id
+ * @property int $user_id
+ * @property string $customer_account
+ * @property string $customer_name
+ * @property string $invoice_number
+ * @property string $currency_code
+ * @property string $open_amount
+ * @property \Illuminate\Support\Carbon $created_at
+ * @property \Illuminate\Support\Carbon $updated_at
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereCurrencyCode($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereCustomerAccount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereCustomerName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereInvoiceNumber($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereOpenAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereUpdatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\OpenInvoice whereUserId($value)
+ * @mixin \Eloquent
+ */
 class OpenInvoice extends Model
 {
     protected $table = 'open_invoice';
