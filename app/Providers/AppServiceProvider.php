@@ -76,5 +76,9 @@ class AppServiceProvider extends ServiceProvider
             );
         });
         resolve(InvoiceProcessor::class);
+
+        if ($this->app->environment() !== 'production') {
+            $this->app->register(\Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class);
+        }
     }
 }
