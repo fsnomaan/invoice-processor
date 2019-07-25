@@ -203,7 +203,7 @@ class InvoiceProcessor
 
     private function getMatchingInvoiceNumbers(BankStatement $bsRow, bool $partial=false) : array
     {
-        $matchingInvoices = [];
+        $matchingInvoiceNumbers = [];
 
         foreach ($this->invoiceNumbers as $invoiceNumber) {
             if ($partial) {
@@ -211,23 +211,28 @@ class InvoiceProcessor
                 if ($invoicePart) {
                     if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoicePart)) ) !== false) {
                         $matchingInvoices[] = $invoiceNumber;
-                    } elseif (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoicePart)) ) !== false) {
-                        $matchingInvoices[] = $invoiceNumber;
+                    } elseif (!$bsRow->payment_ref) {
+                        if (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoicePart)) ) !== false) {
+                            $matchingInvoices[] = $invoiceNumber;
+                        }
                     }
                 }
             } else {
                 if ($invoiceNumber) {
                     if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoiceNumber)) ) !== false) {
-                        $matchingInvoices[] = $invoiceNumber;
-                    } elseif (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoiceNumber)) ) !== false) {
-                        $matchingInvoices[] = $invoiceNumber;
+                        $matchingInvoiceNumbers[] = $invoiceNumber;
+                    } elseif ( !$bsRow->payment_ref ) {
+                        if (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoiceNumber)) ) !== false) {
+                            dump($bsRow->payment_ref);
+                            var_dump(empty($bsRow->payment_ref));
+                            $matchingInvoiceNumbers[] = $invoiceNumber;
+                        }
                     }
                 }
             }
         }
-
         // remove duplicate invoice number
-        return array_keys(array_flip($matchingInvoices));
+        return array_keys(array_flip($matchingInvoiceNumbers));
 
     }
 
