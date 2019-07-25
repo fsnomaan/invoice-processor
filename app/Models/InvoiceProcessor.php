@@ -79,6 +79,9 @@ class InvoiceProcessor
 
     private function matchByInvoiceNumber($invoiceNumber, bool $partial=false)
     {
+
+//        dump($this->bsRowSequence);
+
         if ( empty($this->bsRowSequence) ) {
             return;
         }
@@ -88,7 +91,7 @@ class InvoiceProcessor
         if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
 
             $matchingInvoiceNumbers = $this->getMatchingInvoiceNumbers($bsRow, $partial);
-
+//dump($matchingInvoiceNumbers);
             // if only one match found
             if (count($matchingInvoiceNumbers) == 1 && !$partial) {
                 $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
@@ -100,8 +103,9 @@ class InvoiceProcessor
                 // if more than one match found
             } else {
                 $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
+//                dump($openInvoiceRows);
                 $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
-
+//dump($openInvoiceTotal);
                 if ( $this->isTotalMatches((float)$bsRow->amount, (float)$openInvoiceTotal)) {
                     foreach($openInvoiceRows as $openInvoiceRow) {
                         $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
@@ -204,18 +208,20 @@ class InvoiceProcessor
         foreach ($this->invoiceNumbers as $invoiceNumber) {
             if ($partial) {
                 $invoicePart = $this->getInvoicePart($invoiceNumber);
-                if ($invoicePart &&
-                    (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoicePart)) ) !== false) ||
-                    (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoicePart)) ) !== false)
-                ) {
-                    $matchingInvoices[] = $invoiceNumber;
+                if ($invoicePart) {
+                    if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoicePart)) ) !== false) {
+                        $matchingInvoices[] = $invoiceNumber;
+                    } elseif (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoicePart)) ) !== false) {
+                        $matchingInvoices[] = $invoiceNumber;
+                    }
                 }
             } else {
-                if ($invoiceNumber &&
-                    (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoiceNumber)) ) !== false) ||
-                    (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoiceNumber)) ) !== false)
-                ) {
-                    $matchingInvoices[] = $invoiceNumber;
+                if ($invoiceNumber) {
+                    if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoiceNumber)) ) !== false) {
+                        $matchingInvoices[] = $invoiceNumber;
+                    } elseif (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoiceNumber)) ) !== false) {
+                        $matchingInvoices[] = $invoiceNumber;
+                    }
                 }
             }
         }
@@ -258,6 +264,8 @@ class InvoiceProcessor
 
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow)
     {
+//        dump($bsRow);
+//        dump($openInvoiceRow);
         $this->export[] = [
             $bsRow->sequence,
             $bsRow->transaction_date,

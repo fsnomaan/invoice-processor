@@ -42,16 +42,17 @@ class BankStatement extends Model
 
     public function getByInvoiceNumber(string $invoice, int $userId)
     {
-        return Model::where('payment_ref', 'LIKE', '%' . $invoice . '%')
-            ->orwhere('payee_name', 'LIKE', '%' . $invoice . '%')
+        $rows = Model::where('payment_ref', 'LIKE', '%' . $invoice . '%')
             ->where('user_id', $userId)
             ->first();
-    }
 
-    public function getUnmatchedRows(array $ids)
-    {
-        return Model::whereNotIn('id', $ids)
-            ->get();
+        if (empty($rows)) {
+            $rows = Model::where('payee_name', 'LIKE', '%' . $invoice . '%')
+                ->where('user_id', $userId)
+                ->first();
+        }
+
+        return $rows;
     }
 
     public function deleteById(int $userId)
