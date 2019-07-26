@@ -223,8 +223,8 @@ class InvoiceProcessor
                         $matchingInvoiceNumbers[] = $invoiceNumber;
                     } elseif ( !$bsRow->payment_ref ) {
                         if (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoiceNumber)) ) !== false) {
-                            dump($bsRow->payment_ref);
-                            var_dump(empty($bsRow->payment_ref));
+//                            dump($bsRow->payment_ref);
+//                            var_dump(empty($bsRow->payment_ref));
                             $matchingInvoiceNumbers[] = $invoiceNumber;
                         }
                     }
