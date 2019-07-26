@@ -6,7 +6,7 @@ use App\Models\BankStatement;
 class StatementImporter
 {
     const COLUMNS = [];
-    
+
     /** @var BankStatement  */
     private $bs;
 
@@ -24,7 +24,7 @@ class StatementImporter
     public function importBankStatement($path, int $userId): bool
     {
         $this->userId = $userId;
-        
+
         $this->truncateDBForUser($this->userId);
 
         $dataTable = $this->getCsvData($path);
@@ -84,6 +84,8 @@ class StatementImporter
             $dataTable[$k] = array_map('trim', $dt);
             $dataTable[$k]['amount'] = floatval(str_replace(",","",$dt['amount']));
             $dataTable[$k]['original_amount'] = floatval(str_replace(",","",$dt['original_amount']));
+            $dataTable[$k]['payment_ref'] = utf8_encode($dt['payment_ref']);
+            $dataTable[$k]['payee_name'] = utf8_encode($dt['payee_name']);
         }
         return $dataTable;
     }
