@@ -39,3 +39,9 @@ Route::group(['prefix' => 'admin'], function () {
 Auth::routes();
 
 Route::get('/home', 'ProcessInvoiceController@index')->name('home');
+
+\Event::listen('Illuminate\Database\Events\QueryExecuted', function ($query) {
+    Log::info( json_encode($query->sql) );
+    Log::info( json_encode($query->bindings) );
+    Log::info( json_encode($query->time)   );
+});

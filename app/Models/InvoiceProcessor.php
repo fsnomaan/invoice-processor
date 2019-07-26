@@ -70,7 +70,6 @@ class InvoiceProcessor
         $this->exportUnmatchedStatementRows();
 
 
-//        dump($this->bsRowSequence);
 //        dump($this->invoiceNumbers);
 //        dd($this->export);
 
@@ -171,21 +170,20 @@ class InvoiceProcessor
     private function matchByCompanyName(BankStatement $bsRow, Collection $invoices)
     {
         $matchedInvoices = [];
-        $messages = [];
 
         foreach ($invoices as $invoice) {
             $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId);
             if ($nameMap) {
-                $messages[] = 'Name Mapping';
+                $message = 'Name Mapping';
             } else {
                 $nameMap = $invoice->customer_name;
-                $messages[] = 'Match By Name';
+                $message = 'Match By Name';
             }
 
-//            dump(strtolower($bsRow->payment_ref), trim(strtolower($nameMap)));
-            if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($nameMap)) ) !== false ||
-                strpos(strtolower($bsRow->payee_name), trim(strtolower($nameMap)) ) !== false
+            if (preg_match("/\b".$nameMap."\b/i", $bsRow->payment_ref) ||
+                preg_match("/\b".$nameMap."\b/i", $bsRow->payee_name)
             ) {
+                $this->message = $message;
                 $matchedInvoices[] = $invoice;
             }
         }
@@ -195,7 +193,6 @@ class InvoiceProcessor
                 $this->message = 'Multiple Invoices';
                 $this->exportRowsWithNoMatch($bsRow, null, $matchedInvoices[0]);
             } else{
-                $this->message = $messages[0];
                 $this->exportRowsWithMatch($bsRow, $matchedInvoices[0]);
             }
         }
