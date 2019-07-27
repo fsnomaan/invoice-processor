@@ -169,7 +169,7 @@ class InvoiceProcessor
         }
 
         if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
-                $this->exportRowsWithMatch($bsRow, $invoice[0]);
+                $this->exportRowsWithMatch($bsRow, $invoice);
         }
     }
 
