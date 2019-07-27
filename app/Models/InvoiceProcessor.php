@@ -174,14 +174,15 @@ class InvoiceProcessor
         foreach ($invoices as $invoice) {
             $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId);
             if ($nameMap) {
+                $nameMap = trim($nameMap);
                 $message = 'Name Mapping';
             } else {
                 $nameMap = $invoice->customer_name;
                 $message = 'Match By Name';
             }
 
-            if (preg_match("/\b".$nameMap."\b/i", $bsRow->payment_ref) ||
-                preg_match("/\b".$nameMap."\b/i", $bsRow->payee_name)
+            if (strpos(strtolower($bsRow->payment_ref), strtolower($nameMap) ) !== false ||
+                strpos(strtolower($bsRow->payee_name), strtolower($nameMap) )  !== false
             ) {
                 $this->message = $message;
                 $matchedInvoices[] = $invoice;
@@ -274,7 +275,7 @@ class InvoiceProcessor
             $openInvoiceRow->customer_account,
             $openInvoiceRow->invoice_number,
             $bsRow->currency,
-            $openInvoiceRow->open_amount,
+            $this->isPartialPayment ? $bsRow->original_amount : $openInvoiceRow->open_amount,
             $bsRow->payment_ref,
             $bsRow->payee_name,
             $openInvoiceRow->customer_name,

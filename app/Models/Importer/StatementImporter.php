@@ -84,8 +84,13 @@ class StatementImporter
             $dataTable[$k] = array_map('trim', $dt);
             $dataTable[$k]['amount'] = floatval(str_replace(",","",$dt['amount']));
             $dataTable[$k]['original_amount'] = floatval(str_replace(",","",$dt['original_amount']));
+
             $dataTable[$k]['payment_ref'] = utf8_encode($dt['payment_ref']);
             $dataTable[$k]['payee_name'] = utf8_encode($dt['payee_name']);
+
+            $dataTable[$k]['payment_ref'] = ' ' . $dt['payment_ref'] . ' ';
+            $dataTable[$k]['payee_name'] = ' ' . $dt['payee_name'] . ' ';
+
         }
         return $dataTable;
     }
