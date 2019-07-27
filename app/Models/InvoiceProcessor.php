@@ -180,8 +180,11 @@ class InvoiceProcessor
         if ($matches) {
             $words = end($matches); // ab&c
             $words = preg_replace('/[^A-Za-z\-]/', ' ', $words); // ab c
-            $word = $words; // ab
-            return $word . ' ';
+            $words = explode(' ', $words);
+            if (count($words) > 1) {
+                return $words[0];
+            }
+            return $words[0] . ' ';
         }
         return '';
     }
