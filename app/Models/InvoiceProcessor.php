@@ -163,7 +163,12 @@ class InvoiceProcessor
 
     private function matchByFirstWord(BankStatement $bsRow, OpenInvoice $invoice)
     {
-        if (strpos(strtolower($invoice->customer_name), strtolower($this->getFirstWord($bsRow->payee_name)) ) !== false) {
+        $needle = strtolower($this->getFirstWord($bsRow->payee_name));
+        if (! $needle) {
+            return;
+        }
+
+        if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
                 $this->exportRowsWithMatch($bsRow, $invoice[0]);
         }
     }
