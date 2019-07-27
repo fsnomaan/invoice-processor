@@ -69,17 +69,12 @@ class InvoiceProcessor
 
         $this->exportUnmatchedStatementRows();
 
-
-//        dump($this->invoiceNumbers);
 //        dd($this->export);
-
         return $this->export;
     }
 
     private function matchByInvoiceNumber($invoiceNumber, bool $partial=false)
     {
-
-//        dump($this->bsRowSequence);
 
         if ( empty($this->bsRowSequence) ) {
             return;
@@ -90,7 +85,7 @@ class InvoiceProcessor
         if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
 
             $matchingInvoiceNumbers = $this->getMatchingInvoiceNumbers($bsRow, $partial);
-//dump($matchingInvoiceNumbers);
+
             // if only one match found
             if (count($matchingInvoiceNumbers) == 1 && !$partial) {
                 $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
@@ -102,9 +97,8 @@ class InvoiceProcessor
                 // if more than one match found
             } else {
                 $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
-//                dump($openInvoiceRows);
                 $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
-//dump($openInvoiceTotal);
+
                 if ( $this->isTotalMatches((float)$bsRow->amount, (float)$openInvoiceTotal)) {
                     foreach($openInvoiceRows as $openInvoiceRow) {
                         $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
@@ -160,11 +154,31 @@ class InvoiceProcessor
             if ( count($invoice) == 1 ) {
                 $this->isPartialPayment = false;
                 $this->message = 'Invoice Total';
-                $this->exportRowsWithMatch($bsRow, $invoice[0]);
+                $this->matchByFirstWord($bsRow, $invoice[0]);
             } elseif ( count($invoice) > 1 ) {
                 $this->matchByCompanyName($bsRow, $invoice);
             }
         }
+    }
+
+    private function matchByFirstWord(BankStatement $bsRow, OpenInvoice $invoice)
+    {
+        if (strpos(strtolower($invoice->customer_name), strtolower($this->getFirstWord($bsRow->payee_name)) ) !== false) {
+                $this->exportRowsWithMatch($bsRow, $invoice[0]);
+        }
+    }
+
+    private function getFirstWord(string $line): string
+    {
+        $words = explode(' ', trim($line) )[0]; // 1ab&c
+        preg_match('/\D+/', $words, $matches);
+        if ($matches) {
+            $words = end($matches); // ab&c
+            $words = preg_replace('/[^A-Za-z\-]/', ' ', $words); // ab c
+            $word = $words; // ab
+            return $word . ' ';
+        }
+        return '';
     }
 
     private function matchByCompanyName(BankStatement $bsRow, Collection $invoices)
@@ -221,8 +235,6 @@ class InvoiceProcessor
                         $matchingInvoiceNumbers[] = $invoiceNumber;
                     } elseif ( !$bsRow->payment_ref ) {
                         if (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoiceNumber)) ) !== false) {
-//                            dump($bsRow->payment_ref);
-//                            var_dump(empty($bsRow->payment_ref));
                             $matchingInvoiceNumbers[] = $invoiceNumber;
                         }
                     }
@@ -231,7 +243,6 @@ class InvoiceProcessor
         }
         // remove duplicate invoice number
         return array_keys(array_flip($matchingInvoiceNumbers));
-
     }
 
     private function getInvoicePart(string $invoiceNumber): ?string
@@ -267,8 +278,6 @@ class InvoiceProcessor
 
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow)
     {
-//        dump($bsRow);
-//        dump($openInvoiceRow);
         $this->export[] = [
             $bsRow->sequence,
             $bsRow->transaction_date,
