@@ -157,6 +157,7 @@ class InvoiceProcessor
                 $this->matchByFirstWord($bsRow, $invoice[0]);
             } elseif ( count($invoice) > 1 ) {
                 $this->matchByCompanyName($bsRow, $invoice);
+                $this->matchByTwoWords($bsRow, $invoice);
             }
         }
     }
@@ -169,7 +170,8 @@ class InvoiceProcessor
         }
 
         if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
-                $this->exportRowsWithMatch($bsRow, $invoice);
+            $this->message = 'Match By Name';
+            $this->exportRowsWithMatch($bsRow, $invoice);
         }
     }
 
@@ -185,6 +187,19 @@ class InvoiceProcessor
                 return $words[0];
             }
             return $words[0] . ' ';
+        }
+        return '';
+    }
+
+    private function getFirstTwoWords(string $line): string
+    {
+        $words = explode(' ', trim($line) );
+        $words = $words[0] . ' ' . $words[1];
+        $matches = preg_replace('/[0-9]+/', '', $words); // remove numbers
+        if ($matches) {
+            $words = preg_replace('/[^A-Za-z\-]/', ' ', $words); // remove special chars
+            $words = explode(' ', $words);
+                return $words[0] . ' ' . $words[1];
         }
         return '';
     }
@@ -217,6 +232,39 @@ class InvoiceProcessor
                 $this->exportRowsWithNoMatch($bsRow, null, $matchedInvoices[0]);
             } else{
                 $this->exportRowsWithMatch($bsRow, $matchedInvoices[0]);
+            }
+        }
+    }
+
+    private function matchByTwoWords(BankStatement $bsRow, Collection $invoices)
+    {
+        $foundInvoices = [];
+        $needle = strtolower($this->getFirstWord($bsRow->payee_name));
+        if (! $needle) {
+            return;
+        }
+
+        foreach ($invoices as $invoice) {
+            if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
+                $foundInvoices[] = $invoice;
+            }
+        }
+
+        if (count($foundInvoices) == 1 ) {
+            $this->message = 'Match By Name';
+            $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
+        } elseif (count($foundInvoices) > 1) {
+
+            $needle = strtolower($this->getFirstTwoWords($bsRow->payee_name));
+            if (! $needle) {
+                return;
+            }
+
+            foreach ($foundInvoices as $invoice) {
+                if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
+                    $this->message = 'Match By Name';
+                    $this->exportRowsWithMatch($bsRow, $invoice);
+                }
             }
         }
     }
