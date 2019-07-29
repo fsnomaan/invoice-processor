@@ -156,8 +156,9 @@ class InvoiceProcessor
                 $this->message = 'Invoice Total';
                 $this->matchByFirstWord($bsRow, $invoice[0]);
             } elseif ( count($invoice) > 1 ) {
-                $this->matchByCompanyName($bsRow, $invoice);
-                $this->matchByTwoWords($bsRow, $invoice);
+                if (!$this->matchByCompanyName($bsRow, $invoice)) {
+                    $this->matchByTwoWords($bsRow, $invoice);
+                }
             }
         }
     }
@@ -204,7 +205,7 @@ class InvoiceProcessor
         return '';
     }
 
-    private function matchByCompanyName(BankStatement $bsRow, Collection $invoices)
+    private function matchByCompanyName(BankStatement $bsRow, Collection $invoices): bool
     {
         $matchedInvoices = [];
 
@@ -215,7 +216,7 @@ class InvoiceProcessor
                 $message = 'Name Mapping';
             } else {
                 $nameMap = $invoice->customer_name;
-                $message = 'Match By Name';
+                $message = 'Match By Company Name';
             }
 
             if (strpos(strtolower($bsRow->payment_ref), strtolower($nameMap) ) !== false ||
@@ -232,8 +233,11 @@ class InvoiceProcessor
                 $this->exportRowsWithNoMatch($bsRow, null, $matchedInvoices[0]);
             } else{
                 $this->exportRowsWithMatch($bsRow, $matchedInvoices[0]);
+                return true;
             }
         }
+
+        return false;
     }
 
     private function matchByTwoWords(BankStatement $bsRow, Collection $invoices)
@@ -254,7 +258,6 @@ class InvoiceProcessor
             $this->message = 'Match By Name';
             $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
         } elseif (count($foundInvoices) > 1) {
-
             $needle = strtolower($this->getFirstTwoWords($bsRow->payee_name));
             if (! $needle) {
                 return;
