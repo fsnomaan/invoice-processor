@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
+ini_set('max_execution_time', 300);
 
 class InvoiceProcessor
 {
@@ -170,7 +171,9 @@ class InvoiceProcessor
             return;
         }
 
-        if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
+        if (strpos(strtolower($invoice->customer_name), ' ' . $needle ) !== false ||
+            strpos(strtolower($invoice->customer_name), $needle . ' ' ) !== false
+        ) {
             $this->message = 'Payee Name';
             $this->exportRowsWithMatch($bsRow, $invoice);
         }
@@ -182,12 +185,12 @@ class InvoiceProcessor
         preg_match('/\D+/', $words, $matches);
         if ($matches) {
             $words = end($matches); // ab&c
-            $words = preg_replace('/[^A-Za-z\-]/', ' ', $words); // ab c
+            $words = preg_replace('/[^A-Za-z]/', ' ', $words); // ab c
             $words = explode(' ', $words);
             if (count($words) > 1) {
                 return $words[0];
             }
-            return $words[0] . ' ';
+            return $words[0];
         }
         return '';
     }
@@ -203,7 +206,7 @@ class InvoiceProcessor
         }
 
         if ($matches) {
-            $words = preg_replace('/[^A-Za-z\-]/', ' ', $words); // remove special chars
+            $words = preg_replace('/[^A-Za-z]/', ' ', $words); // remove special chars
             $words = explode(' ', $words);
             return $words[0] . ' ' . $words[1];
         }
@@ -254,7 +257,8 @@ class InvoiceProcessor
         }
 
         foreach ($invoices as $invoice) {
-            if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
+
+            if (strpos(strtolower($invoice->customer_name), $needle) !== false) {
                 $foundInvoices[] = $invoice;
             }
         }
@@ -263,21 +267,21 @@ class InvoiceProcessor
             $this->message = 'Payee Name';
             $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
         } elseif (count($foundInvoices) > 1) {
-            $foundInvoices = [];
             $needle = strtolower($this->getFirstTwoWords($bsRow->payee_name));
             if (! $needle) {
                 return;
             }
 
+            $foundMoreInvoices = [];
             foreach ($foundInvoices as $invoice) {
                 if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
-                    $foundInvoices[] = $invoice;
+                    $foundMoreInvoices[] = $invoice;
                 }
             }
 
-            if (count($foundInvoices) == 1 ) {
+            if (count($foundMoreInvoices) == 1 ) {
                 $this->message = 'Payee Name';
-                $this->exportRowsWithMatch($bsRow, $invoice);
+                $this->exportRowsWithMatch($bsRow, $foundMoreInvoices[0]);
             }
         }
     }
