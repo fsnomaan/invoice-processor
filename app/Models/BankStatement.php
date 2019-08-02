@@ -45,7 +45,6 @@ class BankStatement extends Model
         $rows = Model::where('payment_ref', 'LIKE', '%' . $invoice . '%')
             ->where('user_id', $userId)
             ->first();
-
         if (empty($rows)) {
             $rows = Model::where('payee_name', 'LIKE', '%' . $invoice . '%')
                 ->where('payment_ref', '')
