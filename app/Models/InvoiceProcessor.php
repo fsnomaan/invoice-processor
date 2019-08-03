@@ -70,7 +70,7 @@ class InvoiceProcessor
 
         $this->exportUnmatchedStatementRows();
 
-//        dd($this->export);
+        dd($this->export);
         return $this->export;
     }
 
@@ -155,33 +155,44 @@ class InvoiceProcessor
             if ( count($invoice) == 1 ) {
                 $this->isPartialPayment = false;
                 $this->message = 'Invoice Total';
-                $this->matchByFirstWord($bsRow, $invoice[0]);
+                $this->matchInvoiceByWord($bsRow, $invoice[0]);
             } elseif ( count($invoice) > 1 ) {
                 if (!$this->matchByCompanyName($bsRow, $invoice)) {
-                    $this->matchByTwoWords($bsRow, $invoice);
+                    $this->matchInvoicesByWords($bsRow, $invoice);
                 }
             }
         }
     }
 
-    private function matchByFirstWord(BankStatement $bsRow, OpenInvoice $invoice)
+    private function matchInvoiceByWord(BankStatement $bsRow, OpenInvoice $invoice)
     {
-        $needle = strtolower($this->getFirstWord($bsRow->payee_name));
-        if (! $needle) {
-            return;
+        $needles = [];
+        for($i=0; $i<3; $i++) {
+            $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
         }
 
-        if (strpos(strtolower($invoice->customer_name), ' ' . $needle ) !== false ||
-            strpos(strtolower($invoice->customer_name), $needle . ' ' ) !== false
-        ) {
-            $this->message = 'Payee Name';
-            $this->exportRowsWithMatch($bsRow, $invoice);
+        foreach ($needles as $needle) {
+            if (! $needle) {
+                return;
+            }
+
+            if (strpos(strtolower($invoice->customer_name), ' ' . strtolower($needle) ) !== false ||
+                strpos(strtolower($invoice->customer_name), strtolower($needle) . ' ' ) !== false
+            ) {
+                $this->message = 'Payee Name';
+                $this->exportRowsWithMatch($bsRow, $invoice);
+                return;
+            }
         }
     }
 
-    private function getFirstWord(string $line): string
+    private function getWordByPosition(string $line, int $position = 0): string
     {
-        $words = explode(' ', trim($line) )[0]; // 1ab&c
+        $parts = explode(' ', trim($line) );
+        if ( !isset($parts[$position]) ) {
+            return '';
+        }
+        $words = explode(' ', trim($line) )[$position]; // 1ab&c
         preg_match('/\D+/', $words, $matches);
         if ($matches) {
             $words = end($matches); // ab&c
@@ -248,42 +259,32 @@ class InvoiceProcessor
         return false;
     }
 
-    private function matchByTwoWords(BankStatement $bsRow, Collection $invoices)
+    private function matchInvoicesByWords(BankStatement $bsRow, Collection $invoices)
     {
-        $foundInvoices = [];
-        $needle = strtolower($this->getFirstWord($bsRow->payee_name));
-        if (! $needle) {
-            return;
+        $needles = [];
+        for($i=0; $i<3; $i++) {
+            $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
         }
 
-        foreach ($invoices as $invoice) {
-
-            if (strpos(strtolower($invoice->customer_name), $needle) !== false) {
-                $foundInvoices[] = $invoice;
-            }
-        }
-
-        if (count($foundInvoices) == 1 ) {
-            $this->message = 'Payee Name';
-            $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
-        } elseif (count($foundInvoices) > 1) {
-            $needle = strtolower($this->getFirstTwoWords($bsRow->payee_name));
+        foreach ($needles as $needle) {
             if (! $needle) {
                 return;
             }
-
-            $foundMoreInvoices = [];
-            foreach ($foundInvoices as $invoice) {
-                if (strpos(strtolower($invoice->customer_name), $needle ) !== false) {
-                    $foundMoreInvoices[] = $invoice;
+            $foundInvoices = [];
+            foreach ($invoices as $invoice) {
+                if (strpos(strtolower($invoice->customer_name), strtolower($needle)) !== false) {
+                    $foundInvoices[] = $invoice;
                 }
             }
 
-            if (count($foundMoreInvoices) == 1 ) {
+            if ( count($foundInvoices) == 1) {
                 $this->message = 'Payee Name';
-                $this->exportRowsWithMatch($bsRow, $foundMoreInvoices[0]);
+                $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
+            } elseif (count($foundInvoices) > 1) {
+                $invoices = $foundInvoices;
             }
         }
+
     }
 
     private function getMatchingInvoiceNumbers(BankStatement $bsRow, bool $partial=false) : array
