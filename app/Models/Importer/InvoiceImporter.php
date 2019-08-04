@@ -69,8 +69,14 @@ class InvoiceImporter
 
     private function sanitize($dataTable)
     {
+        $dataTable = array_filter($dataTable);
         foreach($dataTable as $k => $dt) {
             $dataTable[$k] = array_map('trim', $dt);
+
+            if (! isset($dt['open_amount'])) {
+                continue;
+            }
+
             $dataTable[$k]['customer_name'] = utf8_encode($dt['customer_name']);
             $dataTable[$k]['open_amount'] = floatval(str_replace(",","",$dt['open_amount']));
         }
