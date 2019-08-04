@@ -166,7 +166,7 @@ class InvoiceProcessor
     private function matchInvoiceByWord(BankStatement $bsRow, OpenInvoice $invoice)
     {
         $needles = [];
-        for($i=0; $i<4; $i++) {
+        for($i=0; $i<5; $i++) {
             $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
         }
         foreach ($needles as $needle) {
@@ -260,7 +260,7 @@ class InvoiceProcessor
     private function matchInvoicesByWords(BankStatement $bsRow, Collection $invoices)
     {
         $needles = [];
-        for($i=0; $i<4; $i++) {
+        for($i=0; $i<5; $i++) {
             $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
         }
 
