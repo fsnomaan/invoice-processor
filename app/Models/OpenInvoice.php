@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use PhpParser\Node\Expr\AssignOp\Mod;
 
 /**
  * App\Models\OpenInvoice
@@ -65,7 +66,6 @@ class OpenInvoice extends Model
 
     public function getInvoiceFromTotalAndName(float $total, string $name)
     {
-       DB::enableQueryLog();
         $results = Model::where('amount_transaction', trim($total))
             ->where('name', 'LIKE', '%' . $name . '%')->get();
         return $results;
@@ -74,5 +74,13 @@ class OpenInvoice extends Model
     public function deleteById(int $userId)
     {
         Model::where('user_id', $userId)->delete();
+    }
+
+    public function getAccountGroupedByTotal(float $amount)
+    {
+        return Model::select('customer_account', 'customer_name', 'currency_code', DB::raw('SUM(open_amount) as total'))
+            ->groupBy('customer_account', 'customer_name', 'currency_code')
+            ->having('total', '=', $amount)
+            ->get();
     }
 }

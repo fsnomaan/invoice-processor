@@ -68,9 +68,12 @@ class InvoiceProcessor
 
         $this->matchByInvoiceTotalOrName();
 
+        $this->matchByAccountGrouping();
+
         $this->exportUnmatchedStatementRows();
 
-//        dd($this->export);
+
+        dd($this->export);
         return $this->export;
     }
 
@@ -108,11 +111,14 @@ class InvoiceProcessor
                     }
                 } else {
                     if (! $partial) {
+                        dump($openInvoiceRows);
                         foreach($openInvoiceRows as $openInvoiceRow) {
+                            dump($openInvoiceRow);
                             $this->message = 'Invoice Number';
                             $this->isPartialPayment = false;
                             $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                         }
+                        dump($openInvoiceTotal);
                         $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
                         $this->message = 'No Match Found';
                         $this->isPartialPayment = false;
@@ -348,12 +354,44 @@ class InvoiceProcessor
         }
     }
 
+
+    private function matchByAccountGrouping()
+    {
+        $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
+        /** @var BankStatement $bsRow */
+        foreach ($bsRows as $bsRow) {
+            $accountGroups = $this->openInvoice->getAccountGroupedByTotal($bsRow->original_amount);
+            $needles = [];
+            for($i=0; $i<5; $i++) {
+                $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
+            }
+
+            foreach ($needles as $needle) {
+                if (!$needle) {
+                    return;
+                }
+                $foundInvoices = [];
+                foreach ($accountGroups as $accountGroup) {
+                    dump($accountGroup->customer_name);
+                    if (strpos(strtolower($accountGroup->customer_name), strtolower($needle)) !== false) {
+                        dump($accountGroup);
+                        $foundInvoices[] = $accountGroup;
+                    }
+                }
+
+                if ( count($foundInvoices) == 1) {
+                    $this->message = 'Account Total';
+                    $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
+                } elseif (count($foundInvoices) > 1) {
+                    $accountGroups = $foundInvoices;
+                }
+//                dump($foundInvoices);
+            }
+        }
+    }
+
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow)
     {
-        if (!in_array($bsRow->sequence, $this->bsRowSequence) ) {
-            return;
-        }
-
         $this->export[] = [
             $bsRow->sequence,
             $bsRow->transaction_date,
