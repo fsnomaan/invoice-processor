@@ -55,11 +55,9 @@ class InvoiceProcessor
     public function processInvoice(int $userId) :array
     {
         $this->userId = $userId;
-//        $this->bankAccountMap = $this->bankAccount->getAccountsMap($this->userId);
 
         $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers($userId)->toArray();
         $this->bsRowSequence = $this->bs->getSequence($userId)->toArray();
-
         foreach ($this->invoiceNumbers as $invoiceNumber) {
             $this->matchByInvoiceNumber($invoiceNumber);
         }
@@ -72,8 +70,7 @@ class InvoiceProcessor
 
         $this->exportUnmatchedStatementRows();
 
-
-        dd($this->export);
+//        dd($this->export);
         return $this->export;
     }
 
@@ -175,7 +172,7 @@ class InvoiceProcessor
         for($i=0; $i<5; $i++) {
             $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
         }
-        foreach ($needles as $needle) {
+        foreach (array_filter($needles) as $needle) {
             if (! $needle) {
                 return;
             }
@@ -270,7 +267,7 @@ class InvoiceProcessor
             $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
         }
 
-        foreach ($needles as $needle) {
+        foreach (array_filter($needles) as $needle) {
             if (! $needle) {
                 return;
             }
@@ -361,31 +358,33 @@ class InvoiceProcessor
         /** @var BankStatement $bsRow */
         foreach ($bsRows as $bsRow) {
             $accountGroups = $this->openInvoice->getAccountGroupedByTotal($bsRow->original_amount);
+
             $needles = [];
             for($i=0; $i<5; $i++) {
                 $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
             }
 
-            foreach ($needles as $needle) {
+            foreach (array_filter($needles) as $needle) {
                 if (!$needle) {
                     return;
                 }
                 $foundInvoices = [];
                 foreach ($accountGroups as $accountGroup) {
-                    dump($accountGroup->customer_name);
                     if (strpos(strtolower($accountGroup->customer_name), strtolower($needle)) !== false) {
-                        dump($accountGroup);
                         $foundInvoices[] = $accountGroup;
                     }
                 }
 
                 if ( count($foundInvoices) == 1) {
-                    $this->message = 'Account Total';
-                    $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
+                    $invoices = $this->openInvoice->getByCustomerAccount($foundInvoices[0]->customer_account);
+                    foreach ($invoices as $invoice) {
+                        $this->message = 'Account Total';
+                        $this->exportRowsWithMatch($bsRow, $invoice);
+                    }
+                    break;
                 } elseif (count($foundInvoices) > 1) {
                     $accountGroups = $foundInvoices;
                 }
-//                dump($foundInvoices);
             }
         }
     }

@@ -83,4 +83,9 @@ class OpenInvoice extends Model
             ->having('total', '=', $amount)
             ->get();
     }
+
+    public function getByCustomerAccount(string $customerAccount)
+    {
+        return Model::where('customer_account', $customerAccount)->get();
+    }
 }
