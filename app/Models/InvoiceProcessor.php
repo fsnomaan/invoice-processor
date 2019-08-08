@@ -108,14 +108,11 @@ class InvoiceProcessor
                     }
                 } else {
                     if (! $partial) {
-                        dump($openInvoiceRows);
                         foreach($openInvoiceRows as $openInvoiceRow) {
-                            dump($openInvoiceRow);
                             $this->message = 'Invoice Number';
                             $this->isPartialPayment = false;
                             $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                         }
-                        dump($openInvoiceTotal);
                         $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
                         $this->message = 'No Match Found';
                         $this->isPartialPayment = false;
