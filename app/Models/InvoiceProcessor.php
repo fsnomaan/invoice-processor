@@ -76,7 +76,6 @@ class InvoiceProcessor
 
     private function matchByInvoiceNumber($invoiceNumber, bool $partial=false)
     {
-
         if ( empty($this->bsRowSequence) ) {
             return;
         }
@@ -86,11 +85,9 @@ class InvoiceProcessor
         if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
 
             $matchingInvoiceNumbers = $this->getMatchingInvoiceNumbers($bsRow, $partial);
-
             // if only one match found
             if (count($matchingInvoiceNumbers) == 1 && !$partial) {
                 $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
-
                 if ( $this->matchSingleInvoiceTotal($openInvoiceRow, $bsRow) ) {
                     $this->message = 'Invoice Number';
                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
@@ -99,11 +96,10 @@ class InvoiceProcessor
             } else {
                 $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
                 $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
-
-                if ( $this->isTotalMatches((float)$bsRow->amount, (float)$openInvoiceTotal)) {
+                if ( (float)$openInvoiceTotal > (float)$bsRow->amount )  {
                     foreach($openInvoiceRows as $openInvoiceRow) {
                         $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
-                        $this->isPartialPayment = false;
+                        $this->isPartialPayment = true;
                         $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                     }
                 } else {
@@ -294,10 +290,10 @@ class InvoiceProcessor
                 $invoicePart = $this->getInvoicePart($invoiceNumber);
                 if ($invoicePart) {
                     if (strpos(strtolower($bsRow->payment_ref), trim(strtolower($invoicePart)) ) !== false) {
-                        $matchingInvoices[] = $invoiceNumber;
+                        $matchingInvoiceNumbers[] = $invoiceNumber;
                     } elseif (!$bsRow->payment_ref) {
                         if (strpos(strtolower($bsRow->payee_name), trim(strtolower($invoicePart)) ) !== false) {
-                            $matchingInvoices[] = $invoiceNumber;
+                            $matchingInvoiceNumbers[] = $invoiceNumber;
                         }
                     }
                 }
@@ -313,8 +309,9 @@ class InvoiceProcessor
                 }
             }
         }
+
         // remove duplicate invoice number
-        return array_keys(array_flip($matchingInvoiceNumbers));
+        return array_unique($matchingInvoiceNumbers);
     }
 
     private function getInvoicePart(string $invoiceNumber): ?string

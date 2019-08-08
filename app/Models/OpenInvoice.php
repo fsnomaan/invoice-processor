@@ -43,7 +43,7 @@ class OpenInvoice extends Model
 
     public function getRowsFromInvoices(array $invoiceNumbers)
     {
-        return Model::whereIn('invoice_number', $invoiceNumbers)->distinct()->get();
+        return Model::whereIn('invoice_number', $invoiceNumbers)->get();
     }
 
     public function getAllInvoiceNumbers(int $userId)
