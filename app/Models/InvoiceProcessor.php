@@ -263,6 +263,7 @@ class InvoiceProcessor
             if ( count($foundInvoices) == 1) {
                 $this->message = 'Payee Name';
                 $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
+                break;
             } elseif (count($foundInvoices) > 1) {
                 $invoices = $foundInvoices;
             }
@@ -320,11 +321,6 @@ class InvoiceProcessor
         return $openInvoiceTotal;
     }
 
-    private function isTotalMatches(float $bsTotal, float $openInvoiceTotal) : bool
-    {
-        return $bsTotal == $openInvoiceTotal;
-    }
-
     private function exportUnmatchedStatementRows()
     {
         $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
@@ -333,7 +329,6 @@ class InvoiceProcessor
             $this->exportRowsWithNoMatch($bsRow, null);
         }
     }
-
 
     private function matchByAccountGrouping()
     {
