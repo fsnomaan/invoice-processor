@@ -80,7 +80,7 @@ class InvoiceProcessor
             return;
         }
 
-        /** @var BankStatement[] $bsRow */
+        /** @var BankStatement[] $bsRows */
         $bsRows = $this->bs->getByInvoiceNumber($invoiceNumber, $this->userId);
         foreach ($bsRows as $bsRow) {
             if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
@@ -96,9 +96,14 @@ class InvoiceProcessor
                 } else {
                     $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
                     $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
-                    if ( (float)$openInvoiceTotal >= (float)$bsRow->amount )  {
+                    if ( (float)$openInvoiceTotal == (float)$bsRow->amount )  {
                         foreach($openInvoiceRows as $openInvoiceRow) {
-//                        $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
+                            $this->message = 'Invoice Number';
+                            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                        }
+                    } elseif ( (float)$openInvoiceTotal > (float)$bsRow->amount )  {
+                        foreach($openInvoiceRows as $openInvoiceRow) {
+                            $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
                             $this->message = 'Invoice Number';
                             $this->isPartialPayment = true;
                             $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
@@ -205,7 +210,6 @@ class InvoiceProcessor
         }
         return '';
     }
-
 
     private function matchByCompanyName(BankStatement $bsRow, Collection $invoices): bool
     {
