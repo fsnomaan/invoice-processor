@@ -94,8 +94,10 @@ class InvoiceProcessor
                     }
                     // if more than one match found
                 } else {
+                    /** @var OpenInvoice[] $openInvoiceRows */
                     $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
                     $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
+
                     if ( (float)$openInvoiceTotal == (float)$bsRow->amount )  {
                         foreach($openInvoiceRows as $openInvoiceRow) {
                             $this->message = 'Invoice Number';
@@ -103,10 +105,15 @@ class InvoiceProcessor
                         }
                     } elseif ( (float)$openInvoiceTotal > (float)$bsRow->amount )  {
                         foreach($openInvoiceRows as $openInvoiceRow) {
-                            $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
-                            $this->message = 'Invoice Number';
-                            $this->isPartialPayment = true;
-                            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                            if ($openInvoiceRow->open_amount == $bsRow->amount) {
+                                $this->message = 'Invoice Number';
+                                $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                                break;
+                            } else {
+                                $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
+                                $this->isPartialPayment = true;
+                                $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                            }
                         }
                     } else {
                         if (! $partial) {
