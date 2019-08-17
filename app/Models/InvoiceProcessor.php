@@ -70,7 +70,7 @@ class InvoiceProcessor
 
         $this->exportUnmatchedStatementRows();
 
-        dd($this->export);
+//        dd($this->export);
         return $this->export;
     }
 
@@ -128,7 +128,6 @@ class InvoiceProcessor
                                 $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                             }
                             $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
-                            dump($differenceInTotal);
                             $this->message = 'No Match Found';
                             $this->isPartialPayment = false;
                             $this->exportRowsWithNoMatch($bsRow, $differenceInTotal);
