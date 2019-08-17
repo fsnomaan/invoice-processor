@@ -70,7 +70,7 @@ class InvoiceProcessor
 
         $this->exportUnmatchedStatementRows();
 
-//        dd($this->export);
+        dd($this->export);
         return $this->export;
     }
 
@@ -128,6 +128,7 @@ class InvoiceProcessor
                                 $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                             }
                             $differenceInTotal = $this->getDifferenceInTotal((float)$bsRow->amount, $openInvoiceTotal);
+                            dump($differenceInTotal);
                             $this->message = 'No Match Found';
                             $this->isPartialPayment = false;
                             $this->exportRowsWithNoMatch($bsRow, $differenceInTotal);
@@ -177,10 +178,8 @@ class InvoiceProcessor
 
     private function matchInvoiceByWord(BankStatement $bsRow, OpenInvoice $invoice)
     {
-        $needles = [];
-        for($i=0; $i<5; $i++) {
-            $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
-        }
+        $needles = $this->getWordsByPosition($bsRow->payee_name);
+
         foreach (array_filter($needles) as $needle) {
             if (! $needle) {
                 return;
@@ -201,36 +200,6 @@ class InvoiceProcessor
                 }
             }
         }
-    }
-
-    private function getWordByPosition(string $line, int $position = 0): string
-    {
-        $line = trim(preg_replace('/\s\s+/', ' ', str_replace("\n", " ", $line)));
-        $parts = explode(' ', trim($line) );
-        if ( !isset($parts[$position]) ) {
-            return '';
-        }
-        $words = explode(' ', trim($line) )[$position]; // 1ab&c
-        preg_match('/\D+/', $words, $matches);
-        if ($matches) {
-            $match = end($matches); // ab&c
-            $words = preg_replace('/[^A-Za-z]/', ' ', $match); // ab c
-            $words = explode(' ', trim($words));
-
-            $ampersandWords = [];
-            if (count($words) > 1) {
-                if (strpos($match, '&') !== FALSE) {
-                    $ampersandWords[] = $words[0] . '&' . $words[1];
-                    $ampersandWords[] = $words[0] . ' & ' . $words[1];
-                    $ampersandWords[] = $words[0] . ' ' . $words[1];
-                    $ampersandWords[] = $words[0] . '' . $words[1];
-                    return serialize($ampersandWords);
-                }
-                return $words[0];
-            }
-            return $words[0];
-        }
-        return '';
     }
 
     private function matchByCompanyName(BankStatement $bsRow, Collection $invoices): bool
@@ -270,10 +239,7 @@ class InvoiceProcessor
 
     private function matchInvoicesByWords(BankStatement $bsRow, Collection $invoices)
     {
-        $needles = [];
-        for($i=0; $i<5; $i++) {
-            $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
-        }
+        $needles = $this->getWordsByPosition($bsRow->payee_name);
 
         foreach (array_filter($needles) as $needle) {
             if (! $needle) {
@@ -363,10 +329,7 @@ class InvoiceProcessor
         foreach ($bsRows as $bsRow) {
             $accountGroups = $this->openInvoice->getAccountGroupedByTotal($bsRow->original_amount);
 
-            $needles = [];
-            for($i=0; $i<5; $i++) {
-                $needles[] = $this->getWordByPosition($bsRow->payee_name, $i);
-            }
+            $needles = $this->getWordsByPosition($bsRow->payee_name);
 
             foreach (array_filter($needles) as $needle) {
                 if (!$needle) {
@@ -391,6 +354,49 @@ class InvoiceProcessor
                 }
             }
         }
+    }
+
+    private function getWordByPosition(string $line, int $position = 0): string
+    {
+        $line = trim(preg_replace('/\s\s+/', ' ', str_replace("\n", " ", $line)));
+        $parts = explode(' ', trim($line) );
+        if ( !isset($parts[$position]) ) {
+            return '';
+        }
+        $words = explode(' ', trim($line) )[$position]; // 1ab&c
+        preg_match('/\D+/', $words, $matches);
+        if ($matches) {
+            $match = end($matches); // ab&c
+            $words = preg_replace('/[^A-Za-z]/', ' ', $match); // ab c
+            $words = explode(' ', trim($words));
+
+            $ampersandWords = [];
+            if (count($words) > 1) {
+                if (strpos($match, '&') !== FALSE) {
+                    $ampersandWords[] = $words[0] . '&' . $words[1];
+                    $ampersandWords[] = $words[0] . ' & ' . $words[1];
+                    $ampersandWords[] = $words[0] . ' ' . $words[1];
+                    $ampersandWords[] = $words[0] . '' . $words[1];
+                    return serialize($ampersandWords);
+                }
+                return $words[0];
+            }
+            return $words[0];
+        }
+        return '';
+    }
+
+    private function getWordsByPosition(string $payeeName, int $count=5)
+    {
+        $needles = [];
+        for($i=0; $i<$count; $i++) {
+            $word = $this->getWordByPosition($payeeName, $i);
+            if ( !in_array(trim(strtolower($word)), ['the', 'uk', 'ltd', 'limited']) ) {
+                $needles[] = $word;
+            }
+        }
+
+        return $needles;
     }
 
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow)
