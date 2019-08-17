@@ -104,15 +104,20 @@ class InvoiceProcessor
                             $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                         }
                     } elseif ( (float)$openInvoiceTotal > (float)$bsRow->amount )  {
-                        foreach($openInvoiceRows as $openInvoiceRow) {
-                            if ($openInvoiceRow->open_amount == $bsRow->amount) {
-                                $this->message = 'Invoice Number';
-                                $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
-                                break;
-                            } else {
+                        // if all rows for same account, continue with partial payment
+                        if ($this->isAllForSameAccount($openInvoiceRows)) {
+                            foreach($openInvoiceRows as $openInvoiceRow) {
                                 $this->message = empty($partial) ? 'Invoice Number' : 'Partial Invoice Number';
                                 $this->isPartialPayment = true;
                                 $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                            }
+                        } else {
+                            foreach($openInvoiceRows as $openInvoiceRow) {
+                                if ($openInvoiceRow->open_amount == $bsRow->amount) {
+                                    $this->message = 'Invoice Number';
+                                    $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                                    break;
+                                }
                             }
                         }
                     } else {
@@ -131,6 +136,16 @@ class InvoiceProcessor
                 }
             }
         }
+    }
+
+    private function isAllForSameAccount(Collection $invoiceRows): bool
+    {
+        $accounts = array_column($invoiceRows->toArray(), 'customer_account');
+        if (count(array_unique($accounts)) === 1 && end($accounts) === 'true') {
+            return true;
+        }
+
+        return false;
     }
 
     private function matchByPartialInvoiceNumber()
