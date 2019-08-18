@@ -39,6 +39,8 @@ class InvoiceProcessor
     /** @var bool */
     private $isPartialPayment = false;
 
+    private $isOverPayment = false;
+
     public function __construct(
         BankStatement $bs,
         OpenInvoice $openInvoice,
@@ -90,6 +92,10 @@ class InvoiceProcessor
                     $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
                     if ( (float)$openInvoiceRow->open_amount == (float)$bsRow->amount ) {
                         $this->message = 'Invoice Number';
+                        $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                    } elseif ( (float)$openInvoiceRow->open_amount < (float)$bsRow->amount ) {
+                        $this->message = 'Invoice Number';
+                        $this->isOverPayment = true;
                         $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
                     }
                     // if more than one match found
@@ -413,7 +419,8 @@ class InvoiceProcessor
             $this->message,
             $bsRow->original_amount,
             $openInvoiceRow->open_amount,
-            $this->isPartialPayment ? 'Yes' : 'No'
+            $this->isPartialPayment ? 'Yes' : 'No',
+            $this->isOverPayment ? 'Yes' : 'No'
         ];
 
         $this->deleteElement($bsRow->sequence, $this->bsRowSequence);
@@ -441,7 +448,8 @@ class InvoiceProcessor
             $this->message,
             $bsRow->original_amount,
             '',
-            $this->isPartialPayment ? 'Yes' : 'No'
+            'No',
+            'No'
         ];
 
         $this->deleteElement($bsRow->sequence, $this->bsRowSequence);

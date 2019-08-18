@@ -105,7 +105,7 @@ class ProcessInvoiceController extends Controller
         }
 
         $this->export = $this->invoiceProcessor->processInvoice($request->userId);
-        
+
         // remove user data from database before export
 //        $this->statementImporter->truncateDBForUser($request->userId);
 //        $this->invoiceImporter->truncateDBForUser($request->userId);
@@ -133,7 +133,7 @@ class ProcessInvoiceController extends Controller
         ];
 
         $this->validate($request, $rules, $customMessages);
-        
+
     }
 
     private function streamResponse(string $userName)
@@ -151,7 +151,8 @@ class ProcessInvoiceController extends Controller
             'Matching method',
             'Statement amount',
             'Invoice open amount',
-            'Partial payment'
+            'Partial payment',
+            'Over payment'
         ];
         $sortedExport = [];
         foreach ($this->export as $row) {
