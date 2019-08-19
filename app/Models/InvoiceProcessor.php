@@ -412,7 +412,7 @@ class InvoiceProcessor
             $openInvoiceRow->customer_account,
             $openInvoiceRow->invoice_number,
             $bsRow->currency,
-            $this->isPartialPayment ? $bsRow->original_amount : $openInvoiceRow->open_amount,
+            $this->getAmount($bsRow, $openInvoiceRow),
             $bsRow->payment_ref,
             $bsRow->payee_name,
             $openInvoiceRow->customer_name,
@@ -431,6 +431,16 @@ class InvoiceProcessor
 
         $this->message = '';
         $this->isPartialPayment = false;
+        $this->isOverPayment = false;
+    }
+
+    private function getAmount(BankStatement $bankStatement, OpenInvoice $openInvoice): int
+    {
+        if ($this->isOverPayment || $this->isPartialPayment) {
+            return $bankStatement->original_amount;
+        } else {
+            return $openInvoice->open_amount;
+        }
     }
 
     private function exportRowsWithNoMatch(BankStatement $bsRow, float $difference=null, OpenInvoice $invoice=null)
