@@ -40,18 +40,12 @@ class BankStatement extends Model
 {
     protected $table = 'bank_statement';
 
-    public function getByInvoiceNumber(string $invoice, int $userId)
+    public function getByInvoiceNumber(string $invoice, int $userId, string $searchField)
     {
-        $rows = Model::where('payment_ref', 'LIKE', '%' . $invoice . '%')
+        $rows = Model::where($searchField, 'LIKE', '%' . $invoice . '%')
             ->where('user_id', $userId)
             ->get();
 
-        if ($rows->isEmpty()) {
-            $rows = Model::where('payee_name', 'LIKE', '%' . $invoice . '%')
-                ->where('payment_ref', '')
-                ->where('user_id', $userId)
-                ->get();
-        }
         return $rows;
     }
 

@@ -61,9 +61,12 @@ class InvoiceProcessor
 
         foreach (['payment_ref', 'payee_name'] as $searchField) {
             $this->matchByInvNumberWhenStatementEqualsInvoice($searchField);
+            $this->matchByInvNumberWhenStatementGreaterThanInvoice($searchField);
+            $this->matchByInvNumberWhenStatementLowerThanInvoice($searchField);
         }
 
         $this->exportUnmatchedStatementRows();
+
         dd($this->export);
         return $this->export;
     }
@@ -72,8 +75,7 @@ class InvoiceProcessor
     {
         if ( empty($this->bsRowSequence) ) { return; }
         foreach ($this->invoiceNumbers as $invoiceNumber) {
-            dump($invoiceNumber);
-            $bsRows = $this->bs->getByInvoiceNumber($invoiceNumber, $this->userId);
+            $bsRows = $this->bs->getByInvoiceNumber($invoiceNumber, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
                     $matchingInvoiceNumbers = $this->getMatchingInvoiceNumbers($bsRow, $searchField);
@@ -89,9 +91,50 @@ class InvoiceProcessor
         }
     }
 
+    private function matchByInvNumberWhenStatementGreaterThanInvoice(string $searchField)
+    {
+        if ( empty($this->bsRowSequence) ) { return; }
+        foreach ($this->invoiceNumbers as $invoiceNumber) {
+            $bsRows = $this->bs->getByInvoiceNumber($invoiceNumber, $this->userId, $searchField);
+            foreach ($bsRows as $bsRow) {
+                if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
+                    $matchingInvoiceNumbers = $this->getMatchingInvoiceNumbers($bsRow, $searchField);
+                    if (count($matchingInvoiceNumbers) == 1) {
+                        $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
+                        if ((float)$bsRow->amount > (float)$openInvoiceRow->open_amount) {
+                            $this->message = 'Invoice Number';
+                            $this->isOverPayment = true;
+                            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private function matchByInvNumberWhenStatementLowerThanInvoice(string $searchField)
+    {
+        if ( empty($this->bsRowSequence) ) { return; }
+        foreach ($this->invoiceNumbers as $invoiceNumber) {
+            $bsRows = $this->bs->getByInvoiceNumber($invoiceNumber, $this->userId, $searchField);
+            foreach ($bsRows as $bsRow) {
+                if (! empty($bsRow) && in_array($bsRow->sequence, $this->bsRowSequence)) {
+                    $matchingInvoiceNumbers = $this->getMatchingInvoiceNumbers($bsRow, $searchField);
+                    if (count($matchingInvoiceNumbers) == 1) {
+                        $openInvoiceRow = $this->openInvoice->getByInvoiceNumber($matchingInvoiceNumbers[0]);
+                        if ((float)$bsRow->amount < (float)$openInvoiceRow->open_amount) {
+                            $this->message = 'Invoice Number';
+                            $this->isPartialPayment = true;
+                            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private function getMatchingInvoiceNumbers(BankStatement $bsRow, string $searchField, bool $partial=false) : array
     {
-        dump($bsRow->$searchField);
         $matchingInvoiceNumbers = [];
 
         foreach ($this->invoiceNumbers as $invoiceNumber) {
