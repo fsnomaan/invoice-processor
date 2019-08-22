@@ -65,7 +65,7 @@ class InvoiceProcessor
             $this->matchByInvNumberWhenStatementLowerThanInvoice($searchField);
             $this->matchByMultipleInvoiceWhenStatementEqualsInvoice($searchField);
             $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
-            $this->matchByTotalWhenStatementEqualsInvoice($searchField);
+            $this->matchByTotal($searchField);
         }
 
         $this->exportUnmatchedStatementRows();
@@ -196,11 +196,11 @@ class InvoiceProcessor
         return false;
     }
 
-    private function matchByTotalWhenStatementEqualsInvoice(string $searchField)
+    private function matchByTotal(string $searchField)
     {
         $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
-            $invoices = $this->openInvoice->getInvoiceByMatchingName((float)$bsRow->amount);
+            $invoices = $this->openInvoice->getInvoiceByAmount((float)$bsRow->amount);
             $matchedInvoices = [];
             foreach ($invoices as $invoice) {
                 $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId);
@@ -238,6 +238,8 @@ class InvoiceProcessor
             }
         }
     }
+
+//    private function
 
     private function getOpenInvoicesTotal(Collection $openInvoiceRows) : float
     {
