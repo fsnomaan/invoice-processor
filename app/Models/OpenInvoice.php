@@ -58,10 +58,9 @@ class OpenInvoice extends Model
         return Model::where('open_amount', $amount)->get();
     }
 
-    public function getInvoiceByMatchingName(string $name, array $invoices)
+    public function getInvoiceByMatchingName(string $name)
     {
-        return Model::where('name', 'LIKE', '%' . $name . '%')
-            ->whereIn('invoice', $invoices)->get();
+        return Model::where('customer_name', 'LIKE', '%' . $name . '%');
     }
 
     public function getInvoiceFromTotalAndName(float $total, string $name)
