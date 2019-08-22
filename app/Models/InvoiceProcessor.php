@@ -147,7 +147,7 @@ class InvoiceProcessor
                     if (count($matchingInvoiceNumbers) > 1) {
                         /** @var Collection $openInvoiceRows */
                         $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
-                        $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
+                        $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
                         if ( (float)$openInvoiceTotal == (float)$bsRow->amount )  {
                             if ($this->isAllForSameAccount($openInvoiceRows)) {
                                 foreach($openInvoiceRows as $openInvoiceRow) {
@@ -173,7 +173,7 @@ class InvoiceProcessor
                     if (count($matchingInvoiceNumbers) > 1) {
                         /** @var Collection $openInvoiceRows */
                         $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
-                        $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows);
+                        $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
                         if ( (float)$openInvoiceTotal != (float)$bsRow->amount )  {
                             if ($this->isAllForSameAccount($openInvoiceRows)) {
                                 $this->message = 'Only Customer Account';
@@ -241,11 +241,11 @@ class InvoiceProcessor
 
 //    private function
 
-    private function getOpenInvoicesTotal(Collection $openInvoiceRows) : float
+    private function getOpenInvoicesTotal(array $openInvoiceRows) : float
     {
         $openInvoiceTotal = 0;
         foreach($openInvoiceRows as $openInvoiceRow) {
-            $openInvoiceTotal += (float) $openInvoiceRow->open_amount;
+            $openInvoiceTotal += (float) $openInvoiceRow['open_amount'];
         }
 
         return $openInvoiceTotal;
