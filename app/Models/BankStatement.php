@@ -40,9 +40,9 @@ class BankStatement extends Model
 {
     protected $table = 'bank_statement';
 
-    public function getByInvoiceNumber(string $invoice, int $userId, string $searchField)
+    public function findBySearchField(string $needle, int $userId, string $searchField)
     {
-        $rows = Model::where($searchField, 'LIKE', '%' . $invoice . '%')
+        $rows = Model::where($searchField, 'LIKE', '%' . $needle . '%')
             ->where('user_id', $userId)
             ->get();
 

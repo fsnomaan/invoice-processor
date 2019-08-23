@@ -53,14 +53,25 @@ class OpenInvoice extends Model
             ->pluck('invoice_number');
     }
 
-    public function getInvoiceByAmount(float $amount)
+    public function getUniqueCustomerNames(int $userId)
     {
-        return Model::where('open_amount', $amount)->get();
+        return Model::where('user_id', $userId)
+            ->distinct()
+            ->pluck('customer_name');
     }
 
-    public function getInvoiceByMatchingName(string $name)
+    public function getByAmount(float $amount, int $userId)
     {
-        return Model::where('customer_name', 'LIKE', '%' . $name . '%');
+        return Model::where('open_amount', $amount)
+            ->where('user_id', $userId)
+            ->get();
+    }
+
+    public function getByCustomerName(string $name, int $userId)
+    {
+        return Model::where('customer_name', 'LIKE', '%' . $name . '%')
+            ->where('user_id', $userId)
+            ->get();
     }
 
     public function getInvoiceFromTotalAndName(float $total, string $name)
@@ -83,8 +94,10 @@ class OpenInvoice extends Model
             ->get();
     }
 
-    public function getByCustomerAccount(string $customerAccount)
+    public function getByCustomerAccount(string $customerAccount, int $userId)
     {
-        return Model::where('customer_account', $customerAccount)->get();
+        return Model::where('customer_account', $customerAccount)
+            ->where('user_id', $userId)
+            ->get();
     }
 }
