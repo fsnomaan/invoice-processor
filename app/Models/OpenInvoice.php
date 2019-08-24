@@ -53,10 +53,11 @@ class OpenInvoice extends Model
             ->pluck('invoice_number');
     }
 
-    public function getUniqueCustomerNames(int $userId)
+    public function getUniqueCustomerNames(int $userId, array $invoiceNumbers)
     {
         return Model::where('user_id', $userId)
             ->distinct()
+            ->whereIn('invoice_number', $invoiceNumbers)
             ->pluck('customer_name');
     }
 

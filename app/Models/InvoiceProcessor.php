@@ -60,7 +60,6 @@ class InvoiceProcessor
 
         $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers($userId)->toArray();
         $this->bsRowSequence = $this->bs->getSequence($userId)->toArray();
-        $this->uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($userId)->toArray();
 
         foreach (['payment_ref', 'payee_name'] as $searchField) {
             $this->matchByInvNumberWhenStatementEqualsInvoice($searchField);
@@ -68,7 +67,9 @@ class InvoiceProcessor
             $this->matchByInvNumberWhenStatementLowerThanInvoice($searchField);
             $this->matchByMultipleInvoiceWhenStatementEqualsInvoice($searchField);
             $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
-            $this->matchByTotal($searchField);
+            $this->matchByTotalWhenStatementEqualsInvoice($searchField);
+            $this->matchByTotalWhenStatementEqualsInvoiceTotal($searchField);
+            $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal($searchField);
             $this->matchByAccountNameWhenStatementEqualsInvoice($searchField);
             $this->matchByAccountNameWhenStatementEqualsMultipleInvoice($searchField);
             $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice($searchField);
@@ -202,54 +203,92 @@ class InvoiceProcessor
         return false;
     }
 
-    private function matchByTotal(string $searchField)
+    private function matchByTotalWhenStatementEqualsInvoice(string $searchField)
     {
         $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
-            $invoices = $this->openInvoice->getByAmount((float)$bsRow->amount, $this->userId);
-            $matchedInvoices = [];
-            foreach ($invoices as $invoice) {
-                $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId);
-                if ($nameMap) {
-                    $nameMap = trim($nameMap);
-                    $message = 'Name Mapping';
-                } else {
-                    $nameMap = $invoice->customer_name;
-                    $message = 'ERP Account Name';
-                }
-
-                if (strpos(strtolower($bsRow->$searchField), strtolower($nameMap) ) !== false
-                ) {
-                    $this->message = $message;
-                    $matchedInvoices[] = $invoice;
-                }
-            }
+            $matchedInvoices = $this->getMatchedInvoiceForAmount($bsRow, $searchField);
 
             if ( $matchedInvoices ) {
-                if (count($matchedInvoices) > 1) {
-                    $invoicesTotal = $this->getOpenInvoicesTotal($matchedInvoices);
-                    if ( (float)$invoicesTotal == (float)$bsRow->amount ) {
-                        foreach($matchedInvoices as $openInvoiceRow) {
-                            $this->message = 'ERP Account Name';
-                            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
-                        }
-                    } else {
-                        $this->message = 'Customer Account Only';
-                        $this->isOverPayment = true;
-                        $this->exportRowsWithNoMatch($bsRow, $matchedInvoices[0]);
-                    }
-                } else {
+                if (count($matchedInvoices) == 1) {
                     $this->exportRowsWithMatch($bsRow, $matchedInvoices[0]);
                 }
             }
         }
     }
 
+    private function matchByTotalWhenStatementEqualsInvoiceTotal(string $searchField)
+    {
+        $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
+        foreach ($bsRows as $bsRow) {
+            $matchedInvoices = $this->getMatchedInvoiceForAmount($bsRow, $searchField);
+
+            if ( $matchedInvoices ) {
+                if (count($matchedInvoices) > 1) {
+                    $invoicesTotal = $this->getOpenInvoicesTotal($matchedInvoices);
+                    if ((float)$invoicesTotal == (float)$bsRow->amount) {
+                        foreach ($matchedInvoices as $openInvoiceRow) {
+                            $this->message = 'ERP Account Name';
+                            $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private function matchByTotalWhenStatementDoesNotEqualsInvoiceTotal(string $searchField)
+    {
+        $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
+        foreach ($bsRows as $bsRow) {
+            $matchedInvoices = $this->getMatchedInvoiceForAmount($bsRow, $searchField);
+
+            if ( $matchedInvoices ) {
+                if (count($matchedInvoices) > 1) {
+                    $invoicesTotal = $this->getOpenInvoicesTotal($matchedInvoices);
+                    if ( (float)$invoicesTotal != (float)$bsRow->amount ) {
+                        $this->message = 'Customer Account Only';
+                        $this->isOverPayment = true;
+                        $this->exportRowsWithNoMatch($bsRow, $matchedInvoices[0]);
+                    }
+                }
+            }
+        }
+    }
+
+    private function getMatchedInvoiceForAmount(BankStatement $bsRow, string $searchField)
+    {
+        $invoices = $this->openInvoice->getByAmount((float)$bsRow->amount, $this->userId);
+        $matchedInvoices = [];
+        foreach ($invoices as $invoice) {
+            $nameMap = $this->companyName->getByName($invoice->customer_name, $this->userId);
+            if ($nameMap) {
+                $message = 'Name map';
+                $nameMap = trim($nameMap);
+            } else {
+                $message = 'ERP Name Map';
+                $nameMap = $invoice->customer_name;
+
+            }
+
+            if (strpos(strtolower($bsRow->$searchField), strtolower($nameMap) ) !== false
+            ) {
+                $this->message = $message;
+                $matchedInvoices[] = $invoice;
+            }
+        }
+        return $matchedInvoices;
+    }
+
     private function matchByAccountNameWhenStatementEqualsInvoice(string $searchField)
     {
+        $this->uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
+
         foreach ($this->uniqueCustomers as $customerName) {
+            if ( !$customerName ) return;
             $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
+
                 $matchedInvoices = [];
                 $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
                 foreach ($openInvoiceRows as $openInvoiceRow) {
@@ -270,6 +309,7 @@ class InvoiceProcessor
     private function matchByAccountNameWhenStatementEqualsMultipleInvoice(string $searchField)
     {
         foreach ($this->uniqueCustomers as $customerName) {
+            if ( !$customerName ) return;
             $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $matchedInvoices = [];
@@ -292,6 +332,7 @@ class InvoiceProcessor
     private function matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice(string $searchField)
     {
         foreach ($this->uniqueCustomers as $customerName) {
+            if ( !$customerName ) return;
             $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
@@ -353,6 +394,10 @@ class InvoiceProcessor
 
     private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow)
     {
+        if ( !in_array($openInvoiceRow->invoice_number, $this->invoiceNumbers ) ) {
+            return;
+        }
+
         $this->export[] = [
             $bsRow->sequence,
             $bsRow->transaction_date,
@@ -378,7 +423,7 @@ class InvoiceProcessor
         $this->resetMessage();
     }
 
-    private function getAmount(BankStatement $bankStatement, OpenInvoice $openInvoice): int
+    private function getAmount(BankStatement $bankStatement, OpenInvoice $openInvoice): float
     {
         if ($this->isOverPayment || $this->isPartialPayment) {
             return $bankStatement->original_amount;
