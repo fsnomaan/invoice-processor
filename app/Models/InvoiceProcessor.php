@@ -67,6 +67,7 @@ class InvoiceProcessor
             $this->matchByAccountNameWhenStatementEqualsInvoice($searchField);
             $this->matchByAccountNameWhenStatementEqualsMultipleInvoice($searchField);
             $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice($searchField);
+            $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice($searchField);
             $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
             $this->matchByTotalWhenStatementEqualsInvoice($searchField);
             $this->matchByTotalWhenStatementEqualsInvoiceTotal($searchField);
@@ -74,7 +75,6 @@ class InvoiceProcessor
             $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
             $this->matchByInvNumberWhenStatementGreaterThanInvoice($searchField);
             $this->matchByInvNumberWhenStatementLowerThanInvoice($searchField);
-            $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice($searchField);
         }
 
         $this->exportUnmatchedStatementRows();
@@ -365,7 +365,6 @@ class InvoiceProcessor
                     $this->message = 'Customer Account Only';
                     $this->exportRowsWithNoMatch($bsRow, $openInvoiceRows[0]);
                     $this->deleteElement($customerName, $this->uniqueCustomers);
-
                 }
             }
         }
