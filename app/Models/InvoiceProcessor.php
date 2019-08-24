@@ -63,16 +63,16 @@ class InvoiceProcessor
 
         foreach (['payment_ref', 'payee_name'] as $searchField) {
             $this->matchByInvNumberWhenStatementEqualsInvoice($searchField);
-            $this->matchByInvNumberWhenStatementGreaterThanInvoice($searchField);
-            $this->matchByInvNumberWhenStatementLowerThanInvoice($searchField);
             $this->matchByMultipleInvoiceWhenStatementEqualsInvoice($searchField);
-            $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
-            $this->matchByTotalWhenStatementEqualsInvoice($searchField);
-            $this->matchByTotalWhenStatementEqualsInvoiceTotal($searchField);
-            $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal($searchField);
             $this->matchByAccountNameWhenStatementEqualsInvoice($searchField);
             $this->matchByAccountNameWhenStatementEqualsMultipleInvoice($searchField);
             $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice($searchField);
+            $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
+            $this->matchByTotalWhenStatementEqualsInvoice($searchField);
+            $this->matchByTotalWhenStatementEqualsInvoiceTotal($searchField);
+            $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
+            $this->matchByInvNumberWhenStatementGreaterThanInvoice($searchField);
+            $this->matchByInvNumberWhenStatementLowerThanInvoice($searchField);
         }
 
         $this->exportUnmatchedStatementRows();
@@ -266,7 +266,7 @@ class InvoiceProcessor
                 $message = 'Name map';
                 $nameMap = trim($nameMap);
             } else {
-                $message = 'ERP Name Map';
+                $message = 'ERP account Name';
                 $nameMap = $invoice->customer_name;
 
             }
