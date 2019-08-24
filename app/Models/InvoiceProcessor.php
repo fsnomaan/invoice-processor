@@ -70,9 +70,11 @@ class InvoiceProcessor
             $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
             $this->matchByTotalWhenStatementEqualsInvoice($searchField);
             $this->matchByTotalWhenStatementEqualsInvoiceTotal($searchField);
+            $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal($searchField);
             $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice($searchField);
             $this->matchByInvNumberWhenStatementGreaterThanInvoice($searchField);
             $this->matchByInvNumberWhenStatementLowerThanInvoice($searchField);
+            $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice($searchField);
         }
 
         $this->exportUnmatchedStatementRows();
@@ -345,6 +347,25 @@ class InvoiceProcessor
                         $this->deleteElement($customerName, $this->uniqueCustomers);
 
                     }
+                }
+            }
+        }
+    }
+
+    private function matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice(string $searchField)
+    {
+        foreach ($this->uniqueCustomers as $customerName) {
+            if ( !$customerName ) return;
+            $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
+            foreach ($bsRows as $bsRow) {
+                $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
+
+                $invoicesTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
+                if ( (float)$invoicesTotal != (float)$bsRow->amount ) {
+                    $this->message = 'Customer Account Only';
+                    $this->exportRowsWithNoMatch($bsRow, $openInvoiceRows[0]);
+                    $this->deleteElement($customerName, $this->uniqueCustomers);
+
                 }
             }
         }
