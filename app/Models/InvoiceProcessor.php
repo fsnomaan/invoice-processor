@@ -308,7 +308,7 @@ class InvoiceProcessor
         $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
 
         foreach ($uniqueCustomers as $customerName) {
-            if ( !$customerName ) return;
+            if ( !$customerName ) continue;
             $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
 
@@ -334,7 +334,7 @@ class InvoiceProcessor
         $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
 
         foreach ($uniqueCustomers as $customerName) {
-            if ( !$customerName ) return;
+            if ( !$customerName ) continue;
             $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $matchedInvoices = [];
@@ -359,7 +359,7 @@ class InvoiceProcessor
         $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
 
         foreach ($uniqueCustomers as $customerName) {
-            if ( !$customerName ) return;
+            if ( !$customerName ) continue;
             $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
@@ -379,10 +379,11 @@ class InvoiceProcessor
 
     private function matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice(string $searchField)
     {
+
         $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
 
         foreach ($uniqueCustomers as $customerName) {
-            if ( !$customerName ) return;
+            if ( !$customerName ) continue;
             $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
