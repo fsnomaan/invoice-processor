@@ -379,7 +379,6 @@ class InvoiceProcessor
 
     private function matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice(string $searchField)
     {
-
         $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
 
         foreach ($uniqueCustomers as $customerName) {
@@ -387,7 +386,6 @@ class InvoiceProcessor
             $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
-
                 $invoicesTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
                 if ( (float)$invoicesTotal != (float)$bsRow->amount ) {
                     $this->message = 'matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice';

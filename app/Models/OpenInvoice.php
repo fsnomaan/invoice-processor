@@ -70,7 +70,7 @@ class OpenInvoice extends Model
 
     public function getByCustomerName(string $name, int $userId)
     {
-        return Model::where('customer_name', 'LIKE', '%' . $name . '%')
+        return Model::where('customer_name', 'LIKE', '%' . $name )
             ->where('user_id', $userId)
             ->get();
     }

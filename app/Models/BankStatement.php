@@ -42,7 +42,7 @@ class BankStatement extends Model
 
     public function findBySearchField(string $needle, int $userId, string $searchField)
     {
-        $rows = Model::where($searchField, 'LIKE', '%' . $needle . '%')
+        $rows = Model::where($searchField, 'LIKE', ' ' . $needle . '%')
             ->where('user_id', $userId)
             ->get();
 
