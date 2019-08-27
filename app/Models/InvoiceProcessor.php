@@ -61,44 +61,41 @@ class InvoiceProcessor
         $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers($userId)->toArray();
         $this->bsRowSequence = $this->bs->getSequence($userId)->toArray();
 
-//        $this->matchByInvNumberWhenStatementEqualsInvoice("payment_ref");
-//        $this->matchByInvNumberWhenStatementEqualsInvoice("payee_name");
-//
-//        $this->matchByMultipleInvoiceWhenStatementEqualsInvoice("payment_ref");
-//        $this->matchByMultipleInvoiceWhenStatementEqualsInvoice("payee_name");
-//
-//        $this->matchByAccountNameWhenStatementEqualsInvoice("payment_ref");
-//        $this->matchByAccountNameWhenStatementEqualsInvoice("payee_name");
-//
-//        $this->matchByAccountNameWhenStatementEqualsMultipleInvoice("payment_ref");
-//        $this->matchByAccountNameWhenStatementEqualsMultipleInvoice("payee_name");
-//
-//        $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice("payment_ref");
-//        $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice("payee_name");
-//
-//        $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payment_ref");
-//        $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
-//
-//        $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payment_ref");
-//        $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payee_name");
-//
-//        $this->matchByTotalWhenStatementEqualsInvoice("payment_ref");
-//        $this->matchByTotalWhenStatementEqualsInvoice("payee_name");
-//
-//        $this->matchByTotalWhenStatementEqualsInvoiceTotal("payment_ref");
-//        $this->matchByTotalWhenStatementEqualsInvoiceTotal("payee_name");
-//
-//        $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal("payment_ref");
-//        $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal("payee_name");
-//
-//        $this->matchByInvNumberWhenStatementGreaterThanInvoice("payment_ref");
-//        $this->matchByInvNumberWhenStatementGreaterThanInvoice("payee_name");
-//
-//        $this->matchByInvNumberWhenStatementLowerThanInvoice("payment_ref");
-//        $this->matchByInvNumberWhenStatementLowerThanInvoice("payee_name");
-
         $this->matchByInvNumberWhenStatementEqualsInvoice("payment_ref");
         $this->matchByInvNumberWhenStatementEqualsInvoice("payee_name");
+
+        $this->matchByMultipleInvoiceWhenStatementEqualsInvoice("payment_ref");
+        $this->matchByMultipleInvoiceWhenStatementEqualsInvoice("payee_name");
+
+        $this->matchByAccountNameWhenStatementEqualsInvoice("payment_ref");
+        $this->matchByAccountNameWhenStatementEqualsInvoice("payee_name");
+
+        $this->matchByAccountNameWhenStatementEqualsMultipleInvoice("payment_ref");
+        $this->matchByAccountNameWhenStatementEqualsMultipleInvoice("payee_name");
+
+        $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice("payment_ref");
+        $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice("payee_name");
+
+        $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payment_ref");
+        $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
+
+        $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payment_ref");
+        $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payee_name");
+
+        $this->matchByTotalWhenStatementEqualsInvoice("payment_ref");
+        $this->matchByTotalWhenStatementEqualsInvoice("payee_name");
+
+        $this->matchByTotalWhenStatementEqualsInvoiceTotal("payment_ref");
+        $this->matchByTotalWhenStatementEqualsInvoiceTotal("payee_name");
+
+        $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal("payment_ref");
+        $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal("payee_name");
+
+        $this->matchByInvNumberWhenStatementGreaterThanInvoice("payment_ref");
+        $this->matchByInvNumberWhenStatementGreaterThanInvoice("payee_name");
+
+        $this->matchByInvNumberWhenStatementLowerThanInvoice("payment_ref");
+        $this->matchByInvNumberWhenStatementLowerThanInvoice("payee_name");
 
         $this->exportUnmatchedStatementRows();
 
@@ -312,7 +309,7 @@ class InvoiceProcessor
 
         foreach ($uniqueCustomers as $customerName) {
             if ( !$customerName ) continue;
-            $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
+            $bsRows = $this->bs->findByERPName($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
 
                 $matchedInvoices = [];
@@ -338,7 +335,7 @@ class InvoiceProcessor
 
         foreach ($uniqueCustomers as $customerName) {
             if ( !$customerName ) continue;
-            $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
+            $bsRows = $this->bs->findByERPName($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $matchedInvoices = [];
                 $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
@@ -363,7 +360,7 @@ class InvoiceProcessor
 
         foreach ($uniqueCustomers as $customerName) {
             if ( !$customerName ) continue;
-            $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
+            $bsRows = $this->bs->findByERPName($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
 
@@ -386,7 +383,7 @@ class InvoiceProcessor
 
         foreach ($uniqueCustomers as $customerName) {
             if ( !$customerName ) continue;
-            $bsRows = $this->bs->findBySearchField($customerName, $this->userId, $searchField);
+            $bsRows = $this->bs->findByERPName($customerName, $this->userId, $searchField);
             foreach ($bsRows as $bsRow) {
                 $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
                 $invoicesTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
