@@ -79,6 +79,18 @@ class InvoiceProcessor
         $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payment_ref");
         $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
 
+        $this->matchByNameMapWhenStatementEqualsInvoice("payment_ref");
+        $this->matchByNameMapWhenStatementEqualsInvoice("payee_name");
+
+        $this->matchByNameMapWhenStatementEqualsMultipleInvoice("payment_ref");
+        $this->matchByNameMapWhenStatementEqualsMultipleInvoice("payee_name");
+
+        $this->matchByNameMapWhenStatementEqualsSumOfMultipleInvoice("payment_ref");
+        $this->matchByNameMapWhenStatementEqualsSumOfMultipleInvoice("payee_name");
+
+        $this->matchByNameMapWhenStatementNotEqualsSumOfMultipleInvoice("payment_ref");
+        $this->matchByNameMapWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
+
         $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payment_ref");
         $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payee_name");
 
@@ -389,6 +401,112 @@ class InvoiceProcessor
                 $invoicesTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
                 if ( (float)$invoicesTotal != (float)$bsRow->amount ) {
                     $this->message = 'matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice';
+                    $this->exportRowsWithNoMatch($bsRow, $openInvoiceRows[0]);
+                    $this->deleteElement($customerName, $this->uniqueCustomers);
+                }
+            }
+        }
+    }
+
+    private function matchByNameMapWhenStatementEqualsInvoice(string $searchField)
+    {
+        $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
+        foreach ($uniqueCustomers as $customerName) {
+            if ( !$customerName ) continue;
+
+            $mappedCustomerName = $this->companyName->getByName($customerName, $this->userId);
+            if ( !$mappedCustomerName ) continue;
+
+            $bsRows = $this->bs->findByERPName($mappedCustomerName, $this->userId, $searchField);
+            foreach ($bsRows as $bsRow) {
+
+                $matchedInvoices = [];
+                $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
+                foreach ($openInvoiceRows as $openInvoiceRow) {
+                    if ((float)$openInvoiceRow->open_amount == (float)$bsRow->amount) {
+                        $matchedInvoices[] = $openInvoiceRow;
+                    }
+                }
+                if (count($matchedInvoices) == 1) {
+                    $this->message = 'matchByNameMapWhenStatementEqualsInvoice';
+                    $this->exportRowsWithMatch($bsRow, $matchedInvoices[0]);
+                    $this->deleteElement($customerName, $this->uniqueCustomers);
+                }
+            }
+        }
+    }
+
+    private function matchByNameMapWhenStatementEqualsMultipleInvoice(string $searchField)
+    {
+        $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
+
+        foreach ($uniqueCustomers as $customerName) {
+            if ( !$customerName ) continue;
+
+            $mappedCustomerName = $this->companyName->getByName($customerName, $this->userId);
+            if ( !$mappedCustomerName ) continue;
+
+            $bsRows = $this->bs->findByERPName($mappedCustomerName, $this->userId, $searchField);
+            foreach ($bsRows as $bsRow) {
+                $matchedInvoices = [];
+                $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
+                foreach ($openInvoiceRows as $openInvoiceRow) {
+                    if ((float)$openInvoiceRow->open_amount == (float)$bsRow->amount) {
+                        $matchedInvoices[] = $openInvoiceRow;
+                    }
+                }
+                if (count($matchedInvoices) > 1) {
+                    $this->message = 'matchByNameMapWhenStatementEqualsMultipleInvoice';
+                    $this->isOverPayment = true;
+                    $this->exportRowsWithNoMatch($bsRow, $matchedInvoices[0]);
+                    $this->deleteElement($customerName, $this->uniqueCustomers);
+                }
+            }
+        }
+    }
+
+    private function matchByNameMapWhenStatementEqualsSumOfMultipleInvoice(string $searchField)
+    {
+        $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
+
+        foreach ($uniqueCustomers as $customerName) {
+            if ( !$customerName ) continue;
+
+            $mappedCustomerName = $this->companyName->getByName($customerName, $this->userId);
+            if ( !$mappedCustomerName ) continue;
+
+            $bsRows = $this->bs->findByERPName($mappedCustomerName, $this->userId, $searchField);
+            foreach ($bsRows as $bsRow) {
+                $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
+
+                $invoicesTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
+                if ( (float)$invoicesTotal == (float)$bsRow->amount ) {
+                    foreach ($openInvoiceRows as $openInvoiceRow) {
+                        $this->message = 'matchByNameMapWhenStatementEqualsSumOfMultipleInvoice';
+                        $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
+                        $this->deleteElement($customerName, $this->uniqueCustomers);
+                    }
+                }
+            }
+        }
+    }
+
+    private function matchByNameMapWhenStatementNotEqualsSumOfMultipleInvoice(string $searchField)
+    {
+        $uniqueCustomers = $this->openInvoice->getUniqueCustomerNames($this->userId, $this->invoiceNumbers)->toArray();
+
+        foreach ($uniqueCustomers as $customerName) {
+            if ( !$customerName ) continue;
+
+            $mappedCustomerName = $this->companyName->getByName($customerName, $this->userId);
+            if ( !$mappedCustomerName ) continue;
+
+            $bsRows = $this->bs->findByERPName($mappedCustomerName, $this->userId, $searchField);
+            foreach ($bsRows as $bsRow) {
+                $openInvoiceRows = $this->openInvoice->getByCustomerName($customerName, $this->userId);
+                $invoicesTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
+                if ( (float)$invoicesTotal != (float)$bsRow->amount ) {
+                    $this->message = 'matchByNameMapWhenStatementNotEqualsSumOfMultipleInvoice';
                     $this->exportRowsWithNoMatch($bsRow, $openInvoiceRows[0]);
                     $this->deleteElement($customerName, $this->uniqueCustomers);
                 }
