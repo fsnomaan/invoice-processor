@@ -60,8 +60,8 @@
                         <table id="tbl-map-company" class="table-condensed table-hover option" style="width: 100%;">
                             <thead>
                             <tr>
-                                <th scope="col" class="text-left">Company Name</th>
-                                <th scope="col" class="text-left">Map To</th>
+                                <th scope="col" class="text-left">ERP Name</th>
+                                <th scope="col" class="text-left">Statement Name</th>
                                 <th scope="col" class="text-left"></th>
                             </tr>
                             </thead>

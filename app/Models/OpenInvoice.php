@@ -61,10 +61,11 @@ class OpenInvoice extends Model
             ->pluck('customer_name');
     }
 
-    public function getByAmount(float $amount, int $userId)
+    public function getByAmount(float $amount, int $userId, array $invoiceNumbers)
     {
         return Model::where('open_amount', $amount)
             ->where('user_id', $userId)
+            ->whereIn('invoice_number', $invoiceNumbers)
             ->get();
     }
 
@@ -87,9 +88,11 @@ class OpenInvoice extends Model
         Model::where('user_id', $userId)->delete();
     }
 
-    public function getAccountGroupedByTotal(float $amount)
+    public function getAccountGroupedByTotal(float $amount, int $userId, array $invoiceNumbers)
     {
         return Model::select('customer_account', 'customer_name', 'currency_code', DB::raw('SUM(open_amount) as total'))
+            ->where('user_id', $userId)
+            ->whereIn('invoice_number', $invoiceNumbers)
             ->groupBy('customer_account', 'customer_name', 'currency_code')
             ->having('total', '=', $amount)
             ->get();
