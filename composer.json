@@ -15,7 +15,6 @@
         "laravelcollective/html": "^5.5",
         "maatwebsite/excel": "~2.1.0",
         "orchestra/parser": "^3.5",
-        "phpoffice/phpspreadsheet": "^1.4",
         "tcg/voyager": "^1.2"
     },
     "require-dev": {
