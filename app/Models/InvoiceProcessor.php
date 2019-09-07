@@ -63,7 +63,7 @@ class InvoiceProcessor
         $this->bsRowSequence = $this->bs->getSequence($userId)->toArray();
     
         $this->matchByInvNumberWhenStatementEqualsInvoice("payment_ref");
-//        $this->matchByInvNumberWhenStatementEqualsInvoice("payee_name");
+        $this->matchByInvNumberWhenStatementEqualsInvoice("payee_name");
         $this->matchByMultipleInvoiceWhenStatementEqualsInvoice("payment_ref");
 //        $this->matchByMultipleInvoiceWhenStatementEqualsInvoice("payee_name");
 //        $this->matchByNameMapWhenStatementEqualsInvoice("payment_ref");

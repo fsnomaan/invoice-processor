@@ -16,10 +16,10 @@
             <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home" aria-selected="true">Home</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Customer Name Mapping</a>
+            <a class="nav-link" id="name-mapping-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile" aria-selected="false">Customer Name Mapping</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Bank Account Mapping</a>
+            <a class="nav-link" id="account-mapping-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact" aria-selected="false">Bank Account Mapping</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" id="settings-tab" data-toggle="tab" href="#settings" role="tab" aria-controls="settings" aria-selected="false">Settings</a>
@@ -52,7 +52,7 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="name-mapping-tab">
             <div class="row">
                 <div class="col-sm-4 offset-4 mb-3">
                     <div class="mappingTable">
@@ -94,7 +94,7 @@
                 </div>
             </div>
         </div>
-        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="account-mapping-tab">
             <div class="row">
                 <div class="col-sm-4 offset-4 mb-3">
                     <div class="mappingTable">
