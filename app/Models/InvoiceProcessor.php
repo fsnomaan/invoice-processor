@@ -62,7 +62,6 @@ class InvoiceProcessor
         $this->invoiceNumbers = $this->openInvoice->getAllInvoiceNumbers($userId)->toArray();
         $this->bsRowSequence = $this->bs->getSequence($userId)->toArray();
         
-/*
         $this->matchByInvNumberWhenStatementEqualsInvoice("payment_ref");
         $this->matchByInvNumberWhenStatementEqualsInvoice("payee_name");
         $this->matchByMultipleInvoiceWhenStatementEqualsInvoice("payment_ref");
@@ -96,11 +95,16 @@ class InvoiceProcessor
         $this->matchByInvNumberWhenStatementLowerThanInvoice("payment_ref");
 //        $this->matchByInvNumberWhenStatementLowerThanInvoice("payee_name");
 
-*/
-        $this->matchByInvoiceAmountWhenStatementEqualsInvoice();
-        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices();
-        $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices();
-    
+
+        $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payment_ref");
+        $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payee_name");
+
+        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payment_ref");
+        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payee_name");
+
+        $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices("payment_ref");
+        $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices("payee_name");
+
         $this->exportUnmatchedStatementRows();
 
 //        dd($this->export);
@@ -186,7 +190,7 @@ class InvoiceProcessor
                         $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
                         $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
                         if ( (float)$openInvoiceTotal == (float)$bsRow->amount )  {
-                            if ($this->isAllForSameAccount($openInvoiceRows)) {
+                            if ($this->isAllForSameAccount($openInvoiceRows->toArray())) {
                                 foreach($openInvoiceRows as $openInvoiceRow) {
                                     $this->message = 'matchByMultipleInvoiceWhenStatementEqualsInvoice';
                                     $this->exportRowsWithMatch($bsRow, $openInvoiceRow);
@@ -213,7 +217,7 @@ class InvoiceProcessor
                         $openInvoiceRows = $this->openInvoice->getRowsFromInvoices($matchingInvoiceNumbers);
                         $openInvoiceTotal = $this->getOpenInvoicesTotal($openInvoiceRows->toArray());
                         if ( (float)$openInvoiceTotal != (float)$bsRow->amount )  {
-                            if ($this->isAllForSameAccount($openInvoiceRows)) {
+                            if ($this->isAllForSameAccount($openInvoiceRows->toArray())) {
                                 $this->message = 'matchByMultipleInvoiceWhenStatementNotEqualsInvoice';
                                 $this->exportRowsWithNoMatch($bsRow, $openInvoiceRows[0]);
                             }
@@ -224,9 +228,9 @@ class InvoiceProcessor
         }
     }
 
-    private function isAllForSameAccount(Collection $invoiceRows): bool
+    private function isAllForSameAccount(array $invoiceRows): bool
     {
-        $accounts = array_column($invoiceRows->toArray(), 'customer_account');
+        $accounts = array_column($invoiceRows, 'customer_account');
         if (count(array_unique($accounts)) === 1) {
             return true;
         }
@@ -533,21 +537,23 @@ class InvoiceProcessor
         }
     }
 
-    private function matchByInvoiceAmountWhenStatementEqualsInvoice()
+    private function matchByInvoiceAmountWhenStatementEqualsInvoice(string $searchField)
     {
         if ( empty($this->bsRowSequence) ) { return; }
 
         $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
+    
             $invoice = $this->openInvoice->getByAmount((float)$bsRow->amount, $this->userId, $this->invoiceNumbers);
+
             if ( count($invoice) == 1 ) {
                 $invoice = $invoice[0];
-                $needles = str_split($this->getWordsByPosition($bsRow->payee_name));
+                $needles = str_split($this->getWordsByPosition($bsRow->$searchField));
 
                 $searchString = ' ';
                 foreach ($needles as $needle) {
                     if (! $needle) {
-                        return;
+                        continue;
                     }
                     $searchString .= $needle;
                     
@@ -563,42 +569,50 @@ class InvoiceProcessor
         }
     }
 
-    private function matchByInvoiceAmountWhenStatementEqualsMultipleInvoices()
+    private function matchByInvoiceAmountWhenStatementEqualsMultipleInvoices(string $searchField)
     {
         if ( empty($this->bsRowSequence) ) { return; }
 
         $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
             $invoices = $this->openInvoice->getByAmount((float)$bsRow->amount, $this->userId, $this->invoiceNumbers);
-            if ( count($invoices) > 1 ) {
-                $needles = str_split($this->getWordsByPosition($bsRow->payee_name));
 
+            if ( count($invoices) > 1 ) {
+                $needles = str_split($this->getWordsByPosition($bsRow->$searchField));
                 $searchString = ' ';
+    
+                $matchedInvoices = [];
                 foreach ($needles as $needle) {
-                    if (! $needle) {
-                        return;
+                    if (!$needle) {
+                        continue;
                     }
-                    $searchString .= $needle;
                     $foundInvoices = [];
+                    $searchString .= $needle;
                     foreach ($invoices as $invoice) {
                         if (strpos(strtolower(' ' . $invoice->customer_name), strtolower($searchString)) !== false) {
                             $foundInvoices[] = $invoice;
+                        } else {
+                            continue;
                         }
                     }
-
-                    if ( count($foundInvoices) == 1) {
-                        $this->message = 'matchByInvoiceAmountWhenStatementEqualsMultipleInvoice';
-                        $this->exportRowsWithMatch($bsRow, $foundInvoices[0]);
-                        break;
-                    } elseif (count($foundInvoices) > 1) {
+                    if (count($foundInvoices) > 1 ) {
                         $invoices = $foundInvoices;
                     }
+                    $matchedInvoices = $foundInvoices;
+                }
+                
+                if ( count($matchedInvoices) == 1) {
+                    $this->message = 'matchByInvoiceAmountWhenStatementEqualsMultipleInvoice';
+                    $this->exportRowsWithMatch($bsRow, $matchedInvoices[0]);
+                    break;
+                } elseif ($matchedInvoices > 1 && $this->isAllForSameAccount($matchedInvoices)) {
+                    $this->exportRowsWithNoMatch($bsRow, $matchedInvoices[0]);
                 }
             }
         }
     }
 
-    private function matchByAccountTotalWhenStatementEqualsSumOfInvoices()
+    private function matchByAccountTotalWhenStatementEqualsSumOfInvoices(string $searchField)
     {
         if ( empty($this->bsRowSequence) ) { return; }
 
@@ -607,36 +621,40 @@ class InvoiceProcessor
         /** @var BankStatement $bsRow */
         foreach ($bsRows as $bsRow) {
             $accountGroups = $this->openInvoice->getAccountGroupedByTotal($bsRow->original_amount, $this->userId, $this->invoiceNumbers);
-            $needles = str_split($this->getWordsByPosition($bsRow->payee_name));
-
+            $needles = str_split($this->getWordsByPosition($bsRow->$searchField));
             $searchString = ' ';
+            $foundInvoices = [];
             foreach ($needles as $needle) {
                 if (!$needle) {
-                    return;
+                    continue;
                 }
-                
+    
                 $searchString .= $needle;
-                $foundInvoices = [];
+    
                 foreach ($accountGroups as $accountGroup) {
-                    if (strpos(strtolower(' '. $accountGroup->customer_name), strtolower($searchString)) !== false) {
+                    if (strpos(strtolower(' ' . $accountGroup->customer_name), strtolower($searchString)) !== false) {
                         $foundInvoices[] = $accountGroup;
+                    } else {
+                        $foundInvoices = [];
+                        break;
                     }
                 }
-
-                if ( count($foundInvoices) == 1) {
-                    $invoices = $this->openInvoice->getByCustomerAccount($foundInvoices[0]->customer_account, $this->userId);
-                    foreach ($invoices as $invoice) {
-                        $this->message = 'matchByAccountTotalWhenStatementEqualsSumOfInvoices';
-                        $this->exportRowsWithMatch($bsRow, $invoice);
-                    }
-                } elseif (count($foundInvoices) > 1) {
+                if (count($foundInvoices) > 1) {
                     $accountGroups = $foundInvoices;
+                }
+            }
+
+            if ( count($foundInvoices) == 1) {
+                $invoices = $this->openInvoice->getByCustomerAccount($foundInvoices[0]->customer_account, $this->userId);
+                foreach ($invoices as $invoice) {
+                    $this->message = 'matchByAccountTotalWhenStatementEqualsSumOfInvoices';
+                    $this->exportRowsWithMatch($bsRow, $invoice);
                 }
             }
         }
     }
 
-    private function getWordsByPosition(string $payeeName, int $count=5)
+    private function getWordsByPosition(string $payeeName)
     {
         $line = trim(preg_replace('/\s\s+/', ' ', str_replace("\n", " ", $payeeName)));
         $parts = explode(' ', trim($line) );
