@@ -73,7 +73,6 @@ class InvoiceProcessor
 //        $this->matchByNameMapWhenStatementEqualsSumOfMultipleInvoice("payment_ref");
         $this->matchByNameMapWhenStatementEqualsSumOfMultipleInvoice("payee_name");
 //        $this->matchByNameMapWhenStatementNotEqualsSumOfMultipleInvoice("payment_ref");
-        $this->matchByNameMapWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
 //        $this->matchByAccountNameWhenStatementEqualsInvoice("payment_ref");
         $this->matchByAccountNameWhenStatementEqualsInvoice("payee_name");
 //        $this->matchByAccountNameWhenStatementEqualsMultipleInvoice("payment_ref");
@@ -81,30 +80,31 @@ class InvoiceProcessor
 //        $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice("payment_ref");
         $this->matchByAccountNameWhenStatementEqualsSumOfMultipleInvoice("payee_name");
 //        $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payment_ref");
-        $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
-        $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payment_ref");
 //        $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payee_name");
 //        $this->matchByTotalWhenStatementEqualsInvoice("payment_ref");
         $this->matchByTotalWhenStatementEqualsInvoice("payee_name");
 //        $this->matchByTotalWhenStatementEqualsInvoiceTotal("payment_ref");
         $this->matchByTotalWhenStatementEqualsInvoiceTotal("payee_name");
 //        $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal("payment_ref");
-        $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal("payee_name");
         $this->matchByInvNumberWhenStatementGreaterThanInvoice("payment_ref");
 //        $this->matchByInvNumberWhenStatementGreaterThanInvoice("payee_name");
         $this->matchByInvNumberWhenStatementLowerThanInvoice("payment_ref");
 //        $this->matchByInvNumberWhenStatementLowerThanInvoice("payee_name");
-
-
+    
         $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payment_ref");
         $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payee_name");
-
+    
         $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payment_ref");
         $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payee_name");
-
+    
         $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices("payment_ref");
         $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices("payee_name");
-
+    
+        $this->matchByTotalWhenStatementDoesNotEqualsInvoiceTotal("payee_name");
+        $this->matchByNameMapWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
+        $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
+        $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payment_ref");
+    
         $this->exportUnmatchedStatementRows();
 
 //        dd($this->export);
