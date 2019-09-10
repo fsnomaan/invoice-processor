@@ -652,11 +652,9 @@ class InvoiceProcessor
         }
     }
 
-    private function getWordsByPosition(string $payeeName)
+    private function getWordsByPosition(string $payeeName, $count = 10)
     {
-        $line = trim(preg_replace('/\s\s+/', ' ', str_replace("\n", " ", $payeeName)));
-        $parts = explode(' ', trim($line) );
-        return join(' ' , array_slice($parts, 0, 2));
+        return substr(trim($payeeName), 0, $count);
     }
     
 
