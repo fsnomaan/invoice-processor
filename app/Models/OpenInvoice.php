@@ -68,10 +68,19 @@ class OpenInvoice extends Model
             ->whereIn('invoice_number', $invoiceNumbers)
             ->get();
     }
+    
+    public function getByAmountAndName(float $amount, int $userId, array $invoiceNumbers, string $name)
+    {
+        return Model::where('open_amount', $amount)
+            ->where('user_id', $userId)
+            ->where('customer_name', 'LIKE', '%' . $name . '%')
+            ->whereIn('invoice_number', $invoiceNumbers)
+            ->get();
+    }
 
     public function getByCustomerName(string $name, int $userId)
     {
-        return Model::where('customer_name', 'LIKE', '%' . $name )
+        return Model::where('customer_name', 'LIKE', '%' . $name . '%' )
             ->where('user_id', $userId)
             ->get();
     }
@@ -88,10 +97,11 @@ class OpenInvoice extends Model
         Model::where('user_id', $userId)->delete();
     }
 
-    public function getAccountGroupedByTotal(float $amount, int $userId, array $invoiceNumbers)
+    public function getAccountGroupedByTotalForName(float $amount, int $userId, array $invoiceNumbers, string $name)
     {
         return Model::select('customer_account', 'customer_name', 'currency_code', DB::raw('SUM(open_amount) as total'))
             ->where('user_id', $userId)
+            ->where('customer_name', 'LIKE', '%' . $name . '%')
             ->whereIn('invoice_number', $invoiceNumbers)
             ->groupBy('customer_account', 'customer_name', 'currency_code')
             ->having('total', '=', $amount)
