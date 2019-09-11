@@ -561,9 +561,11 @@ class InvoiceProcessor
         $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
             $needles = $this->getWordsByPosition($bsRow->$searchField);
+            if ( empty(trim($needles)) ) { return; }
 
             $invoice = $this->openInvoice->getByAmountAndName((float)$bsRow->amount, $this->userId, $this->invoiceNumbers, $needles);
             if ( count($invoice) == 1 ) {
+                $this->message = 'matchByInvoiceAmountWhenStatementEqualsInvoice';
                 $this->exportRowsWithMatch($bsRow, $invoice[0]);
             }
         }
@@ -576,6 +578,8 @@ class InvoiceProcessor
         $bsRows = $this->bs->getByPaymentSequence($this->bsRowSequence);
         foreach ($bsRows as $bsRow) {
             $needles = $this->getWordsByPosition($bsRow->$searchField);
+            if ( empty(trim($needles)) ) { return; }
+
             /** @var Collection $matchedInvoices */
             $matchedInvoices = $this->openInvoice->getByAmountAndName(
                 (float)$bsRow->amount,
@@ -588,6 +592,7 @@ class InvoiceProcessor
                 $this->message = 'matchByInvoiceAmountWhenStatementEqualsMultipleInvoice';
                 $this->exportRowsWithMatch($bsRow, $matchedInvoices[0]);
             } elseif (count($matchedInvoices) > 1 && $this->isAllForSameAccount($matchedInvoices->toArray())) {
+                $this->message = 'matchByInvoiceAmountWhenStatementEqualsMultipleInvoice';
                 $this->exportRowsWithNoMatch($bsRow, $matchedInvoices[0]);
             }
         
@@ -603,6 +608,8 @@ class InvoiceProcessor
         /** @var BankStatement $bsRow */
         foreach ($bsRows as $bsRow) {
             $needles = $this->getWordsByPosition($bsRow->$searchField);
+            if ( empty(trim($needles)) ) { return; }
+    
             $matchedInvoices = $this->openInvoice->getAccountGroupedByTotalForName(
                 $bsRow->original_amount,
                 $this->userId,
@@ -626,12 +633,15 @@ class InvoiceProcessor
         /** @var BankStatement $bsRow */
         foreach ($bsRows as $bsRow) {
             $needles = $this->getWordsByPosition($bsRow->$searchField);
+            if ( empty(trim($needles)) ) { return; }
+    
             /** @var Collection $invoices */
             $invoices = $this->openInvoice->getByCustomerName($needles, $this->userId);
             if ( count($invoices) == 1) {
                 $this->message = 'matchByPayeeNameOnly';
                 $this->exportRowsWithMatch($bsRow, $invoices[0]);
             } elseif (count($invoices) > 1 && $this->isAllForSameAccount($invoices->toArray())) {
+                $this->message = 'matchByPayeeNameOnly';
                 $this->exportRowsWithNoMatch($bsRow, $invoices[0]);
             }
         }
