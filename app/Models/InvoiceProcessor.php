@@ -99,7 +99,7 @@ class InvoiceProcessor
 
         $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payment_ref");
         $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payee_name");
-    
+
 //        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payment_ref");
 //        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payee_name");
 
@@ -120,7 +120,7 @@ class InvoiceProcessor
         $this->matchByAccountNameWhenStatementNotEqualsSumOfMultipleInvoice("payee_name");
         $this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payment_ref");
         //$this->matchByMultipleInvoiceWhenStatementNotEqualsInvoice("payee_name");
-        
+
         $this->exportUnmatchedStatementRows();
 
 //        dd($this->export);
@@ -647,17 +647,21 @@ class InvoiceProcessor
         $bsRows = $this->getBsRows();
         /** @var BankStatement $bsRow */
         foreach ($bsRows as $bsRow) {
-            $needles = $this->getWordsByPosition($bsRow->$searchField);
-            if ( empty(trim($needles)) ) { return; }
+            for($i=7; $i<=10; $i++) {
+                $needles = $this->getWordsByPosition($bsRow->$searchField, $i);
+                if ( empty(trim($needles)) ) { return; }
     
-            /** @var Collection $invoices */
-            $invoices = $this->openInvoice->getByCustomerName($needles, $this->userId);
-            if ( count($invoices) == 1) {
-                $this->message = 'matchByPayeeNameOnly';
-                $this->exportRowsWithMatch($bsRow, $invoices[0]);
-            } elseif (count($invoices) > 1 && $this->isAllForSameAccount($invoices->toArray())) {
-                $this->message = 'matchByPayeeNameOnly';
-                $this->exportRowsWithNoMatch($bsRow, $invoices[0]);
+                /** @var Collection $invoices */
+                $invoices = $this->openInvoice->getByCustomerName($needles, $this->userId);
+                if ( count($invoices) == 1) {
+                    $this->message = 'matchByPayeeNameOnly';
+                    $this->exportRowsWithMatch($bsRow, $invoices[0]);
+                    break;
+                } elseif (count($invoices) > 1 && $this->isAllForSameAccount($invoices->toArray())) {
+                    $this->message = 'matchByPayeeNameOnly';
+                    $this->exportRowsWithNoMatch($bsRow, $invoices[0]);
+                    break;
+                }
             }
         }
     }
