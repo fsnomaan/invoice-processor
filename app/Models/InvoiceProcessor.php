@@ -655,7 +655,7 @@ class InvoiceProcessor
                 $invoices = $this->openInvoice->getByCustomerName($needles, $this->userId);
                 if ( count($invoices) == 1) {
                     $this->message = 'matchByPayeeNameOnly';
-                    $this->exportRowsWithMatch($bsRow, $invoices[0]);
+                    $this->exportRowsWithMatch($bsRow, $invoices[0], $bsRow->original_amount);
                     break;
                 } elseif (count($invoices) > 1 && $this->isAllForSameAccount($invoices->toArray())) {
                     $this->message = 'matchByPayeeNameOnly';
@@ -723,7 +723,7 @@ class InvoiceProcessor
         return new Collection();
     }
     
-    private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow)
+    private function exportRowsWithMatch(BankStatement $bsRow, OpenInvoice $openInvoiceRow, float $amount=0)
     {
         if ( !in_array($openInvoiceRow->invoice_number, $this->invoiceNumbers ) ) {
             return;
@@ -735,7 +735,7 @@ class InvoiceProcessor
             $openInvoiceRow->customer_account,
             $openInvoiceRow->invoice_number,
             $bsRow->currency,
-            $this->getAmount($bsRow, $openInvoiceRow),
+            $this->getAmount($bsRow, $openInvoiceRow, $amount),
             $bsRow->payment_ref,
             $bsRow->payee_name,
             $openInvoiceRow->customer_name,
@@ -753,9 +753,9 @@ class InvoiceProcessor
         $this->resetMessage();
     }
 
-    private function getAmount(BankStatement $bankStatement, OpenInvoice $openInvoice): float
+    private function getAmount(BankStatement $bankStatement, OpenInvoice $openInvoice, float $amount=0): float
     {
-        if ($this->isOverPayment || $this->isPartialPayment) {
+        if ($this->isOverPayment || $this->isPartialPayment || $amount) {
             return $bankStatement->original_amount;
         }
 
