@@ -153,7 +153,8 @@ class ProcessInvoiceController extends Controller
             'Statement amount',
             'Invoice open amount',
             'Partial payment',
-            'Over payment'
+            'Over payment',
+            'Manual check'
         ];
         $sortedExport = [];
         foreach ($this->export as $row) {
