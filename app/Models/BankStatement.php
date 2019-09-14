@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $payee_name
  * @property string|null $original_amount
  * @property string|null $original_currency
+ * @property string|null $bank_account_number
  * @property \Illuminate\Support\Carbon $created_at
  * @property \Illuminate\Support\Carbon $updated_at
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\BankStatement newModelQuery()

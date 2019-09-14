@@ -24,6 +24,7 @@ class CreateBankStatementTable extends Migration
             $table->mediumText("payee_name")->nullable();
             $table->mediumText("original_amount")->nullable();
             $table->mediumText("original_currency")->nullable();
+            $table->mediumText("bank_account_number")->nullable();
             $table->timestamp('created_at')->default(DB::raw('CURRENT_TIMESTAMP'));
             $table->timestamp('updated_at')->default(DB::raw('CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP'));
             $table->foreign('user_id')->references('id')->on('users');

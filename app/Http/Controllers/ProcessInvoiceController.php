@@ -146,6 +146,7 @@ class ProcessInvoiceController extends Controller
             'Currency',
             'Amount',
             'Payment Reference',
+            'Bank ID',
             'Payee Name',
             'ERP Name',
             'Matching method',
