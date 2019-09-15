@@ -105,8 +105,8 @@ class InvoiceProcessor
         $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payment_ref");
         $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payee_name");
 
-        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payment_ref");
-        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payee_name");
+//        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payment_ref");
+//        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payee_name");
     
         $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices("payment_ref");
         $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices("payee_name");
