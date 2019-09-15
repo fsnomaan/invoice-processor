@@ -105,8 +105,8 @@ class InvoiceProcessor
         $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payment_ref");
         $this->matchByInvoiceAmountWhenStatementEqualsInvoice("payee_name");
 
-//        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payment_ref");
-//        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payee_name");
+        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payment_ref");
+        $this->matchByInvoiceAmountWhenStatementEqualsMultipleInvoices("payee_name");
     
         $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices("payment_ref");
         $this->matchByAccountTotalWhenStatementEqualsSumOfInvoices("payee_name");
@@ -580,7 +580,7 @@ class InvoiceProcessor
                     $this->exportRowsWithMatch($bsRow, $matchedInvoices[0], $this->getMessage(__FUNCTION__)['manualCheck']);
                     break;
                 } elseif ( count($matchedInvoices) > 1 && $this->isAllForSameAccount($matchedInvoices->toArray()) ) {
-                    $this->message = $this->getMessage(__FUNCTION__)['message'];
+                    $this->message = 'Invoice Amount - Multiple Invoice';
                     $this->exportRowsWithNoMatch($bsRow, $this->getMessage(__FUNCTION__)['manualCheck'], $matchedInvoices[0]);
                     break;
                 }
@@ -882,7 +882,7 @@ class InvoiceProcessor
             ],
             'matchByInvoiceAmountWhenStatementEqualsInvoice' => [
                 'message' => 'Invoice Amount - Single Invoice',
-                'manualCheck' => ''
+                'manualCheck' => 'Yes'
             ],
             'matchByAccountTotalWhenStatementEqualsSumOfInvoices' => [
                 'message' => 'ERP Account Total - Multiple',
