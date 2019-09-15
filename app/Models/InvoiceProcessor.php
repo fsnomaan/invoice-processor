@@ -878,7 +878,7 @@ class InvoiceProcessor
             ],
             'matchByTotalWhenStatementEqualsInvoiceTotal' => [
                 'message' => 'ERP Account Total - Multiple',
-                'manualCheck' => 'InvoicesYes'
+                'manualCheck' => 'Yes'
             ],
             'matchByInvoiceAmountWhenStatementEqualsInvoice' => [
                 'message' => 'Invoice Amount - Single Invoice',
@@ -886,7 +886,7 @@ class InvoiceProcessor
             ],
             'matchByAccountTotalWhenStatementEqualsSumOfInvoices' => [
                 'message' => 'ERP Account Total - Multiple',
-                'manualCheck' => 'InvoicesYes'
+                'manualCheck' => 'Yes'
             ],
             'matchByPayeeNameOnly' => [
                 'message' => 'Payee Name - Input Needed',
